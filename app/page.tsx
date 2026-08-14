@@ -31,18 +31,19 @@ const PARTICLES = [
   { size: 6,  top: '68%', left: '58%', delay: '3.5s',  dur: '9s',   opacity: 0.35 },
 ]
 
-function useInView(threshold = 0.15) {
+function useInView() {
   const ref = useRef<HTMLDivElement>(null)
   const [inView, setInView] = useState(false)
   useEffect(() => {
     const el = ref.current; if (!el) return
+    // rootMargin positivo dispara ANTES de que entre en viewport
     const obs = new IntersectionObserver(
       ([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect() } },
-      { threshold }
+      { threshold: 0, rootMargin: '0px 0px -60px 0px' }
     )
     obs.observe(el)
     return () => obs.disconnect()
-  }, [threshold])
+  }, [])
   return { ref, inView }
 }
 
@@ -87,6 +88,20 @@ export default function HomePage() {
   const sec1 = useInView(); const sec2 = useInView()
   const sec3 = useInView(); const sec4 = useInView()
   const sec5 = useInView(); const sec6 = useInView()
+
+  // Forzar visible si ya está en viewport al montar
+  useEffect(() => {
+    // pequeño delay para asegurar que el DOM está listo
+    const t = setTimeout(() => {
+      document.querySelectorAll('[data-inview]').forEach(el => {
+        const rect = el.getBoundingClientRect()
+        if (rect.top < window.innerHeight) {
+          el.dispatchEvent(new Event('forceInView'))
+        }
+      })
+    }, 100)
+    return () => clearTimeout(t)
+  }, [])
 
   // Efecto ripple en botones
   const handleRipple = useCallback((e: React.MouseEvent<HTMLElement>) => {
@@ -322,18 +337,32 @@ export default function HomePage() {
           </div>
 
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill, minmax(250px, 1fr))', gap:'24px' }}>
-            {featured.map((product, i) => (
-              <div
-                key={product.id}
-                style={{
-                  opacity: sec2.inView ? 1 : 0,
-                  transform: sec2.inView ? 'translateY(0) scale(1)' : 'translateY(32px) scale(.97)',
-                  transition: `opacity .6s ease ${i * 80}ms, transform .6s cubic-bezier(.34,1.2,.64,1) ${i * 80}ms`,
-                }}
-              >
-                <ProductCard product={product} />
-              </div>
-            ))}
+            {featured.length === 0 ? (
+              /* Skeleton mientras carga */
+              Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} style={{ borderRadius:'14px', overflow:'hidden', background:'#fff', boxShadow:'0 2px 20px rgba(33,31,30,.07)' }}>
+                  <div className="skeleton" style={{ aspectRatio:'3/4', borderRadius:0 }} />
+                  <div style={{ padding:'16px' }}>
+                    <div className="skeleton" style={{ height:'12px', width:'40%', marginBottom:'8px' }} />
+                    <div className="skeleton" style={{ height:'16px', width:'80%', marginBottom:'12px' }} />
+                    <div className="skeleton" style={{ height:'22px', width:'35%' }} />
+                  </div>
+                </div>
+              ))
+            ) : (
+              featured.map((product, i) => (
+                <div
+                  key={product.id}
+                  style={{
+                    opacity: sec2.inView ? 1 : 0,
+                    transform: sec2.inView ? 'translateY(0) scale(1)' : 'translateY(32px) scale(.97)',
+                    transition: `opacity .6s ease ${i * 80}ms, transform .6s cubic-bezier(.34,1.2,.64,1) ${i * 80}ms`,
+                  }}
+                >
+                  <ProductCard product={product} />
+                </div>
+              ))
+            )}
           </div>
 
           <div style={{ textAlign:'center', marginTop:'52px' }}>
