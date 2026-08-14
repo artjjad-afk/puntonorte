@@ -63,11 +63,69 @@ body {
   100% { transform: translateX(-50%); }
 }
 
-.animate-fadeUp   { animation: fadeUp .6s ease both; }
-.animate-fadeIn   { animation: fadeIn .5s ease both; }
-.animate-float    { animation: float 4s ease-in-out infinite; }
-.animate-pulse-wa { animation: pulse-wa 2.5s ease-in-out infinite; }
-.animate-marquee  { animation: marquee 25s linear infinite; }
+/* ── WOW: Nuevas animaciones ── */
+@keyframes shimmer-text {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+@keyframes glow-pulse {
+  0%,100% { text-shadow: 0 0 20px rgba(193,105,43,0), 0 0 40px rgba(193,105,43,0); }
+  50%     { text-shadow: 0 0 20px rgba(193,105,43,.5), 0 0 60px rgba(232,140,74,.3); }
+}
+@keyframes ripple {
+  0%   { transform:scale(0); opacity:.6; }
+  100% { transform:scale(4); opacity:0; }
+}
+@keyframes particle-float {
+  0%   { transform: translateY(0) translateX(0) scale(1); opacity:.7; }
+  33%  { transform: translateY(-30px) translateX(15px) scale(1.2); opacity:1; }
+  66%  { transform: translateY(-15px) translateX(-10px) scale(.8); opacity:.5; }
+  100% { transform: translateY(0) translateX(0) scale(1); opacity:.7; }
+}
+@keyframes border-glow {
+  0%,100% { box-shadow: 0 0 0 0 rgba(193,105,43,0), inset 0 0 0 0 rgba(193,105,43,0); }
+  50%     { box-shadow: 0 0 24px 4px rgba(193,105,43,.25), inset 0 0 12px rgba(193,105,43,.08); }
+}
+@keyframes badge-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(193,105,43,.6); }
+  50%     { box-shadow: 0 0 0 8px rgba(193,105,43,0); }
+}
+@keyframes slide-up-fade {
+  from { opacity:0; transform:translateY(40px) scale(.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes count-up {
+  from { opacity:0; transform:translateY(16px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes shine-sweep {
+  0%   { left:-100%; }
+  100% { left:200%; }
+}
+@keyframes scale-in {
+  from { opacity:0; transform:scale(.85); }
+  to   { opacity:1; transform:scale(1); }
+}
+@keyframes copper-flow {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes tilt-in {
+  from { opacity:0; transform:perspective(600px) rotateX(12deg) translateY(24px); }
+  to   { opacity:1; transform:perspective(600px) rotateX(0deg) translateY(0); }
+}
+
+.animate-fadeUp      { animation: fadeUp .6s ease both; }
+.animate-fadeIn      { animation: fadeIn .5s ease both; }
+.animate-float       { animation: float 4s ease-in-out infinite; }
+.animate-pulse-wa    { animation: pulse-wa 2.5s ease-in-out infinite; }
+.animate-marquee     { animation: marquee 25s linear infinite; }
+.animate-slide-up    { animation: slide-up-fade .65s cubic-bezier(.22,1,.36,1) both; }
+.animate-scale-in    { animation: scale-in .5s cubic-bezier(.34,1.56,.64,1) both; }
+.animate-tilt-in     { animation: tilt-in .7s cubic-bezier(.22,1,.36,1) both; }
+.animate-glow        { animation: glow-pulse 3s ease-in-out infinite; }
+.animate-badge-pulse { animation: badge-pulse 2s ease-in-out infinite; }
 
 /* ── Clases de delay ── */
 .delay-100 { animation-delay:.1s; }
@@ -91,6 +149,58 @@ body {
   background-clip: text;
 }
 
+/* ── WOW: Texto con shimmer animado ── */
+.text-shimmer {
+  background: linear-gradient(120deg, #c1692b 0%, #e88c4a 30%, #fff5e6 50%, #e88c4a 70%, #c1692b 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer-text 4s linear infinite;
+}
+
+/* ── WOW: Efecto ripple en botones ── */
+.btn-primary {
+  display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  background:#c1692b; color:#fff; border:none; cursor:pointer;
+  font-weight:700; letter-spacing:.8px; text-decoration:none;
+  transition: background .2s, transform .15s, box-shadow .2s;
+  position:relative; overflow:hidden;
+}
+.btn-primary::before {
+  content:''; position:absolute;
+  width:20px; height:20px; border-radius:50%;
+  background:rgba(255,255,255,.35);
+  transform:scale(0); opacity:0;
+  pointer-events:none;
+}
+.btn-primary:active::before {
+  animation: ripple .5s ease-out forwards;
+  left:calc(var(--rx, 50%) - 10px);
+  top:calc(var(--ry, 50%) - 10px);
+}
+.btn-primary::after {
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(135deg, rgba(255,255,255,.18) 0%, transparent 60%);
+  pointer-events:none;
+}
+.btn-primary:hover {
+  background:#a8541f;
+  transform:translateY(-2px);
+  box-shadow:0 12px 32px rgba(193,105,43,.5), 0 0 0 0 rgba(193,105,43,.3);
+}
+.btn-primary:active { transform:translateY(0); }
+
+/* Sweep shine on hover */
+.btn-primary .shine {
+  position:absolute; top:0; left:-100%; width:60%; height:100%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent);
+  transform:skewX(-20deg);
+  transition:none;
+  pointer-events:none;
+}
+.btn-primary:hover .shine { animation: shine-sweep .55s ease forwards; }
+
 /* ── Botones ── */
 .btn-primary {
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
@@ -111,9 +221,15 @@ body {
   display:inline-flex; align-items:center; justify-content:center; gap:8px;
   background:transparent; color:#fff; border:1.5px solid rgba(255,255,255,.4);
   cursor:pointer; font-weight:600; letter-spacing:.5px; text-decoration:none;
-  transition: border-color .2s, background .2s, transform .15s;
+  transition: border-color .2s, background .2s, transform .15s, box-shadow .2s;
+  position:relative; overflow:hidden;
 }
-.btn-ghost:hover { border-color:rgba(255,255,255,.8); background:rgba(255,255,255,.08); transform:translateY(-1px); }
+.btn-ghost:hover {
+  border-color:rgba(255,255,255,.9);
+  background:rgba(255,255,255,.1);
+  transform:translateY(-2px);
+  box-shadow:0 8px 24px rgba(255,255,255,.08);
+}
 
 /* ── Cards ── */
 .product-card {
@@ -121,20 +237,43 @@ body {
   box-shadow:0 2px 20px rgba(33,31,30,.07);
   transition: box-shadow .35s ease, transform .35s ease;
   cursor:pointer; position:relative;
+  /* WOW: preparar para efecto de luz */
+  --mouse-x: 50%;
+  --mouse-y: 50%;
 }
 .product-card:hover {
-  box-shadow:0 16px 48px rgba(33,31,30,.18);
-  transform: translateY(-6px);
+  box-shadow:
+    0 20px 60px rgba(33,31,30,.2),
+    0 0 0 1px rgba(193,105,43,.15);
+  transform: translateY(-8px);
 }
+/* WOW: spotlight de luz que sigue el mouse */
+.product-card::before {
+  content:'';
+  position:absolute;
+  inset:0;
+  background: radial-gradient(
+    280px circle at var(--mouse-x) var(--mouse-y),
+    rgba(193,105,43,.12),
+    transparent 70%
+  );
+  opacity:0;
+  transition:opacity .3s;
+  z-index:1;
+  pointer-events:none;
+  border-radius:14px;
+}
+.product-card:hover::before { opacity:1; }
+
 .product-card .card-img img {
-  transition: transform .5s ease;
+  transition: transform .6s cubic-bezier(.25,.46,.45,.94);
 }
 .product-card:hover .card-img img {
-  transform: scale(1.07);
+  transform: scale(1.09);
 }
 .product-card .add-btn {
   transform: translateY(100%);
-  transition: transform .3s ease;
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
 }
 .product-card:hover .add-btn {
   transform: translateY(0);
@@ -165,6 +304,141 @@ body {
 }
 .section-label::before {
   content:''; width:24px; height:2px; background:#c1692b; border-radius:1px;
+}
+
+/* ═══════════════════════════════════════
+   WOW EFFECTS
+   ═══════════════════════════════════════ */
+
+/* Partícula decorativa */
+.particle {
+  position:absolute;
+  border-radius:50%;
+  pointer-events:none;
+  animation: particle-float linear infinite;
+}
+
+/* Stat card con borde animado */
+.stat-card-wow {
+  position:relative;
+  text-align:center; padding:32px 24px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:16px;
+  backdrop-filter:blur(8px);
+  transition: border-color .3s, box-shadow .3s, transform .3s;
+  overflow:hidden;
+}
+.stat-card-wow::before {
+  content:'';
+  position:absolute; inset:0;
+  background:radial-gradient(circle at 50% 0%, rgba(193,105,43,.15) 0%, transparent 60%);
+  opacity:0;
+  transition:opacity .4s;
+}
+.stat-card-wow:hover { 
+  border-color:rgba(193,105,43,.5);
+  box-shadow:0 0 32px rgba(193,105,43,.2), inset 0 0 20px rgba(193,105,43,.05);
+  transform:translateY(-4px);
+}
+.stat-card-wow:hover::before { opacity:1; }
+
+/* Número del stat con animación */
+.stat-number {
+  color:#c1692b;
+  font-size:clamp(28px, 4vw, 44px);
+  font-weight:800;
+  letter-spacing:-1px;
+  margin:0 0 6px;
+  display:inline-block;
+  animation: count-up .6s cubic-bezier(.34,1.56,.64,1) both;
+}
+
+/* Badge con glow */
+.badge-glow {
+  animation: badge-pulse 2.2s ease-in-out infinite;
+}
+
+/* Categoría card con efecto de brillo */
+.cat-card-wow {
+  position:relative; overflow:hidden; border-radius:16px; cursor:pointer;
+}
+.cat-card-wow::after {
+  content:'';
+  position:absolute; top:-50%; left:-60%;
+  width:40%; height:200%;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
+  transform:skewX(-20deg);
+  transition:none;
+  pointer-events:none;
+  opacity:0;
+}
+.cat-card-wow:hover::after {
+  opacity:1;
+  animation:shine-sweep .7s ease forwards;
+}
+
+/* Hero badge brillante */
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  background:rgba(193,105,43,.15);
+  border:1px solid rgba(193,105,43,.35);
+  border-radius:100px; padding:6px 18px;
+  animation: border-glow 3s ease-in-out infinite;
+}
+.hero-badge-dot {
+  width:7px; height:7px; border-radius:50%;
+  background:#c1692b;
+  box-shadow:0 0 8px #c1692b, 0 0 16px rgba(193,105,43,.6);
+  animation: pulse-wa 2s ease-in-out infinite;
+}
+
+/* Testimonial con hover glow */
+.testimonial-wow {
+  background:#fff; border-radius:16px; padding:28px;
+  border:1px solid #e8e5e2;
+  transition:all .35s cubic-bezier(.25,.46,.45,.94);
+  position:relative; overflow:hidden;
+}
+.testimonial-wow::before {
+  content:'"'; font-size:80px; line-height:.8; color:#c1692b; opacity:.12;
+  position:absolute; top:16px; right:20px;
+  font-family:Georgia,serif; pointer-events:none;
+  transition:opacity .3s, transform .3s;
+}
+.testimonial-wow:hover {
+  border-color:#c1692b;
+  box-shadow:0 12px 40px rgba(193,105,43,.15);
+  transform:translateY(-6px);
+}
+.testimonial-wow:hover::before { opacity:.25; transform:scale(1.1); }
+
+/* Scroll indicator animado */
+.scroll-indicator {
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+}
+.scroll-indicator-line {
+  width:1px; height:40px;
+  background:linear-gradient(to bottom, rgba(193,105,43,.8), transparent);
+  animation: float 2s ease-in-out infinite;
+}
+.scroll-indicator-dot {
+  width:6px; height:6px; border-radius:50%;
+  background:#c1692b;
+  box-shadow:0 0 10px #c1692b;
+  animation: pulse-wa 2s ease-in-out infinite;
+}
+
+/* Imagen de fondo del hero con parallax suave */
+.hero-bg-img {
+  transition: transform .1s ease-out;
+}
+
+/* Anuncio con gradiente animado */
+.announcement-bar {
+  background: linear-gradient(90deg, #c1692b, #e88c4a, #a8541f, #c1692b);
+  background-size: 300% 100%;
+  animation: copper-flow 6s ease infinite;
 }
 
 /* ═══════════════════════════════════════

@@ -71,8 +71,8 @@ export function Navbar() {
         .nav-icon-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
       `}</style>
 
-      {/* Announcement bar */}
-      <div style={{ background: 'linear-gradient(90deg, #c1692b, #a8541f, #c1692b)', backgroundSize: '200%', color: '#fff', fontSize: '12px', textAlign: 'center', padding: '8px 16px', fontWeight: '600', letterSpacing: '0.8px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+      {/* Announcement bar con gradiente animado */}
+      <div className="announcement-bar" style={{ color: '#fff', fontSize: '12px', textAlign: 'center', padding: '9px 16px', fontWeight: '700', letterSpacing: '0.8px', overflow: 'hidden', whiteSpace: 'nowrap' }}>
         <div className="animate-marquee" style={{ display: 'inline-flex', gap: '60px', width: 'max-content' }}>
           {[...Array(4)].map((_, i) => (
             <span key={i} style={{ display: 'inline-flex', gap: '48px' }}>
@@ -119,13 +119,22 @@ export function Navbar() {
             <button onClick={openCart} className="nav-icon-btn" style={{ position: 'relative' }}>
               <ShoppingCart size={19} />
               {cartCount > 0 && (
-                <span style={{ position: 'absolute', top: '6px', right: '6px', background: '#c1692b', color: '#fff', borderRadius: '50%', width: '16px', height: '16px', fontSize: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', boxShadow: '0 0 0 2px #211f1e' }}>
+                <span style={{
+                  position: 'absolute', top: '5px', right: '5px',
+                  background: 'linear-gradient(135deg, #e88c4a, #c1692b)',
+                  color: '#fff', borderRadius: '50%',
+                  width: '17px', height: '17px', fontSize: '10px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: '800', boxShadow: '0 0 8px rgba(193,105,43,.7), 0 0 0 2px #211f1e',
+                  animation: 'badge-pulse 2s ease-in-out infinite',
+                }}>
                   {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}
             </button>
 
             <Link href="/tienda" className="btn-primary nav-cta" style={{ padding: '9px 18px', borderRadius: '10px', fontSize: '13px' }}>
+              <span className="shine" />
               Comprar ahora
             </Link>
 
@@ -174,6 +183,7 @@ export function Navbar() {
         {/* Bottom CTAs */}
         <div style={{ padding: '20px 24px', borderTop: '1px solid rgba(255,255,255,0.06)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <Link href="/tienda" onClick={() => setMenuOpen(false)} className="btn-primary" style={{ padding: '14px', borderRadius: '12px', fontSize: '14px', width: '100%', textAlign: 'center' }}>
+            <span className="shine" />
             Ver toda la tienda
           </Link>
           <a href="https://wa.me/584140906768" target="_blank" rel="noopener noreferrer"
