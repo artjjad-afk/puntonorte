@@ -1,0 +1,319 @@
+/* ============================================================================
+   PUNTO NORTE · ADMIN CONSOLE — component layer
+   ----------------------------------------------------------------------------
+   Estilos ESTRUCTURALES que consumen los tokens de tokens.css.
+   Aquí viven ConsoleShell y NavDock. Ningún valor "mágico": todo referencia
+   a var(--…). Se importa en el layout DESPUÉS de tokens.css.
+   ========================================================================== */
+
+/* ──────────────────────────────────────────────────────────────────────────
+   CONSOLE SHELL — el vacío L0 con light-map + grano + retícula técnica
+   ────────────────────────────────────────────────────────────────────────── */
+.console {
+  position: relative;
+  min-height: 100vh;
+  background: var(--bg-console);
+  color: var(--silver);
+  font-family: var(--font-mono);
+  font-size: var(--fs-data);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* Capa de retícula técnica (blueprint) — enmascarada hacia el centro */
+.console::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: var(--grid-tech);
+  background-size: var(--grid-size) var(--grid-size);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 42%, #000 20%, transparent 78%);
+          mask-image: radial-gradient(ellipse 80% 70% at 50% 42%, #000 20%, transparent 78%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Capa de grano en deriva sutil */
+.console::after {
+  content: '';
+  position: fixed;
+  inset: -6%;
+  background-image: var(--grain-tex);
+  background-size: 140px 140px;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: overlay;
+  pointer-events: none;
+  z-index: 1;
+  animation: grain-drift 14s var(--ease-mass) infinite;
+}
+
+/* Escenario de contenido — por encima de las capas de fondo.
+   padding-bottom generoso: el contenido nunca queda bajo el dock inferior. */
+.console-stage {
+  position: relative;
+  z-index: 2;
+  min-height: 100vh;
+  padding-bottom: 140px;
+}
+
+/* El storefront usa scrollbar cobre; la consola la quiere mínima y fría */
+.console ::-webkit-scrollbar { width: 8px; height: 8px; }
+.console ::-webkit-scrollbar-track { background: transparent; }
+.console ::-webkit-scrollbar-thumb {
+  background: var(--iron);
+  border-radius: 100px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.console ::-webkit-scrollbar-thumb:hover { background: var(--steel); background-clip: content-box; }
+.console ::selection { background: var(--blue-aura); color: var(--white-hot); }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   PRIMITIVA DE BORDE REACTIVO — el 1px que "capta la luz" del cursor
+   Se aplica a cualquier superficie de vidrio: el ::before dibuja SOLO el anillo
+   de 1px usando la técnica de máscara compuesta (xor / exclude).
+   --mx / --my los actualiza el componente en onMouseMove.
+   ────────────────────────────────────────────────────────────────────────── */
+.edge-react {
+  position: relative;
+  --mx: 50%;
+  --my: 0%;
+}
+.edge-react::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--hairline);
+  background: var(--edge-glow);
+  -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.55;
+  transition: opacity var(--t-base) var(--ease-mass);
+  z-index: 3;
+}
+.edge-react:hover::before { opacity: 1; }
+
+/* ──────────────────────────────────────────────────────────────────────────
+   NAV DOCK — muelle de navegación flotante (L3)
+   Barra inferior centrada, vidrio profundo, colapsable por micro-interacción:
+   en reposo muestra iconos; al hover del muelle revela las etiquetas.
+   ────────────────────────────────────────────────────────────────────────── */
+.dock {
+  position: fixed;
+  left: 50%;
+  bottom: var(--sp-5);
+  transform: translateX(-50%);
+  z-index: 40;
+
+  display: flex;
+  align-items: stretch;
+  gap: var(--sp-1);
+  padding: var(--sp-2);
+
+  background: var(--glass-l3);
+  background-image: linear-gradient(180deg, var(--glass-l3-hi), transparent 60%), var(--glass-tint) ;
+  backdrop-filter: var(--glass-blur) var(--glass-sat);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-sat);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-float);
+
+  animation: dock-rise var(--t-cinema) var(--ease-recoil) both;
+  transition: gap var(--t-base) var(--ease-tension);
+}
+
+/* Grupo de items */
+.dock-group {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+/* Separador vertical interno */
+.dock-sep {
+  width: var(--hairline);
+  align-self: stretch;
+  margin: var(--sp-1) var(--sp-1);
+  background: linear-gradient(180deg, transparent, var(--steel), transparent);
+}
+
+/* Item del dock — icono + etiqueta colapsable */
+.dock-item {
+  --accent: var(--nickel);
+  --accent-aura: transparent;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  height: 46px;
+  padding: 0 11px;
+  border: var(--hairline) solid transparent;
+  border-radius: var(--r-md);
+  color: var(--accent);
+  background: transparent;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: var(--fs-meta);
+  letter-spacing: var(--track-mono);
+  white-space: nowrap;
+  overflow: hidden;
+  transition:
+      color        var(--t-quick) var(--ease-mass),
+      background   var(--t-quick) var(--ease-mass),
+      border-color var(--t-base)  var(--ease-mass),
+      box-shadow   var(--t-base)  var(--ease-mass),
+      transform    var(--t-base)  var(--ease-recoil);
+}
+
+/* Micro-interacción de colapso: la etiqueta ocupa 0 en reposo y crece al hover
+   del muelle completo. La densidad "respira" — sensación de instrumento. */
+.dock-item .dock-label {
+  max-width: 0;
+  opacity: 0;
+  margin-left: 0;
+  transition:
+      max-width  var(--t-heavy) var(--ease-tension),
+      opacity    var(--t-quick) var(--ease-mass),
+      margin-left var(--t-heavy) var(--ease-tension);
+}
+.dock:hover .dock-item .dock-label,
+.dock-item.is-active .dock-label {
+  max-width: 120px;
+  opacity: 1;
+  margin-left: var(--sp-2);
+}
+
+.dock-item .dock-glyph {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  transition: transform var(--t-base) var(--ease-recoil);
+}
+
+/* Reposo → hover: eleva y aclara */
+.dock-item:hover {
+  color: var(--chrome);
+  background: var(--glass-l2-hi);
+  border-color: var(--edge-soft);
+  transform: translateY(-3px);
+}
+.dock-item:hover .dock-glyph { transform: translateY(-1px) scale(1.06); }
+
+/* Activo (ruta actual) → COBRE. El acento se gana por estado. */
+.dock-item.is-active {
+  --accent: var(--copper-bright);
+  color: var(--copper-bright);
+  background: var(--copper-film);
+  border-color: var(--copper-aura);
+  box-shadow: var(--glow-copper);
+  animation: pulse-copper 4.5s var(--ease-mass) infinite;
+}
+
+/* Punto testigo de estado activo */
+.dock-item.is-active::after {
+  content: '';
+  position: absolute;
+  top: 7px; right: 7px;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--copper-core);
+  box-shadow: 0 0 8px var(--copper-core), 0 0 2px var(--copper-bright);
+}
+
+/* Variante destructiva (salir) → azul se descarta; usa señal crítica al hover */
+.dock-item.is-danger:hover {
+  color: var(--signal-crit);
+  border-color: var(--signal-crit-aura);
+  box-shadow: var(--glow-crit);
+}
+
+/* Marca / testigo del sistema al inicio del dock */
+.dock-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  height: 46px;
+  padding: 0 var(--sp-2) 0 11px;
+  color: var(--smoke);
+}
+.dock-brand .brand-mark {
+  display: grid;
+  place-items: center;
+  width: 30px; height: 30px;
+  border-radius: var(--r-sm);
+  background: var(--copper-film);
+  border: var(--hairline) solid var(--copper-aura);
+  color: var(--copper-core);
+}
+.dock-brand .brand-meta { display: flex; flex-direction: column; line-height: 1; gap: 3px; }
+.dock-brand .brand-name {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semi);
+  font-size: var(--fs-meta);
+  letter-spacing: var(--track-tight);
+  color: var(--smoke);
+}
+.dock-brand .brand-tag {
+  font-size: var(--fs-micro);
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--pewter);
+}
+.dock-brand .brand-pulse {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--signal-ok);
+  box-shadow: 0 0 8px var(--signal-ok-aura);
+  animation: data-blink 2.4s var(--ease-mass) infinite;
+}
+
+/* Tooltip de item cuando el muelle está colapsado (accesibilidad de refuerzo) */
+.dock-item .dock-tip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(6px);
+  padding: 5px 9px;
+  border-radius: var(--r-xs);
+  background: var(--graphite-2);
+  border: var(--hairline) solid var(--steel);
+  color: var(--chrome);
+  font-size: var(--fs-micro);
+  letter-spacing: var(--track-mono);
+  text-transform: uppercase;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  box-shadow: var(--shadow-panel);
+  transition: opacity var(--t-quick) var(--ease-mass), transform var(--t-quick) var(--ease-recoil);
+}
+.dock:not(:hover) .dock-item:hover .dock-tip {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ──────────────────────────────────────────────────────────────────────────
+   RESPONSIVE — el muelle se ancla al borde inferior en pantallas estrechas
+   ────────────────────────────────────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .dock {
+    left: var(--sp-3);
+    right: var(--sp-3);
+    bottom: var(--sp-3);
+    transform: none;
+    justify-content: space-around;
+    border-radius: var(--r-lg);
+    padding: var(--sp-2) var(--sp-1);
+  }
+  .dock-brand, .dock-sep { display: none; }
+  .dock-item { padding: 0 10px; }
+  /* En móvil las etiquetas permanecen colapsadas: solo iconos + tooltip */
+  .dock:hover .dock-item:not(.is-active) .dock-label { max-width: 0; opacity: 0; margin-left: 0; }
+  .console-stage { padding-bottom: 96px; }
+}

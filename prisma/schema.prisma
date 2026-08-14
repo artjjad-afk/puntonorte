@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id            Int      @id @default(autoincrement())
+  name          String   @db.VarChar(200)
+  slug          String   @unique @db.VarChar(200)
+  price         Float
+  originalPrice Float?
+  category      String   @db.VarChar(100)
+  subcategory   String?  @db.VarChar(100)
+  description   String   @db.Text
+  images        String   @db.LongText
+  sizes         String?  @db.Text
+  colors        String?  @db.Text
+  badge         String?  @db.VarChar(50)
+  inStock       Boolean  @default(true)
+  featured      Boolean  @default(false)
+  active        Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("products")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(100)
+  slug      String   @unique @db.VarChar(100)
+  image     String?  @db.VarChar(500)
+  active    Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("categories")
+}
+
+model Order {
+  id            Int      @id @default(autoincrement())
+  customerName  String   @db.VarChar(200)
+  customerPhone String   @db.VarChar(50)
+  address       String   @db.Text
+  city          String   @db.VarChar(100)
+  notes         String?  @db.Text
+  paymentMethod String   @db.VarChar(50)
+  items         String   @db.LongText
+  total         Float
+  status        String   @default("pending") @db.VarChar(50)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("orders")
+}

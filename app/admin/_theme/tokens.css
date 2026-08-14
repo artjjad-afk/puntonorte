@@ -1,0 +1,330 @@
+/* ============================================================================
+   PUNTO NORTE · ADMIN CONSOLE
+   Design Tokens — "Cyber-Industrial Minimalism"
+   ----------------------------------------------------------------------------
+   Sistema de variables aislado del storefront público (globals.css).
+   Se importa ÚNICAMENTE en el layout de /admin. No hay componentes aquí:
+   solo el lenguaje visual. Todo componente futuro consume estos tokens.
+
+   Convención de capas (z-context):
+     L0  vacío / base negra + light-map + grano
+     L1  superficies estructurales (grid, riel del dock)
+     L2  vidrio de datos (paneles, tarjetas de métrica)
+     L3  vidrio interactivo (dock flotante, modales, tooltips)
+     L4  foco / dato seleccionado (borde eléctrico, glow)
+   ========================================================================== */
+
+:root {
+
+  /* ==========================================================================
+     01 · ESCALA MONOCROMÁTICA  —  humo → negro absoluto
+     El 92% de la UI vive aquí. Valores hex únicos, no repetidos, para permitir
+     mezclas de profundidad reales (nunca opacidades de un mismo gris).
+     ========================================================================== */
+  --void:        #050505;   /* base absoluta — el vacío del que emerge todo   */
+  --abyss:       #0a0a0b;   /* fondo de secciones hundidas                    */
+  --graphite-1:  #101012;   /* superficie estructural base (L1)               */
+  --graphite-2:  #16161a;   /* superficie estructural elevada                 */
+  --graphite-3:  #1d1d22;   /* borde interno / divisores densos               */
+  --iron:        #26262c;   /* trazo estructural visible                      */
+  --steel:       #35353d;   /* borde de reposo del vidrio                     */
+  --ash:         #4a4a54;   /* iconografía inactiva                           */
+  --pewter:      #6d6d78;   /* texto terciario / metadatos                    */
+  --nickel:      #8f8f9a;   /* texto secundario                               */
+  --silver:      #b8b8c0;   /* texto de cuerpo estándar                       */
+  --chrome:      #d6d6db;   /* texto de énfasis                               */
+  --smoke:       #ededf0;   /* titulares / valores primarios                  */
+  --white-hot:   #fbfbfd;   /* dato crítico máximo (casi nunca)               */
+
+  /* ==========================================================================
+     02 · ACENTOS  —  se ganan por ESTADO, nunca decorativos
+     COBRE OXIDADO  →  activo / proceso en curso / marca
+     AZUL ELÉCTRICO →  seleccionado / dato en foco / enlace de datos
+     Cada acento incluye su rampa (deep/core/bright) y sus versiones de aura.
+     ========================================================================== */
+
+  /* Cobre oxidado — mate, terroso, industrial (no naranja saturado) */
+  --copper-deep:   #6e3a18;   /* óxido en sombra                              */
+  --copper-oxide:  #9a5324;   /* óxido base                                   */
+  --copper:        #c1692b;   /* cobre marca (heredado del storefront)        */
+  --copper-core:   #d4813f;   /* cobre activo, pulido                         */
+  --copper-bright: #e89b5b;   /* filo de luz sobre cobre                      */
+  --copper-aura:   rgba(193, 105, 43, 0.22);  /* halo de estado activo        */
+  --copper-film:   rgba(193, 105, 43, 0.06);  /* tinte de superficie activa   */
+
+  /* Azul eléctrico — frío, energético, señal de foco */
+  --blue-deep:     #0b2a52;   /* señal en sombra                              */
+  --blue-core:     #1f6fed;   /* azul foco base                               */
+  --blue:          #3b8bff;   /* azul eléctrico primario                      */
+  --blue-bright:   #6fb0ff;   /* filo de luz / cursor de dato                 */
+  --blue-aura:     rgba(59, 139, 255, 0.24);  /* halo de selección            */
+  --blue-film:     rgba(59, 139, 255, 0.05);  /* tinte de superficie en foco  */
+
+  /* ==========================================================================
+     03 · ESTADO SEMÁNTICO (telemetría)  —  señales de consola
+     Desaturados hacia lo industrial: informan sin gritar.
+     ========================================================================== */
+  --signal-ok:     #3fae7a;   /* operativo / stock sano                       */
+  --signal-warn:   #d99a2b;   /* umbral / stock bajo                          */
+  --signal-crit:   #d9483b;   /* fallo / agotado / error                      */
+  --signal-idle:   #5b6472;   /* inactivo / sin dato                          */
+  --signal-ok-aura:   rgba(63, 174, 122, 0.18);
+  --signal-warn-aura: rgba(217, 154, 43, 0.18);
+  --signal-crit-aura: rgba(217, 72, 59, 0.20);
+
+  /* ==========================================================================
+     04 · VIDRIO — "Deep Frosted Glass"
+     Superficies translúcidas por nivel de capa. El componente aplica:
+       background: var(--glass-l2);
+       backdrop-filter: var(--glass-blur) var(--glass-sat);
+       border: 1px solid var(--edge-rest);
+     ========================================================================== */
+  --glass-l2:     rgba(255, 255, 255, 0.05);   /* panel de datos              */
+  --glass-l2-hi:  rgba(255, 255, 255, 0.08);   /* panel de datos · hover      */
+  --glass-l3:     rgba(255, 255, 255, 0.10);   /* dock / modal                */
+  --glass-l3-hi:  rgba(255, 255, 255, 0.15);   /* dock / modal · hover        */
+  --glass-tint:   rgba(20, 22, 28, 0.55);      /* tinte frío base del vidrio  */
+
+  --glass-blur:   blur(40px);                  /* blur profundo característico */
+  --glass-blur-lite: blur(18px);               /* elementos pequeños/rápidos  */
+  --glass-sat:    saturate(135%);              /* recupera color tras el blur  */
+
+  /* Borde luminoso reactivo al mouse.
+     --mx / --my son actualizados por JS (0–100%) sobre el elemento;
+     el borde de 1px "capta la luz" en la posición del cursor.            */
+  --mx: 50%;
+  --my: 0%;
+  --edge-rest:   rgba(255, 255, 255, 0.10);    /* filo de reposo (1px)        */
+  --edge-soft:   rgba(255, 255, 255, 0.06);    /* filo tenue interior         */
+  --edge-live:   rgba(255, 255, 255, 0.85);    /* punto de luz del cursor     */
+  --edge-copper: rgba(232, 155, 91, 0.90);     /* filo vivo · estado activo   */
+  --edge-blue:   rgba(111, 176, 255, 0.90);    /* filo vivo · estado foco     */
+
+  /* Gradiente de borde reactivo — usar como border-image o ::before mask.
+     Concentra luz en (--mx,--my) y decae hacia el filo de reposo.        */
+  --edge-glow: radial-gradient(
+      140px circle at var(--mx) var(--my),
+      var(--edge-live),
+      var(--edge-rest) 45%,
+      transparent 80%);
+
+  /* ==========================================================================
+     05 · SOMBRAS — profundidad REAL por multi-capa
+     No una sola sombra difusa: apilamos contacto + cuerpo + ambiente + luz
+     interna, como un objeto físico sobre una mesa oscura.
+     ========================================================================== */
+
+  /* Elevación L2 — panel de datos apoyado */
+  --shadow-panel:
+      0 0.5px 0 0 rgba(255,255,255,0.06) inset,          /* filo superior luz  */
+      0 1px 1px -0.5px rgba(0,0,0,0.60),                 /* contacto duro      */
+      0 4px 8px -2px  rgba(0,0,0,0.55),                  /* cuerpo             */
+      0 12px 28px -6px rgba(0,0,0,0.50),                 /* ambiente medio     */
+      0 32px 64px -20px rgba(0,0,0,0.65);                /* ambiente profundo  */
+
+  /* Elevación L3 — dock / modal flotante (despega del plano) */
+  --shadow-float:
+      0 1px 0 0 rgba(255,255,255,0.10) inset,
+      0 2px 4px -1px  rgba(0,0,0,0.70),
+      0 10px 20px -6px rgba(0,0,0,0.60),
+      0 28px 50px -14px rgba(0,0,0,0.60),
+      0 60px 120px -40px rgba(0,0,0,0.75);
+
+  /* Hundido — inputs, ranuras, wells (luz invertida) */
+  --shadow-inset:
+      0 1px 2px 0 rgba(0,0,0,0.70) inset,
+      0 2px 6px -1px rgba(0,0,0,0.55) inset,
+      0 -0.5px 0 0 rgba(255,255,255,0.04) inset;         /* filo inferior luz  */
+
+  /* Auras de estado — se SUMAN a la sombra base cuando el elemento activa */
+  --glow-copper:
+      0 0 0 1px var(--copper-aura),
+      0 0 18px -2px var(--copper-aura),
+      0 0 40px -8px rgba(193,105,43,0.30);
+  --glow-blue:
+      0 0 0 1px var(--blue-aura),
+      0 0 18px -2px var(--blue-aura),
+      0 0 42px -8px rgba(59,139,255,0.32);
+  --glow-crit:
+      0 0 0 1px var(--signal-crit-aura),
+      0 0 20px -4px rgba(217,72,59,0.35);
+
+  /* ==========================================================================
+     06 · LIGHT-MAP + GRANO  —  el fondo asimétrico L0
+     El layout aplica --bg-console al <body> de /admin. Un solo foco frío
+     arriba-izquierda + un rescoldo cobre abajo-derecha, sobre el vacío.
+     El grano se aplica como capa ::after con --grain-tex (data-URI SVG).
+     ========================================================================== */
+  --bg-console:
+      radial-gradient(120% 90% at 12% -8%,
+          rgba(59,139,255,0.06) 0%,
+          rgba(59,139,255,0.02) 22%,
+          transparent 48%),
+      radial-gradient(90% 80% at 108% 112%,
+          rgba(193,105,43,0.055) 0%,
+          transparent 46%),
+      radial-gradient(60% 50% at 50% 40%,
+          #0b0b0d 0%,
+          var(--void) 70%),
+      var(--void);
+
+  /* Grano procedural — ruido monocromo tenue (feTurbulence). Se superpone
+     con mix-blend-mode: overlay y opacidad baja para romper el banding.   */
+  --grain-tex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --grain-opacity: 0.035;
+
+  /* Retícula técnica opcional (blueprint) para fondos de sección L1 */
+  --grid-line: rgba(255,255,255,0.022);
+  --grid-tech:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  --grid-size: 32px;
+
+  /* ==========================================================================
+     07 · TIPOGRAFÍA  —  mono (datos) + geométrica (mando)
+     Cargar vía next/font en el layout:
+        Space Grotesk  → --font-display (títulos, mando)
+        IBM Plex Mono  → --font-mono    (datos, métricas, tablas, labels)
+     Fallbacks nativos para no bloquear el render.
+     ========================================================================== */
+  --font-display: "Space Grotesk", "Inter Tight", system-ui, sans-serif;
+  --font-mono:    "IBM Plex Mono", "JetBrains Mono", ui-monospace,
+                  "SFMono-Regular", Menlo, monospace;
+
+  /* Escala tipográfica — cuarta menor (1.200) anclada a 13px de dato base.
+     La consola prioriza densidad: cuerpos pequeños, titulares contenidos.  */
+  --fs-micro:  0.6875rem;  /* 11px  — labels de eje / unidades              */
+  --fs-meta:   0.75rem;    /* 12px  — metadatos, timestamps                 */
+  --fs-data:   0.8125rem;  /* 13px  — dato base / tabla                     */
+  --fs-body:   0.9375rem;  /* 15px  — cuerpo de lectura                     */
+  --fs-lead:   1.125rem;   /* 18px  — subtítulo de panel                    */
+  --fs-title:  1.5rem;     /* 24px  — título de sección                     */
+  --fs-hero:   2.25rem;    /* 36px  — cifra dominante / KPI                 */
+  --fs-mega:   3.5rem;     /* 56px  — telemetría de portada                 */
+
+  /* Pesos — la geométrica manda en 500/600; la mono en 400/500 */
+  --fw-light:   300;
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semi:    600;
+
+  /* Interlínea y tracking — tracking amplio en labels mono (estética consola) */
+  --lh-tight:   1.05;   /* cifras KPI                                       */
+  --lh-snug:    1.25;   /* titulares                                        */
+  --lh-normal:  1.5;    /* cuerpo                                           */
+  --track-mono: 0.08em; /* labels/uppercase mono                            */
+  --track-wide: 0.18em; /* micro-labels de eje (estética instrumento)       */
+  --track-tight:-0.02em;/* titulares geométricos grandes                    */
+
+  /* ==========================================================================
+     08 · GEOMETRÍA  —  radios contenidos, industriales (no pill-blando)
+     ========================================================================== */
+  --r-xs:  3px;    /* chips, badges                                        */
+  --r-sm:  6px;    /* botones, inputs                                      */
+  --r-md:  10px;   /* tarjetas de dato                                     */
+  --r-lg:  16px;   /* paneles                                              */
+  --r-xl:  22px;   /* dock flotante / modal                               */
+  --hairline: 1px; /* trazo estructural base                              */
+
+  /* ==========================================================================
+     09 · RITMO ESPACIAL  —  base 4px, denso como panel de instrumentos
+     ========================================================================== */
+  --sp-1:  4px;
+  --sp-2:  8px;
+  --sp-3:  12px;
+  --sp-4:  16px;
+  --sp-5:  24px;
+  --sp-6:  32px;
+  --sp-7:  48px;
+  --sp-8:  64px;
+  --sp-9:  96px;
+
+  /* ==========================================================================
+     10 · MOVIMIENTO  —  curvas bezier de ALTA TENSIÓN (peso e inercia)
+     Nada lineal. Entrada rápida, freno con masa, asentamiento con overshoot.
+     ========================================================================== */
+
+  /* Curvas de firma */
+  --ease-tension:  cubic-bezier(0.16, 1.20, 0.30, 1.00); /* overshoot control */
+  --ease-recoil:   cubic-bezier(0.34, 1.56, 0.42, 1.00); /* rebote marcado    */
+  --ease-mass:     cubic-bezier(0.62, 0.05, 0.10, 0.99); /* arranca lento/pesa */
+  --ease-snap:     cubic-bezier(0.30, 0.90, 0.10, 1.00); /* clic decidido      */
+  --ease-exit:     cubic-bezier(0.55, 0.00, 0.85, 0.35); /* salida que acelera */
+
+  /* Duraciones — la masa se percibe en el rango 180–420ms */
+  --t-instant: 90ms;
+  --t-quick:   160ms;
+  --t-base:    240ms;
+  --t-heavy:   380ms;
+  --t-cinema:  620ms;
+}
+
+/* ============================================================================
+   KEYFRAMES  —  todos gobernados por las curvas de tensión superiores
+   ========================================================================== */
+
+/* Panel que se asienta con masa (entra, sobrepasa, se calibra) */
+@keyframes console-settle {
+  0%   { opacity: 0; transform: translateY(18px) scale(0.985); filter: blur(6px); }
+  60%  { opacity: 1; transform: translateY(-3px) scale(1.004); filter: blur(0); }
+  100% { opacity: 1; transform: translateY(0)     scale(1);     filter: blur(0); }
+}
+
+/* Dock que emerge del borde con inercia */
+@keyframes dock-rise {
+  0%   { opacity: 0; transform: translateY(40px) scale(0.94); }
+  70%  { opacity: 1; transform: translateY(-6px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* Barrido del filo luminoso (escaneo de borde) */
+@keyframes edge-scan {
+  0%   { background-position:   0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* Pulso de estado activo (cobre) — respiración lenta del aura */
+@keyframes pulse-copper {
+  0%,100% { box-shadow: 0 0 0 1px var(--copper-aura), 0 0 14px -4px var(--copper-aura); }
+  50%     { box-shadow: 0 0 0 1px var(--copper-aura), 0 0 26px -2px rgba(193,105,43,0.40); }
+}
+
+/* Pulso de dato en foco (azul) */
+@keyframes pulse-blue {
+  0%,100% { box-shadow: var(--glow-blue); }
+  50%     { box-shadow: 0 0 0 1px var(--blue-aura), 0 0 30px -2px rgba(59,139,255,0.45); }
+}
+
+/* Parpadeo de cursor/dato en vivo (telemetría) */
+@keyframes data-blink {
+  0%,55% { opacity: 1; }
+  60%,100% { opacity: 0.28; }
+}
+
+/* Conteo de aparición para cifras (contador que se "engancha") */
+@keyframes value-lock {
+  0%   { opacity: 0; transform: translateY(0.4em) scaleY(1.15); letter-spacing: 0.1em; }
+  100% { opacity: 1; transform: translateY(0)      scaleY(1);    letter-spacing: normal; }
+}
+
+/* Grano en deriva sutil (evita ruido estático "muerto") */
+@keyframes grain-drift {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-1%, 1%); }
+  50%  { transform: translate(1%, -1%); }
+  75%  { transform: translate(-1%, -1%); }
+  100% { transform: translate(0, 0); }
+}
+
+/* Respeto a accesibilidad — sin movimiento si el usuario lo pide */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --t-instant: 0ms; --t-quick: 0ms; --t-base: 0ms;
+    --t-heavy: 0ms; --t-cinema: 0ms;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

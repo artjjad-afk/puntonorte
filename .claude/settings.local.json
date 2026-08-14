@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cat components/admin/AdminSidebar.tsx)",
+      "Bash(head -120 app/admin/admin.css)",
+      "Bash(npx tsc *)",
+      "Bash(echo \"=== exit: $? ===\")",
+      "Bash(taskkill //F //IM node.exe)"
+    ]
+  }
+}
