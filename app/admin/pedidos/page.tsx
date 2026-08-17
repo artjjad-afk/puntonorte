@@ -105,7 +105,8 @@ export default function AdminPedidos() {
                     {/* Expanded detail */}
                     {isExpanded && (
                       <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '20px 22px', background: 'rgba(0,0,0,0.2)' }}>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}
+                          className="adm-order-detail-grid">
                           <div>
                             <p style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(232,229,226,0.3)', letterSpacing: '1.5px', textTransform: 'uppercase', marginBottom: '10px' }}>Datos del cliente</p>
                             {[
@@ -132,7 +133,8 @@ export default function AdminPedidos() {
                         </div>
 
                         {/* Status + WA */}
-                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px' }}>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '16px' }}
+                          className="adm-order-actions">
                           <span style={{ fontSize: '10px', fontWeight: '700', color: 'rgba(232,229,226,0.3)', letterSpacing: '1.5px', textTransform: 'uppercase', marginRight: '4px' }}>Estado:</span>
                           {Object.entries(STATUS).map(([key, val]) => (
                             <button key={key} onClick={() => updateStatus(order.id, key)}

@@ -57,7 +57,8 @@ export default function AdminDashboard() {
         <div style={{ maxWidth: '1140px', margin: '0 auto' }}>
 
           {/* Header */}
-          <div style={{ marginBottom: '36px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}>
+          <div style={{ marginBottom: '36px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', flexWrap: 'wrap', gap: '16px' }}
+            className="adm-page-header">
             <div>
               <div className="adm-section-label">Panel de control</div>
               <h1 style={{ fontSize: 'clamp(24px, 4vw, 36px)', fontWeight: '800', color: '#fff', margin: 0, letterSpacing: '-1px', lineHeight: 1.1 }}>
@@ -95,10 +96,11 @@ export default function AdminDashboard() {
               </div>
 
               {/* Orders table + Quick actions */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: '16px', alignItems: 'start' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: '16px', alignItems: 'start' }}>
+                <style>{`@media(max-width:900px){ .adm-dash-grid{ grid-template-columns:1fr !important; } .adm-dash-side{ display:none !important; } }`}</style>
 
                 {/* Pedidos recientes */}
-                <div className="glass-card" style={{ overflow: 'hidden' }}>
+                <div className="glass-card adm-dash-grid" style={{ overflow: 'hidden' }}>
                   <div style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2 style={{ fontSize: '16px', fontWeight: '700', color: '#fff', margin: 0 }}>Pedidos recientes</h2>
                     <Link href="/admin/pedidos" style={{ fontSize: '12px', color: '#c1692b', textDecoration: 'none', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -140,7 +142,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {/* Quick actions */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div className="adm-dash-side" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   <div className="glass-card" style={{ padding: '20px' }}>
                     <h3 style={{ fontSize: '13px', fontWeight: '700', color: 'rgba(232,229,226,0.5)', letterSpacing: '1.5px', textTransform: 'uppercase', margin: '0 0 16px' }}>Acciones rápidas</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
