@@ -20,7 +20,8 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
   const [form, setForm] = useState({
     name: '', price: '', originalPrice: '', category: '',
     subcategory: '', description: '', badge: '',
-    inStock: true, featured: false, images: [] as string[],
+    inStock: true, featured: false, active: true,
+    images: [] as string[],
     sizes: [] as string[], colors: [] as string[],
   })
 
@@ -37,9 +38,10 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
         setForm({
           name: p.name || '', price: String(p.price || ''),
           originalPrice: p.originalPrice ? String(p.originalPrice) : '',
-          category: p.category || 'dama', subcategory: p.subcategory || '',
+          category: p.category || '', subcategory: p.subcategory || '',
           description: p.description || '', badge: p.badge || '',
           inStock: p.inStock ?? true, featured: p.featured ?? false,
+          active: p.active ?? true,
           images: Array.isArray(p.images) ? p.images : [],
           sizes: Array.isArray(p.sizes) ? p.sizes : [],
           colors: Array.isArray(p.colors) ? p.colors : [],
@@ -50,19 +52,31 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
 
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
   const addImage = () => { if (imageInput.trim()) { set('images', [...form.images, imageInput.trim()]); setImageInput('') } }
+  const removeImage = (i: number) => set('images', form.images.filter((_: string, idx: number) => idx !== i))
   const addSize = () => { if (sizeInput.trim() && !form.sizes.includes(sizeInput.trim())) { set('sizes', [...form.sizes, sizeInput.trim()]); setSizeInput('') } }
   const addColor = () => { if (colorInput.trim() && !form.colors.includes(colorInput.trim())) { set('colors', [...form.colors, colorInput.trim()]); setColorInput('') } }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true); setError('')
+    setError('')
+
+    // Validación antes de enviar
+    if (!form.name.trim()) { setError('El nombre del producto es requerido.'); return }
+    if (!form.price || parseFloat(form.price) <= 0) { setError('El precio debe ser mayor a 0.'); return }
+    if (!form.description.trim()) { setError('La descripción es requerida.'); return }
+    if (form.images.length === 0) { setError('Agrega al menos una imagen.'); return }
+    if (form.originalPrice && parseFloat(form.originalPrice) <= parseFloat(form.price)) {
+      setError('El precio original debe ser mayor al precio actual.'); return
+    }
+
+    setLoading(true)
     try {
       const res = await fetch(`/api/products/${id}`, {
         method: 'PUT', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       })
       if (res.ok) router.push('/admin/productos')
-      else { const d = await res.json(); setError(d.error || 'Error') }
+      else { const d = await res.json(); setError(d.error || 'Error al guardar') }
     } catch { setError('Error de conexión') }
     finally { setLoading(false) }
   }
@@ -184,7 +198,11 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
               <div style={{ background: '#fff', borderRadius: '16px', padding: '28px', border: '1px solid #e8e5e2' }}>
                 <h2 style={{ fontSize: '15px', fontWeight: '800', color: '#211f1e', margin: '0 0 20px' }}>Opciones</h2>
                 <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
-                  {[{ key: 'inStock', label: 'Disponible en stock' }, { key: 'featured', label: 'Producto destacado' }].map(({ key, label }) => (
+                  {[
+                    { key: 'inStock',  label: 'Disponible en stock' },
+                    { key: 'featured', label: 'Producto destacado (aparece en inicio)' },
+                    { key: 'active',   label: 'Activo (visible en la tienda)' },
+                  ].map(({ key, label }) => (
                     <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
                       <div onClick={() => set(key, !form[key as keyof typeof form])} style={{ width: '20px', height: '20px', borderRadius: '6px', border: `2px solid ${form[key as keyof typeof form] ? '#c1692b' : '#e8e5e2'}`, background: form[key as keyof typeof form] ? '#c1692b' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}>
                         {form[key as keyof typeof form] && <svg width="12" height="12" viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round" /></svg>}
