@@ -74,6 +74,10 @@ export const useCartStore = create<CartStore>()(
       total: () => get().items.reduce((acc, i) => acc + i.product.price * i.quantity, 0),
       count: () => get().items.reduce((acc, i) => acc + i.quantity, 0),
     }),
-    { name: 'punto-norte-cart' }
+    { 
+      name: 'punto-norte-cart',
+      // No persistir el estado de apertura del carrito — siempre empieza cerrado
+      partialize: (state) => ({ items: state.items }),
+    }
   )
 )
