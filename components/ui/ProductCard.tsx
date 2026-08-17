@@ -1,18 +1,20 @@
 'use client'
 import { useState, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, Heart, Eye, Zap } from 'lucide-react'
+import { ShoppingCart, Heart, Eye } from 'lucide-react'
 import { Product } from '@/types'
 import { useCartStore } from '@/store/cart'
 import { useToast } from '@/components/ui/Toast'
+import { useWishlistStore } from '@/store/wishlist'
 
 export function ProductCard({ product }: { product: Product }) {
   const [imgIdx, setImgIdx]         = useState(0)
-  const [wishlisted, setWishlisted] = useState(false)
   const [isAdding, setIsAdding]     = useState(false)
   const cardRef = useRef<HTMLDivElement>(null)
   const { addItem } = useCartStore()
   const { show }    = useToast()
+  const { toggle: toggleWishlist, has: isWishlisted } = useWishlistStore()
+  const wishlisted = isWishlisted(product.id)
 
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -93,7 +95,7 @@ export function ProductCard({ product }: { product: Product }) {
 
           {/* ── Wishlist ── */}
           <button
-            onClick={e => { e.preventDefault(); setWishlisted(w => !w) }}
+            onClick={e => { e.preventDefault(); toggleWishlist(product.id) }}
             style={{
               position:'absolute', top:'12px', right:'12px', zIndex:3,
               width:'36px', height:'36px', borderRadius:'50%',

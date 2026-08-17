@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ShoppingCart, Heart, Shield, Truck, RefreshCw, ChevronLeft, Star, Minus, Plus } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useToast } from '@/components/ui/Toast'
+import { useWishlistStore } from '@/store/wishlist'
 import { ProductCard } from '@/components/ui/ProductCard'
 import { ImageZoom } from '@/components/ui/ImageZoom'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/ui/JsonLd'
@@ -16,6 +17,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const router = useRouter()
   const { addItem } = useCartStore()
   const { show } = useToast()
+  const { toggle: toggleWishlist, has: isWishlisted } = useWishlistStore()
 
   const [product, setProduct] = useState<Product | null>(null)
   const [related, setRelated] = useState<Product[]>([])
@@ -24,7 +26,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedColor, setSelectedColor] = useState('')
   const [quantity, setQuantity] = useState(1)
-  const [wishlisted, setWishlisted] = useState(false)
+  const [sizeError, setSizeError]   = useState(false)
+  const [colorError, setColorError] = useState(false)
 
   useEffect(() => {
     setLoading(true)
@@ -249,8 +252,30 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               >
                 <ShoppingCart size={17} /> {product.inStock ? 'Agregar al carrito' : 'Agotado'}
               </button>
-              <button onClick={() => setWishlisted(w => !w)} style={{ width: '52px', height: '52px', border: `1.5px solid ${wishlisted ? '#c1692b' : '#e8e5e2'}`, borderRadius: '12px', background: wishlisted ? '#fff7f3' : '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .2s' }}>
-                <Heart size={18} fill={wishlisted ? '#c1692b' : 'none'} color={wishlisted ? '#c1692b' : '#393738'} />
+              <button
+                onClick={() => {
+                  if (product) {
+                    toggleWishlist(product.id)
+                    show(
+                      product.name,
+                      isWishlisted(product.id) ? 'Eliminado de favoritos' : 'Agregado a favoritos ♥',
+                      'cart'
+                    )
+                  }
+                }}
+                style={{
+                  width: '52px', height: '52px',
+                  border: `1.5px solid ${product && isWishlisted(product.id) ? '#c1692b' : '#e8e5e2'}`,
+                  borderRadius: '12px',
+                  background: product && isWishlisted(product.id) ? '#fff7f3' : '#fff',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0, transition: 'all .2s',
+                }}>
+                <Heart
+                  size={18}
+                  fill={product && isWishlisted(product.id) ? '#c1692b' : 'none'}
+                  color={product && isWishlisted(product.id) ? '#c1692b' : '#393738'}
+                />
               </button>
             </div>
 
