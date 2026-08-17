@@ -84,8 +84,6 @@ export default function CheckoutPage() {
     )
   }
 
-  const [orderError, setOrderError] = useState(false)
-
   const handleConfirm = async () => {
     setLoading(true)
     setOrderError(false)
