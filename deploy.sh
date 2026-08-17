@@ -22,7 +22,7 @@ echo "🔨 Construyendo aplicación..."
 if npm run build; then
     echo "✅ Build exitoso"
     # 4. Reiniciar solo si el build fue exitoso
-    pm2 restart $APP_NAME
+    pm2 reload ecosystem.config.js --update-env
     echo "🟢 Deploy completado exitosamente"
 else
     echo "❌ Build falló — la tienda sigue corriendo con la versión anterior"
