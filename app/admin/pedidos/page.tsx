@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { Clock, CheckCircle, XCircle, TrendingUp, ShoppingBag, MessageCircle, ChevronDown } from 'lucide-react'
+import { formatWAPhone } from '@/lib/config'
 
 interface Order {
   id: number; customerName: string; customerPhone: string
@@ -140,7 +141,7 @@ export default function AdminPedidos() {
                               {val.icon} {val.label}
                             </button>
                           ))}
-                          <a href={`https://wa.me/${order.customerPhone.replace(/\D/g, '')}?text=${encodeURIComponent(`Hola ${order.customerName}, tu pedido #${order.id} está listo.`)}`}
+                          <a href={`https://wa.me/${formatWAPhone(order.customerPhone)}?text=${encodeURIComponent(`Hola ${order.customerName}, tu pedido #${order.id} está listo.`)}`}
                             target="_blank" rel="noopener noreferrer"
                             style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '7px 14px', background: 'rgba(37,211,102,0.12)', border: '1px solid rgba(37,211,102,0.2)', borderRadius: '8px', color: '#4ade80', textDecoration: 'none', fontSize: '12px', fontWeight: '700' }}>
                             <MessageCircle size={13} /> WhatsApp
