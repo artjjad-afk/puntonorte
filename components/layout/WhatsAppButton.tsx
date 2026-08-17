@@ -5,7 +5,7 @@ const WA_NUMBER = '584140906768'
 const WA_MSG = encodeURIComponent('Hola Punto Norte! Me gustaría obtener información sobre sus productos.')
 
 export function WhatsAppButton() {
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible]       = useState(false)
   const [showTooltip, setShowTooltip] = useState(false)
 
   useEffect(() => {
@@ -25,13 +25,12 @@ export function WhatsAppButton() {
       style={{
         position: 'fixed', bottom: '28px', right: '28px', zIndex: 999,
         width: '56px', height: '56px', borderRadius: '50%',
-        backgroundColor: '#25d366', display: 'flex', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: '#25d366',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
         boxShadow: '0 4px 20px rgba(37,211,102,0.4)',
         animation: 'pulse-wa 2s ease-in-out infinite',
         textDecoration: 'none', transition: 'transform 0.2s',
       }}
-      onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
-      onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
       aria-label="Contactar por WhatsApp"
     >
       <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
