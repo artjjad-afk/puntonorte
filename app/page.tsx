@@ -4,8 +4,17 @@ import { ProductCard } from '@/components/ui/ProductCard'
 import { BubblesCanvas } from '@/components/ui/BubblesCanvas'
 import { LightRays } from '@/components/ui/LightRays'
 import { ParticlesBurst, fireBurst } from '@/components/ui/ParticlesBurst'
-import { getFeatured, categories } from '@/lib/products'
 import { useEffect, useRef, useState, useCallback } from 'react'
+import { Product } from '@/types'
+
+// Categorías del hero — imágenes fijas decorativas
+const categories = [
+  { id: 'dama',       label: 'Dama',       image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=600&q=80' },
+  { id: 'caballero',  label: 'Caballero',  image: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=600&q=80' },
+  { id: 'accesorios', label: 'Accesorios', image: 'https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=600&q=80' },
+  { id: 'perfumes',   label: 'Perfumes',   image: 'https://images.unsplash.com/photo-1547887538-047c9d44754b?w=600&q=80' },
+  { id: 'cargadores', label: 'Cargadores', image: 'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=600&q=80' },
+]
 
 const testimonials = [
   { name: 'María G.',    city: 'Caracas',   text: 'Excelente calidad y llegó súper rápido. El vestido quedó perfecto. 100% recomendado.', stars: 5 },
@@ -70,14 +79,14 @@ function AnimatedNumber({ target, suffix, inView }: { target: number; suffix: st
 }
 
 export default function HomePage() {
-  const [featured, setFeatured] = useState<ReturnType<typeof getFeatured>>([])
+  const [featured, setFeatured] = useState<Product[]>([])
   const [scrollY, setScrollY] = useState(0)
 
   useEffect(() => {
     fetch('/api/products?featured=true')
       .then(r => r.json())
       .then(d => setFeatured(Array.isArray(d) ? d.slice(0, 8) : []))
-      .catch(() => setFeatured(getFeatured()))
+      .catch(() => setFeatured([]))
   }, [])
 
   useEffect(() => {
