@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
     const featured = searchParams.get('featured')
     const showAll = searchParams.get('all') === 'true'
     const activeParam = searchParams.get('active')
+    const q = searchParams.get('q')?.trim()
 
     // showAll solo permitido para admins autenticados
     if (showAll && !isAdmin(req)) {
@@ -36,6 +37,15 @@ export async function GET(req: NextRequest) {
     if (active !== undefined) where.active = active
     if (category && category !== 'all') where.category = category
     if (featured === 'true') where.featured = true
+
+    // Búsqueda por texto — busca en nombre, descripción y categoría
+    if (q) {
+      where.OR = [
+        { name:        { contains: q } },
+        { description: { contains: q } },
+        { category:    { contains: q } },
+      ]
+    }
 
     const products = await prisma.product.findMany({
       where,
