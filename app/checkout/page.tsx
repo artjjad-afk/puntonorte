@@ -44,10 +44,24 @@ export default function CheckoutPage() {
   )
 
   const subtotal = total()
+
+  // Valida números venezolanos: 04XX-XXXXXXX con operadoras reales
+  // Acepta: 0414-1234567 / 04141234567 / 0414 123 4567 / +58414...
+  const validateVenPhone = (phone: string): boolean => {
+    const digits = phone.replace(/\D/g, '')
+    // Quitar prefijo internacional si viene con 58
+    const local = digits.startsWith('58') ? '0' + digits.slice(2) : digits
+    return /^0(412|414|416|424|426)\d{7}$/.test(local)
+  }
+
   const validate = () => {
     const e: Partial<CustomerInfo> = {}
     if (!form.name.trim()) e.name = 'Requerido'
-    if (!form.phone.trim()) e.phone = 'Requerido'
+    if (!form.phone.trim()) {
+      e.phone = 'Requerido'
+    } else if (!validateVenPhone(form.phone)) {
+      e.phone = 'Ingresa un número venezolano válido (ej: 0414-1234567)'
+    }
     if (!form.address.trim()) e.address = 'Requerido'
     if (!form.city.trim()) e.city = 'Requerido'
     setErrors(e)
@@ -116,27 +130,76 @@ export default function CheckoutPage() {
     }
   }
 
-  const field = (key: keyof CustomerInfo, label: string, placeholder: string, type = 'text') => (
-    <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
-      <label style={{ fontSize:'12px', fontWeight:'700', color:'#393738', letterSpacing:'0.8px', textTransform:'uppercase' }}>
-        {label} {key !== 'notes' && <span style={{ color:'#c1692b' }}>*</span>}
-      </label>
-      {key === 'notes' ? (
-        <textarea placeholder={placeholder} value={form.notes || ''} rows={3}
-          onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
-          style={{ padding:'13px 16px', borderRadius:'12px', border:`1.5px solid ${errors[key] ? '#e53e3e' : '#e8e5e2'}`, fontSize:'14px', outline:'none', resize:'vertical', fontFamily:'Arial,sans-serif', transition:'border-color .2s' }}
-          onFocus={e => (e.target.style.borderColor = '#c1692b')}
-          onBlur={e => (e.target.style.borderColor = errors[key] ? '#e53e3e' : '#e8e5e2')} />
-      ) : (
-        <input type={type} placeholder={placeholder} value={form[key] || ''}
-          onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
-          style={{ padding:'13px 16px', borderRadius:'12px', border:`1.5px solid ${errors[key] ? '#e53e3e' : '#e8e5e2'}`, fontSize:'14px', outline:'none', transition:'border-color .2s' }}
-          onFocus={e => (e.target.style.borderColor = '#c1692b')}
-          onBlur={e => (e.target.style.borderColor = errors[key] ? '#e53e3e' : '#e8e5e2')} />
-      )}
-      {errors[key] && <span style={{ fontSize:'12px', color:'#e53e3e' }}>{errors[key]}</span>}
-    </div>
-  )
+  const field = (key: keyof CustomerInfo, label: string, placeholder: string, type = 'text') => {
+    const isPhone = key === 'phone'
+    const phoneValid = isPhone && form.phone.length > 6 && validateVenPhone(form.phone)
+    const phoneInvalid = isPhone && form.phone.length > 6 && !validateVenPhone(form.phone)
+
+    const borderColor = errors[key]
+      ? '#e53e3e'
+      : (isPhone && phoneValid) ? '#25a244'
+      : '#e8e5e2'
+
+    return (
+      <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+        <label style={{ fontSize:'12px', fontWeight:'700', color:'#393738', letterSpacing:'0.8px', textTransform:'uppercase' }}>
+          {label} {key !== 'notes' && <span style={{ color:'#c1692b' }}>*</span>}
+        </label>
+
+        {key === 'notes' ? (
+          <textarea placeholder={placeholder} value={form.notes || ''} rows={3}
+            onChange={e => setForm(f => ({ ...f, notes: e.target.value }))}
+            style={{ padding:'13px 16px', borderRadius:'12px', border:`1.5px solid ${borderColor}`, fontSize:'14px', outline:'none', resize:'vertical', fontFamily:'Arial,sans-serif', transition:'border-color .2s' }}
+            onFocus={e => (e.target.style.borderColor = '#c1692b')}
+            onBlur={e => (e.target.style.borderColor = borderColor)} />
+        ) : (
+          <div style={{ position:'relative' }}>
+            <input
+              type={type}
+              placeholder={placeholder}
+              value={form[key] || ''}
+              onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+              style={{
+                width: '100%', padding:'13px 16px', paddingRight: isPhone ? '44px' : '16px',
+                borderRadius:'12px', border:`1.5px solid ${borderColor}`,
+                fontSize:'14px', outline:'none', transition:'border-color .2s',
+                boxSizing:'border-box',
+              }}
+              onFocus={e => (e.target.style.borderColor = '#c1692b')}
+              onBlur={e => (e.target.style.borderColor = borderColor)}
+            />
+            {/* Indicador visual teléfono */}
+            {isPhone && form.phone.length > 6 && (
+              <span style={{
+                position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)',
+                fontSize:'16px', pointerEvents:'none',
+              }}>
+                {phoneValid ? '✅' : '❌'}
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* Mensaje de error */}
+        {errors[key] && (
+          <span style={{ fontSize:'12px', color:'#e53e3e', display:'flex', alignItems:'center', gap:'4px' }}>
+            ⚠️ {errors[key]}
+          </span>
+        )}
+
+        {/* Ayuda teléfono */}
+        {isPhone && !errors[key] && (
+          <span style={{ fontSize:'11px', color: phoneValid ? '#25a244' : phoneInvalid ? '#e53e3e' : '#7a7675' }}>
+            {phoneValid
+              ? '✓ Número válido'
+              : phoneInvalid
+                ? 'Operadora no reconocida. Válidas: 0412, 0414, 0416, 0424, 0426'
+                : 'Formato: 0414-1234567'}
+          </span>
+        )}
+      </div>
+    )
+  }
 
 
   return (

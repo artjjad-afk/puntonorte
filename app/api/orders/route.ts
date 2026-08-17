@@ -33,6 +33,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Faltan datos del pedido' }, { status: 400 })
     }
 
+    // Validar teléfono venezolano
+    const digits = customerPhone.replace(/\D/g, '')
+    const local = digits.startsWith('58') ? '0' + digits.slice(2) : digits
+    if (!/^0(412|414|416|424|426)\d{7}$/.test(local)) {
+      return NextResponse.json({ error: 'Número de teléfono venezolano inválido' }, { status: 400 })
+    }
+
     const order = await prisma.order.create({
       data: {
         customerName,
