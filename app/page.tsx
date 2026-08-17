@@ -153,11 +153,11 @@ export default function HomePage() {
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,rgba(13,12,11,.97) 0%,rgba(33,31,30,.75) 50%,rgba(13,12,11,.92) 100%)' }} />
         </div>
 
-        {/* Rayos de luz */}
-        <LightRays dark rayCount={10} />
+        {/* Rayos de luz — reducido */}
+        <LightRays dark rayCount={7} />
 
-        {/* Burbujas de cobre */}
-        <BubblesCanvas count={22} dark />
+        {/* Burbujas — reducidas */}
+        <BubblesCanvas count={12} dark />
 
         {/* Orbs CSS */}
         <div className="hero-orb" style={{ position:'absolute', top:'7%', right:'4%', width:'520px', height:'520px', borderRadius:'50%', border:'1px solid rgba(193,105,43,.18)', zIndex:2, pointerEvents:'none' }} />
@@ -319,8 +319,8 @@ export default function HomePage() {
       ════════════════════════════════ */}
       <section ref={sec2.ref} style={{ padding:'100px 32px', background:'#f9f7f5', position:'relative', overflow:'hidden' }}>
 
-        {/* Burbujas coloridas en sección clara */}
-        <BubblesCanvas count={18} dark={false} />
+        {/* Solo burbujas en sección clara — sin rayos para ahorrar CPU */}
+        <BubblesCanvas count={10} dark={false} />
 
         {/* Aurora blobs crema */}
         <div className="aurora-blob animate-aurora-2" style={{ width:'600px', height:'400px', top:'-80px', right:'-120px', background:'radial-gradient(ellipse,rgba(193,105,43,.1),transparent 70%)' }} />
@@ -389,8 +389,8 @@ export default function HomePage() {
       <section ref={sec3.ref} className="promo-strip" style={{ position:'relative' }}>
         {/* Izquierda */}
         <div style={{ background:'#211f1e', padding:'80px 60px', display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', overflow:'hidden' }}>
-          <LightRays dark rayCount={6} />
-          <BubblesCanvas count={14} dark />
+          <LightRays dark rayCount={5} />
+          <BubblesCanvas count={8} dark />
 
           <div style={{ position:'absolute', top:'-60px', right:'-60px', width:'300px', height:'300px', borderRadius:'50%', border:'1px solid rgba(193,105,43,.12)', pointerEvents:'none', zIndex:2 }} />
           <div style={{ position:'absolute', bottom:'-40px', left:'-40px', width:'220px', height:'220px', borderRadius:'50%', background:'radial-gradient(circle,rgba(193,105,43,.12) 0%,transparent 70%)', pointerEvents:'none', zIndex:2 }} />
@@ -450,8 +450,8 @@ export default function HomePage() {
       ════════════════════════════════ */}
       <section ref={sec4.ref} style={{ background:'#1a1817', padding:'80px 32px 100px', position:'relative', overflow:'hidden' }}>
 
-        <LightRays dark rayCount={12} />
-        <BubblesCanvas count={20} dark />
+        <LightRays dark rayCount={8} />
+        <BubblesCanvas count={12} dark />
 
         {/* Aurora oscura */}
         <div className="aurora-blob-dark animate-aurora-1" style={{ width:'700px', height:'400px', top:'50%', left:'50%', transform:'translate(-50%,-50%)', background:'radial-gradient(ellipse,rgba(193,105,43,.12),transparent 70%)' }} />
@@ -503,7 +503,8 @@ export default function HomePage() {
       ════════════════════════════════ */}
       <section ref={sec5.ref} style={{ padding:'100px 32px', background:'#fff', position:'relative', overflow:'hidden' }}>
 
-        <BubblesCanvas count={16} dark={false} />
+        {/* Solo burbujas en testimonios */}
+        <BubblesCanvas count={10} dark={false} />
 
         {/* Blobs aurora */}
         <div className="aurora-blob animate-aurora-3" style={{ width:'600px', height:'600px', top:'-200px', right:'-150px', background:'radial-gradient(circle,rgba(193,105,43,.12),rgba(255,200,100,.06),transparent 70%)' }} />
@@ -576,8 +577,8 @@ export default function HomePage() {
       ════════════════════════════════ */}
       <section ref={sec6.ref} style={{ position:'relative', padding:'120px 32px', background:'#0d0c0b', overflow:'hidden', textAlign:'center' }}>
 
-        <LightRays dark rayCount={14} />
-        <BubblesCanvas count={25} dark />
+        <LightRays dark rayCount={9} />
+        <BubblesCanvas count={14} dark />
 
         <div style={{ position:'absolute', inset:0, zIndex:1 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
