@@ -18,7 +18,8 @@ export default function NuevoProducto() {
   const [form, setForm] = useState({
     name: '', price: '', originalPrice: '', category: '',
     subcategory: '', description: '', badge: '',
-    inStock: true, featured: false, images: [] as string[],
+    inStock: true, featured: false, active: true,
+    images: [] as string[],
     sizes: [] as string[], colors: [] as string[],
   })
 
@@ -179,8 +180,9 @@ export default function NuevoProducto() {
                 <h2 style={{ fontSize: '15px', fontWeight: '800', color: '#211f1e', margin: '0 0 20px' }}>Opciones</h2>
                 <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap' }}>
                   {[
-                    { key: 'inStock', label: 'Disponible en stock' },
+                    { key: 'inStock',  label: 'Disponible en stock' },
                     { key: 'featured', label: 'Producto destacado (aparece en inicio)' },
+                    { key: 'active',   label: 'Activo (visible en la tienda)' },
                   ].map(({ key, label }) => (
                     <label key={key} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', userSelect: 'none' }}>
                       <div onClick={() => set(key, !form[key as keyof typeof form])} style={{ width: '20px', height: '20px', borderRadius: '6px', border: `2px solid ${form[key as keyof typeof form] ? '#c1692b' : '#e8e5e2'}`, background: form[key as keyof typeof form] ? '#c1692b' : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', transition: 'all .2s', flexShrink: 0 }}>
