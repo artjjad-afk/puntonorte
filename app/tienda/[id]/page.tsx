@@ -7,7 +7,7 @@ import { useCartStore } from '@/store/cart'
 import { useToast } from '@/components/ui/Toast'
 import { ProductCard } from '@/components/ui/ProductCard'
 import { ImageZoom } from '@/components/ui/ImageZoom'
-import { ProductJsonLd } from '@/components/ui/JsonLd'
+import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/ui/JsonLd'
 
 interface Product {
   id: number; name: string; slug: string; price: number
@@ -75,6 +75,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   return (
     <>
       <ProductJsonLd product={product as never} />
+      <BreadcrumbJsonLd product={product as never} />
       <style>{`
         .size-btn { padding:10px 18px; border-radius:8px; border:1.5px solid #e8e5e2; background:#fff; cursor:pointer; font-size:13px; font-weight:700; color:#393738; transition:all .2s; min-height:44px; }
         .size-btn:hover { border-color:#c1692b; color:#c1692b; }

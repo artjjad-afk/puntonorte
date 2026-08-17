@@ -9,7 +9,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ['/checkout', '/confirmacion', '/api/'],
       },
     ],
-    sitemap: 'https://puntonorte.shop/sitemap.xml',
-    host: 'https://puntonorte.shop',
+    sitemap: 'https://puntonorteshop.com/sitemap.xml',
+    host: 'https://puntonorteshop.com',
   }
 }

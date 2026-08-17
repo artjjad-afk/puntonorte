@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, MessageCircle } from 'lucide-react'
+import { FaqJsonLd } from '@/components/ui/JsonLd'
 
 const faqs = [
   {
@@ -65,6 +66,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 export default function FaqPage() {
   return (
     <>
+      <FaqJsonLd />
       {/* Hero */}
       <section style={{ background:'linear-gradient(135deg, #211f1e 0%, #393738 100%)', padding:'80px 32px', textAlign:'center', position:'relative', overflow:'hidden' }}>
         <div style={{ position:'absolute', bottom:'-80px', left:'-80px', width:'300px', height:'300px', borderRadius:'50%', border:'1px solid rgba(193,105,43,0.1)', pointerEvents:'none' }} />

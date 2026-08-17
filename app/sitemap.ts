@@ -1,31 +1,51 @@
 import { MetadataRoute } from 'next'
-import { products } from '@/lib/products'
 
-const BASE = 'https://puntonorte.shop'
+const BASE = 'https://puntonorteshop.com'
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPages = [
-    { url: BASE, lastModified: new Date(), changeFrequency: 'weekly' as const, priority: 1.0 },
-    { url: `${BASE}/tienda`, lastModified: new Date(), changeFrequency: 'daily' as const, priority: 0.9 },
-    { url: `${BASE}/nosotros`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.6 },
-    { url: `${BASE}/como-comprar`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.6 },
-    { url: `${BASE}/envios`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.6 },
-    { url: `${BASE}/faq`, lastModified: new Date(), changeFrequency: 'monthly' as const, priority: 0.5 },
+// Sitemap dinámico: incluye productos reales de la base de datos
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  // Páginas estáticas principales
+  const staticPages: MetadataRoute.Sitemap = [
+    { url: BASE,                       lastModified: new Date(), changeFrequency: 'daily',   priority: 1.0 },
+    { url: `${BASE}/tienda`,           lastModified: new Date(), changeFrequency: 'daily',   priority: 0.95 },
+    { url: `${BASE}/nosotros`,         lastModified: new Date(), changeFrequency: 'monthly', priority: 0.65 },
+    { url: `${BASE}/como-comprar`,     lastModified: new Date(), changeFrequency: 'monthly', priority: 0.65 },
+    { url: `${BASE}/envios`,           lastModified: new Date(), changeFrequency: 'monthly', priority: 0.65 },
+    { url: `${BASE}/faq`,              lastModified: new Date(), changeFrequency: 'monthly', priority: 0.6  },
   ]
 
-  const categoryPages = ['dama', 'caballero', 'accesorios', 'perfumes', 'cargadores'].map(cat => ({
+  // Páginas de categoría — Google las indexa individualmente
+  const categoryPages: MetadataRoute.Sitemap = [
+    'dama', 'caballero', 'accesorios', 'perfumes', 'cargadores',
+  ].map(cat => ({
     url: `${BASE}/tienda?cat=${cat}`,
-    lastModified: new Date(),
-    changeFrequency: 'weekly' as const,
-    priority: 0.8,
-  }))
-
-  const productPages = products.map(p => ({
-    url: `${BASE}/tienda/${p.slug}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
     priority: 0.85,
   }))
+
+  // Productos dinámicos desde la base de datos
+  let productPages: MetadataRoute.Sitemap = []
+  try {
+    const res = await fetch(`${BASE}/api/products?all=true`, {
+      next: { revalidate: 3600 }, // revalida cada hora
+    })
+    if (res.ok) {
+      const products = await res.json()
+      if (Array.isArray(products)) {
+        productPages = products
+          .filter((p: { active?: boolean; slug?: string }) => p.active !== false && p.slug)
+          .map((p: { slug: string; updatedAt?: string }) => ({
+            url: `${BASE}/tienda/${p.slug}`,
+            lastModified: p.updatedAt ? new Date(p.updatedAt) : new Date(),
+            changeFrequency: 'weekly' as const,
+            priority: 0.9,
+          }))
+      }
+    }
+  } catch {
+    // Si falla la API, el sitemap sigue funcionando con las páginas estáticas
+  }
 
   return [...staticPages, ...categoryPages, ...productPages]
 }
