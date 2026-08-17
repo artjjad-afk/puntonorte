@@ -1,6 +1,23 @@
-﻿import { Product } from '@/types'
+﻿// Tipo legacy para datos estáticos — los IDs son string en este archivo
+// La DB usa number. Este archivo se mantiene solo como fallback de imágenes de categorías.
+type LegacyProduct = {
+  id: string | number
+  name: string
+  slug: string
+  price: number
+  originalPrice?: number
+  category: string
+  subcategory?: string
+  images: string[]
+  description: string
+  sizes?: string[]
+  colors?: string[]
+  inStock: boolean
+  featured: boolean
+  badge?: string
+}
 
-export const products: Product[] = [
+export const products: LegacyProduct[] = [
   // ── MAQUILLAJE / ACCESORIOS DAMA ──
   {
     id: '1',
@@ -321,9 +338,9 @@ export const products: Product[] = [
 ]
 
 export const getFeatured = () => products.filter(p => p.featured)
-export const getByCategory = (cat: Product['category']) => products.filter(p => p.category === cat)
+export const getByCategory = (cat: string) => products.filter(p => p.category === cat)
 export const getBySlug = (slug: string) => products.find(p => p.slug === slug)
-export const getRelated = (product: Product) =>
+export const getRelated = (product: { id: string | number; category: string }) =>
   products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 4)
 
 export const categories = [
