@@ -69,7 +69,7 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: 'GOOGLE_SEARCH_CONSOLE_CODE', // reemplazar con el código real
+    google: 'f9b3081073f81ab5',
   },
 }
 
