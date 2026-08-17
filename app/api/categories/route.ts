@@ -8,10 +8,13 @@ function isAdmin(req: NextRequest) {
   try { jwt.verify(token, process.env.JWT_SECRET!); return true } catch { return false }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url)
+    const showAll = searchParams.get('all') === 'true'
+
     const cats = await prisma.category.findMany({
-      where: { active: true },
+      where: showAll ? undefined : { active: true },
       orderBy: { order: 'asc' },
     })
     return NextResponse.json(cats)
@@ -26,8 +29,17 @@ export async function POST(req: NextRequest) {
 
   try {
     const { name, slug, image, order } = await req.json()
+
+    // Validación
+    if (!name?.trim()) return NextResponse.json({ error: 'El nombre es requerido' }, { status: 400 })
+    if (!slug?.trim()) return NextResponse.json({ error: 'El slug es requerido' }, { status: 400 })
+
+    // Verificar slug único
+    const existing = await prisma.category.findUnique({ where: { slug: slug.trim() } })
+    if (existing) return NextResponse.json({ error: 'Ya existe una categoría con ese slug' }, { status: 400 })
+
     const cat = await prisma.category.create({
-      data: { name, slug, image: image || null, order: order || 0 },
+      data: { name: name.trim(), slug: slug.trim(), image: image || null, order: order || 0 },
     })
     return NextResponse.json(cat, { status: 201 })
   } catch (e) {

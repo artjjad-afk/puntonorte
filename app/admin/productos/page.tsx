@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
-import { Plus, Pencil, Trash2, Eye, EyeOff, Search, Package, ArrowRight } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, EyeOff, Search, Package } from 'lucide-react'
 import Link from 'next/link'
 
 interface Product {
@@ -28,16 +28,33 @@ export default function AdminProductos() {
   useEffect(() => { fetchProducts() }, [])
 
   const toggleActive = async (id: number, active: boolean) => {
-    await fetch(`/api/products/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !active }) })
-    fetchProducts()
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !active }),
+      })
+      if (!res.ok) throw new Error('Error al actualizar')
+      fetchProducts()
+    } catch (e) {
+      console.error(e)
+      alert('No se pudo actualizar el producto. Intenta de nuevo.')
+    }
   }
 
   const handleDelete = async (id: number) => {
     if (!confirm('¿Eliminar este producto? Esta acción no se puede deshacer.')) return
     setDeleting(id)
-    await fetch(`/api/products/${id}`, { method: 'DELETE' })
-    setDeleting(null)
-    fetchProducts()
+    try {
+      const res = await fetch(`/api/products/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Error al eliminar')
+      fetchProducts()
+    } catch (e) {
+      console.error(e)
+      alert('No se pudo eliminar el producto. Intenta de nuevo.')
+    } finally {
+      setDeleting(null)
+    }
   }
 
   const filtered = products.filter(p =>

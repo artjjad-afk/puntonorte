@@ -28,6 +28,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const [quantity, setQuantity] = useState(1)
   const [sizeError, setSizeError]   = useState(false)
   const [colorError, setColorError] = useState(false)
+  const [shaking, setShaking]       = useState(false)
+
+  const triggerShake = () => {
+    setShaking(true)
+    setTimeout(() => setShaking(false), 450) // duración de la animación + margen
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -67,8 +73,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     const needsSize  = product.sizes  && product.sizes.length  > 0 && !selectedSize
     const needsColor = product.colors && product.colors.length > 0 && !selectedColor
 
-    if (needsSize)  { setSizeError(true);  return }
-    if (needsColor) { setColorError(true); return }
+    if (needsSize)  { setSizeError(true);  triggerShake(); return }
+    if (needsColor) { setColorError(true); triggerShake(); return }
 
     setSizeError(false)
     setColorError(false)
@@ -244,7 +250,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <button
                 onClick={handleAdd}
                 disabled={!product.inStock}
-                className={`btn-primary ${(sizeError || colorError) ? 'shake' : ''}`}
+                className={`btn-primary ${shaking ? 'shake' : ''}`}
                 style={{ flex: 1, padding: '16px', borderRadius: '12px', fontSize: '14px', border: 'none', opacity: product.inStock ? 1 : 0.5, cursor: product.inStock ? 'pointer' : 'not-allowed' }}
               >
                 <ShoppingCart size={17} /> {product.inStock ? 'Agregar al carrito' : 'Agotado'}
@@ -252,10 +258,11 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <button
                 onClick={() => {
                   if (product) {
+                    const wasWishlisted = isWishlisted(product.id)
                     toggleWishlist(product.id)
                     show(
                       product.name,
-                      isWishlisted(product.id) ? 'Eliminado de favoritos' : 'Agregado a favoritos ♥',
+                      wasWishlisted ? 'Eliminado de favoritos' : 'Agregado a favoritos ♥',
                       'cart'
                     )
                   }

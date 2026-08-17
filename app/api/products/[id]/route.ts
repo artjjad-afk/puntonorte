@@ -62,7 +62,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({
       ...product,
-      images: JSON.parse(product.images),
+      images: JSON.parse(product.images || '[]'),
       sizes: product.sizes ? JSON.parse(product.sizes) : [],
       colors: product.colors ? JSON.parse(product.colors) : [],
     })
