@@ -3,22 +3,23 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { CartItem, Product } from '@/types'
 
-// Helper: compara IDs como string para soportar tanto IDs numéricos (DB) como string (legacy)
-function sameId(a: string | number, b: string | number): boolean {
-  return String(a) === String(b)
-}
-
 interface CartStore {
   items: CartItem[]
   isOpen: boolean
   openCart: () => void
   closeCart: () => void
   addItem: (product: Product, size?: string, color?: string) => void
-  removeItem: (productId: string | number, size?: string, color?: string) => void
-  updateQuantity: (productId: string | number, quantity: number, size?: string, color?: string) => void
+  removeItem: (productId: number, size?: string, color?: string) => void
+  updateQuantity: (productId: number, quantity: number, size?: string, color?: string) => void
   clearCart: () => void
   total: () => number
   count: () => number
+}
+
+function matches(item: CartItem, id: number, size?: string, color?: string) {
+  return item.product.id === id
+    && item.selectedSize  === size
+    && item.selectedColor === color
 }
 
 export const useCartStore = create<CartStore>()(
@@ -26,18 +27,16 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       isOpen: false,
-      openCart: () => set({ isOpen: true }),
+      openCart:  () => set({ isOpen: true }),
       closeCart: () => set({ isOpen: false }),
 
       addItem: (product, size, color) => {
         const items = get().items
-        const existing = items.find(
-          i => sameId(i.product.id, product.id) && i.selectedSize === size && i.selectedColor === color
-        )
+        const existing = items.find(i => matches(i, product.id, size, color))
         if (existing) {
           set({
             items: items.map(i =>
-              sameId(i.product.id, product.id) && i.selectedSize === size && i.selectedColor === color
+              matches(i, product.id, size, color)
                 ? { ...i, quantity: i.quantity + 1 }
                 : i
             ),
@@ -49,23 +48,14 @@ export const useCartStore = create<CartStore>()(
       },
 
       removeItem: (productId, size, color) => {
-        set({
-          items: get().items.filter(
-            i => !(sameId(i.product.id, productId) && i.selectedSize === size && i.selectedColor === color)
-          ),
-        })
+        set({ items: get().items.filter(i => !matches(i, productId, size, color)) })
       },
 
       updateQuantity: (productId, quantity, size, color) => {
-        if (quantity <= 0) {
-          get().removeItem(productId, size, color)
-          return
-        }
+        if (quantity <= 0) { get().removeItem(productId, size, color); return }
         set({
           items: get().items.map(i =>
-            sameId(i.product.id, productId) && i.selectedSize === size && i.selectedColor === color
-              ? { ...i, quantity }
-              : i
+            matches(i, productId, size, color) ? { ...i, quantity } : i
           ),
         })
       },
@@ -74,9 +64,9 @@ export const useCartStore = create<CartStore>()(
       total: () => get().items.reduce((acc, i) => acc + i.product.price * i.quantity, 0),
       count: () => get().items.reduce((acc, i) => acc + i.quantity, 0),
     }),
-    { 
+    {
       name: 'punto-norte-cart',
-      // No persistir el estado de apertura del carrito — siempre empieza cerrado
+      // No persistir el estado de apertura del carrito
       partialize: (state) => ({ items: state.items }),
     }
   )

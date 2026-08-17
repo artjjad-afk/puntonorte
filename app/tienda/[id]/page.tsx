@@ -9,12 +9,7 @@ import { ProductCard } from '@/components/ui/ProductCard'
 import { ImageZoom } from '@/components/ui/ImageZoom'
 import { ProductJsonLd, BreadcrumbJsonLd } from '@/components/ui/JsonLd'
 
-interface Product {
-  id: number; name: string; slug: string; price: number
-  originalPrice: number | null; category: string; description: string
-  images: string[]; sizes: string[]; colors: string[]
-  badge: string | null; inStock: boolean; featured: boolean
-}
+import { Product } from '@/types'
 
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -65,17 +60,17 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const waMsg = encodeURIComponent(`Hola Punto Norte! Me interesa: *${product.name}* - $${product.price}. ¿Tienen disponibilidad?`)
 
   const handleAdd = () => {
-    addItem(product as never, selectedSize || undefined, selectedColor || undefined)
+    addItem(product, selectedSize || undefined, selectedColor || undefined)
     if (quantity > 1) {
-      for (let i = 1; i < quantity; i++) addItem(product as never, selectedSize || undefined, selectedColor || undefined)
+      for (let i = 1; i < quantity; i++) addItem(product, selectedSize || undefined, selectedColor || undefined)
     }
     show(product.name, `${quantity > 1 ? `${quantity} unidades` : 'Agregado'} al carrito ✓`, 'cart')
   }
 
   return (
     <>
-      <ProductJsonLd product={product as never} />
-      <BreadcrumbJsonLd product={product as never} />
+      <ProductJsonLd product={product} />
+      <BreadcrumbJsonLd product={product} />
       <style>{`
         .size-btn { padding:10px 18px; border-radius:8px; border:1.5px solid #e8e5e2; background:#fff; cursor:pointer; font-size:13px; font-weight:700; color:#393738; transition:all .2s; min-height:44px; }
         .size-btn:hover { border-color:#c1692b; color:#c1692b; }
@@ -234,7 +229,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               <Link href={`/tienda?cat=${product.category}`} style={{ color: '#c1692b', textDecoration: 'none', fontSize: '13px', fontWeight: '700' }}>Ver más →</Link>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '20px' }}>
-              {related.map(p => <ProductCard key={p.id} product={p as never} />)}
+              {related.map(p => <ProductCard key={p.id} product={p} />)}
             </div>
           </div>
         )}

@@ -140,7 +140,7 @@ function TiendaContent() {
           </div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '24px' }}>
-            {filtered.map(product => <ProductCard key={product.id} product={product as never} />)}
+            {filtered.map(product => <ProductCard key={product.id} product={product} />)}
           </div>
         )}
       </div>

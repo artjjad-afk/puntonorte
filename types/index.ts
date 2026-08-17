@@ -1,18 +1,21 @@
 ﻿export interface Product {
-  id: string
+  id: number                // número — igual que en la DB (era string, causaba bugs en el carrito)
   name: string
   slug: string
   price: number
-  originalPrice?: number
-  category: 'dama' | 'caballero' | 'accesorios' | 'perfumes' | 'cargadores'
-  subcategory?: string
+  originalPrice?: number | null
+  category: string          // string abierto — las categorías son dinámicas desde la DB
+  subcategory?: string | null
   images: string[]
   description: string
   sizes?: string[]
   colors?: string[]
   inStock: boolean
   featured: boolean
-  badge?: string
+  active?: boolean
+  badge?: string | null
+  createdAt?: string
+  updatedAt?: string
 }
 
 export interface CartItem {
@@ -31,11 +34,11 @@ export interface CustomerInfo {
 }
 
 export interface Order {
-  id: string
+  id: number               // número — igual que en la DB
   items: CartItem[]
   total: number
   customer: CustomerInfo
   paymentMethod: string
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered'
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled'
   createdAt: string
 }
