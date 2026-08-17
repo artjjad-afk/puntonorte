@@ -116,10 +116,10 @@ export default function CheckoutPage() {
         return
       }
 
-      // Solo el ID viaja por URL — sin límite de longitud
+      // Solo el ID y el token viajan por URL
       const savedOrder = await res.json()
       clearCart()
-      router.push(`/confirmacion?orderId=${savedOrder.id}`)
+      router.push(`/confirmacion?orderId=${savedOrder.id}&token=${savedOrder.accessToken}`)
     } catch (e) {
       // Error de red o servidor caído
       console.error('Error de conexión al guardar pedido:', e)

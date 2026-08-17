@@ -52,6 +52,7 @@ function ConfirmacionContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const orderId = searchParams.get('orderId')
+  const token   = searchParams.get('token')
 
   const [order, setOrder]     = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
@@ -65,7 +66,7 @@ function ConfirmacionContent() {
   // Cargar pedido desde la API
   useEffect(() => {
     if (!orderId) return
-    fetch(`/api/orders/${orderId}`)
+    fetch(`/api/orders/${orderId}?token=${token ?? ''}`)
       .then(r => {
         if (!r.ok) throw new Error('not found')
         return r.json()

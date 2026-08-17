@@ -52,6 +52,7 @@ model Order {
   items         String   @db.LongText
   total         Float
   status        String   @default("pending") @db.VarChar(50)
+  accessToken   String?  @db.VarChar(64)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

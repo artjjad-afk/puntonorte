@@ -40,8 +40,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  // GET es público — el cliente lo necesita en la página de confirmación
-  // Solo expone los campos necesarios para mostrar el resumen (sin datos sensibles de admin)
+  // GET requiere token de acceso del pedido O ser admin
+  // El token se genera al crear el pedido y viaja por query param: ?token=...
   try {
     const { id } = await params
     const orderId = parseInt(id)
@@ -50,7 +50,16 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const order = await prisma.order.findUnique({ where: { id: orderId } })
     if (!order) return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 })
 
-    // Solo devolver los campos que necesita la página de confirmación
+    // Verificar acceso: admin O token correcto
+    const { searchParams } = new URL(req.url)
+    const tokenParam = searchParams.get('token')
+    const adminAccess = isAdmin(req)
+
+    if (!adminAccess && tokenParam !== order.accessToken) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    // Solo devolver los campos necesarios para la confirmación
     const { customerName, customerPhone, address, city, notes, paymentMethod, total, status } = order
     return NextResponse.json({
       id: order.id,
