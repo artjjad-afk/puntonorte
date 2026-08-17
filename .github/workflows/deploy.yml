@@ -29,7 +29,7 @@ jobs:
             echo "🔨 Construyendo..."
             if npm run build; then
               echo "✅ Build OK — reiniciando app"
-              pm2 restart puntonorte
+              pm2 reload ecosystem.config.js --update-env
               echo "🟢 Deploy completado"
             else
               echo "❌ Build falló — la tienda sigue con la versión anterior"
