@@ -62,9 +62,6 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : null
   const waMsg = encodeURIComponent(`Hola Punto Norte! Me interesa: *${product.name}* - $${product.price}. ¿Tienen disponibilidad?`)
 
-  const [sizeError, setSizeError]   = useState(false)
-  const [colorError, setColorError] = useState(false)
-
   const handleAdd = () => {
     // Validar talla obligatoria
     const needsSize  = product.sizes  && product.sizes.length  > 0 && !selectedSize
