@@ -26,7 +26,8 @@ export default function AdminCategorias() {
   const fetchCats = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/categories')
+      // ?all=true para ver también las categorías inactivas en el admin
+      const res = await fetch('/api/categories?all=true')
       if (res.ok) setCats(await res.json())
     } finally { setLoading(false) }
   }
@@ -55,18 +56,28 @@ export default function AdminCategorias() {
   }
 
   const handleToggle = async (cat: Category) => {
-    await fetch(`/api/categories/${cat.id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ active: !cat.active }),
-    })
-    fetchCats()
+    try {
+      const res = await fetch(`/api/categories/${cat.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ active: !cat.active }),
+      })
+      if (!res.ok) throw new Error('Error al actualizar')
+      fetchCats()
+    } catch {
+      alert('No se pudo actualizar la categoría. Intenta de nuevo.')
+    }
   }
 
   const handleDelete = async (id: number, name: string) => {
     if (!confirm(`¿Eliminar la categoría "${name}"? Los productos de esta categoría quedarán sin categoría visible.`)) return
-    await fetch(`/api/categories/${id}`, { method: 'DELETE' })
-    fetchCats()
+    try {
+      const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Error al eliminar')
+      fetchCats()
+    } catch {
+      alert('No se pudo eliminar la categoría. Intenta de nuevo.')
+    }
   }
 
   const startEdit = (cat: Category) => {
@@ -75,18 +86,23 @@ export default function AdminCategorias() {
   }
 
   const handleEdit = async (id: number) => {
-    await fetch(`/api/categories/${id}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: editForm.name.trim(),
-        slug: slugify(editForm.name),
-        image: editForm.image.trim() || null,
-        order: parseInt(editForm.order) || 0,
-      }),
-    })
-    setEditingId(null)
-    fetchCats()
+    try {
+      const res = await fetch(`/api/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editForm.name.trim(),
+          slug: slugify(editForm.name),
+          image: editForm.image.trim() || null,
+          order: parseInt(editForm.order) || 0,
+        }),
+      })
+      if (!res.ok) throw new Error('Error al guardar')
+      setEditingId(null)
+      fetchCats()
+    } catch {
+      alert('No se pudo guardar los cambios. Intenta de nuevo.')
+    }
   }
 
   const inputStyle: React.CSSProperties = { width: '100%', padding: '10px 14px', borderRadius: '10px', border: '1.5px solid #e8e5e2', fontSize: '14px', outline: 'none', fontFamily: 'Arial, sans-serif', transition: 'border-color .2s', background: '#fff' }

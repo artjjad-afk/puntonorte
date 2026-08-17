@@ -30,8 +30,8 @@ export function WhatsAppButton() {
         animation: 'pulse-wa 2s ease-in-out infinite',
         textDecoration: 'none', transition: 'transform 0.2s',
       }}
-      onMouseOver={e => (e.currentTarget.style.transform = 'scale(1.1)')}
-      onMouseOut={e => (e.currentTarget.style.transform = 'scale(1)')}
+      onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.1)')}
+      onMouseLeave={e => (e.currentTarget.style.transform = 'scale(1)')}
       aria-label="Contactar por WhatsApp"
     >
       <svg width="28" height="28" viewBox="0 0 24 24" fill="white">

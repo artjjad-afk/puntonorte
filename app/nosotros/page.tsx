@@ -21,6 +21,8 @@ export default function NosotrosPage() {
       <style>{`
         .valor-card { background:#fff; border-radius:16px; padding:28px; border:1px solid #e8e5e2; transition:all .3s; }
         .valor-card:hover { border-color:#c1692b; box-shadow:0 8px 32px rgba(193,105,43,0.1); transform:translateY(-4px); }
+        .nosotros-historia { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+        @media(max-width:768px){ .nosotros-historia { grid-template-columns:1fr !important; gap:40px !important; } }
       `}</style>
 
       {/* Hero */}
@@ -39,7 +41,7 @@ export default function NosotrosPage() {
 
       {/* Historia */}
       <section style={{ padding:'80px 32px', background:'#fff' }}>
-        <div style={{ maxWidth:'1100px', margin:'0 auto', display:'grid', gridTemplateColumns:'1fr 1fr', gap:'80px', alignItems:'center' }}>
+        <div style={{ maxWidth:'1100px', margin:'0 auto' }} className="nosotros-historia">
           <div>
             <p className="section-label" style={{ marginBottom:'14px' }}>Nuestra historia</p>
             <h2 style={{ fontSize:'clamp(26px, 4vw, 38px)', fontWeight:'800', color:'#211f1e', letterSpacing:'-1px', lineHeight:'1.2', marginBottom:'24px' }}>

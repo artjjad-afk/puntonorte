@@ -16,10 +16,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const cat = await prisma.category.update({
       where: { id: parseInt(id) },
       data: {
-        ...(body.name !== undefined && { name: body.name }),
-        ...(body.slug !== undefined && { slug: body.slug }),
-        ...(body.image !== undefined && { image: body.image }),
-        ...(body.order !== undefined && { order: body.order }),
+        ...(body.name  !== undefined && { name:   body.name }),
+        ...(body.slug  !== undefined && { slug:   body.slug }),
+        ...(body.image !== undefined && { image:  body.image }),
+        ...(body.order !== undefined && {
+          order: Number.isFinite(parseInt(body.order))
+            ? parseInt(body.order)
+            : 0
+        }),
         ...(body.active !== undefined && { active: body.active }),
       },
     })
