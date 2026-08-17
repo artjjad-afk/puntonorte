@@ -26,6 +26,7 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(0)
   const [paymentMethod, setPaymentMethod] = useState('')
   const [loading, setLoading] = useState(false)
+  const [orderError, setOrderError] = useState(false)
   const [form, setForm] = useState<CustomerInfo>({ name:'', phone:'', address:'', city:'', notes:'' })
   const [errors, setErrors] = useState<Partial<CustomerInfo>>({})
 
@@ -69,11 +70,13 @@ export default function CheckoutPage() {
     )
   }
 
+  const [orderError, setOrderError] = useState(false)
+
   const handleConfirm = async () => {
     setLoading(true)
+    setOrderError(false)
     try {
-      // Guardar pedido en MySQL
-      await fetch('/api/orders', {
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -92,15 +95,25 @@ export default function CheckoutPage() {
           total: subtotal,
         }),
       })
-    } catch (e) {
-      console.error('Error guardando pedido:', e)
-      // No bloqueamos el flujo — el pedido va igual por WhatsApp
-    }
 
-    const msg = buildMsg()
-    clearCart()
-    router.push(`/confirmacion?msg=${msg}`)
-    setLoading(false)
+      if (!res.ok) {
+        // El servidor respondió con error — mostrar aviso pero no bloquear
+        console.error('Error guardando pedido, status:', res.status)
+        setOrderError(true)
+        setLoading(false)
+        return
+      }
+
+      // Solo el ID viaja por URL — sin límite de longitud
+      const savedOrder = await res.json()
+      clearCart()
+      router.push(`/confirmacion?orderId=${savedOrder.id}`)
+    } catch (e) {
+      // Error de red o servidor caído
+      console.error('Error de conexión al guardar pedido:', e)
+      setOrderError(true)
+      setLoading(false)
+    }
   }
 
   const field = (key: keyof CustomerInfo, label: string, placeholder: string, type = 'text') => (
@@ -309,13 +322,60 @@ export default function CheckoutPage() {
                 ? <button onClick={handleNext} className="btn-primary" style={{ padding:'13px 36px', borderRadius:'12px', border:'none', cursor:'pointer', fontSize:'14px' }}>
                     Continuar →
                   </button>
-                : <button onClick={handleConfirm} disabled={loading} style={{
-                    display:'inline-flex', alignItems:'center', gap:'10px', padding:'14px 32px', borderRadius:'12px', border:'none',
-                    background: loading ? '#7a7675' : '#25d366', color:'#fff', cursor: loading ? 'not-allowed' : 'pointer',
-                    fontWeight:'700', fontSize:'14px', transition:'all .2s',
-                  }}>
-                    {loading ? 'Procesando...' : (<><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> Confirmar por WhatsApp</>)}
-                  </button>
+                : <div style={{ display:'flex', flexDirection:'column', gap:'12px', alignItems:'flex-end', flex:1 }}>
+                    {/* Error de conexión */}
+                    {orderError && (
+                      <div style={{ width:'100%', background:'#fef2f2', border:'1.5px solid #fca5a5', borderRadius:'12px', padding:'14px 18px', display:'flex', gap:'12px', alignItems:'flex-start' }}>
+                        <span style={{ fontSize:'18px', flexShrink:0 }}>⚠️</span>
+                        <div>
+                          <p style={{ margin:'0 0 4px', fontWeight:'700', fontSize:'14px', color:'#dc2626' }}>
+                            No pudimos registrar tu pedido
+                          </p>
+                          <p style={{ margin:'0 0 10px', fontSize:'13px', color:'#7f1d1d', lineHeight:'1.5' }}>
+                            Hay un problema de conexión. Tu pedido <strong>no se guardó</strong>. Puedes intentarlo de nuevo o enviarlo directamente por WhatsApp.
+                          </p>
+                          <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
+                            <button
+                              onClick={() => { setOrderError(false); handleConfirm() }}
+                              style={{ padding:'8px 16px', borderRadius:'8px', border:'1.5px solid #dc2626', background:'#dc2626', color:'#fff', cursor:'pointer', fontWeight:'700', fontSize:'12px' }}
+                            >
+                              Reintentar
+                            </button>
+                            <a
+                              href={`https://wa.me/584140906768?text=${buildMsg()}`}
+                              target="_blank" rel="noopener noreferrer"
+                              onClick={() => clearCart()}
+                              style={{ padding:'8px 16px', borderRadius:'8px', border:'1.5px solid #25d366', background:'#25d366', color:'#fff', textDecoration:'none', fontWeight:'700', fontSize:'12px', display:'inline-flex', alignItems:'center', gap:'6px' }}
+                            >
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                              Enviar igual por WhatsApp
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Botón confirmar */}
+                    {!orderError && (
+                      <button
+                        onClick={handleConfirm}
+                        disabled={loading}
+                        style={{
+                          display:'inline-flex', alignItems:'center', gap:'10px',
+                          padding:'14px 32px', borderRadius:'12px', border:'none',
+                          background: loading ? '#7a7675' : '#25d366',
+                          color:'#fff', cursor: loading ? 'not-allowed' : 'pointer',
+                          fontWeight:'700', fontSize:'14px', transition:'all .2s',
+                        }}
+                      >
+                        {loading
+                          ? (<><div style={{ width:'16px', height:'16px', border:'2px solid rgba(255,255,255,.4)', borderTopColor:'#fff', borderRadius:'50%', animation:'spin .7s linear infinite' }} /> Procesando...</>)
+                          : (<><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg> Confirmar por WhatsApp</>)
+                        }
+                        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+                      </button>
+                    )}
+                  </div>
               }
             </div>
           </div>

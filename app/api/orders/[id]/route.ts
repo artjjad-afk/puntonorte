@@ -40,13 +40,30 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 }
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  if (!isAdmin(req)) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-
+  // GET es público — el cliente lo necesita en la página de confirmación
+  // Solo expone los campos necesarios para mostrar el resumen (sin datos sensibles de admin)
   try {
     const { id } = await params
-    const order = await prisma.order.findUnique({ where: { id: parseInt(id) } })
+    const orderId = parseInt(id)
+    if (isNaN(orderId)) return NextResponse.json({ error: 'ID inválido' }, { status: 400 })
+
+    const order = await prisma.order.findUnique({ where: { id: orderId } })
     if (!order) return NextResponse.json({ error: 'Pedido no encontrado' }, { status: 404 })
-    return NextResponse.json({ ...order, items: JSON.parse(order.items) })
+
+    // Solo devolver los campos que necesita la página de confirmación
+    const { customerName, customerPhone, address, city, notes, paymentMethod, total, status } = order
+    return NextResponse.json({
+      id: order.id,
+      customerName,
+      customerPhone,
+      address,
+      city,
+      notes,
+      paymentMethod,
+      total,
+      status,
+      items: JSON.parse(order.items),
+    })
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: 'Error' }, { status: 500 })
