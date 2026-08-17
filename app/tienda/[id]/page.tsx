@@ -59,7 +59,20 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : null
   const waMsg = encodeURIComponent(`Hola Punto Norte! Me interesa: *${product.name}* - $${product.price}. ¿Tienen disponibilidad?`)
 
+  const [sizeError, setSizeError]   = useState(false)
+  const [colorError, setColorError] = useState(false)
+
   const handleAdd = () => {
+    // Validar talla obligatoria
+    const needsSize  = product.sizes  && product.sizes.length  > 0 && !selectedSize
+    const needsColor = product.colors && product.colors.length > 0 && !selectedColor
+
+    if (needsSize)  { setSizeError(true);  return }
+    if (needsColor) { setColorError(true); return }
+
+    setSizeError(false)
+    setColorError(false)
+
     addItem(product, selectedSize || undefined, selectedColor || undefined)
     if (quantity > 1) {
       for (let i = 1; i < quantity; i++) addItem(product, selectedSize || undefined, selectedColor || undefined)
@@ -83,6 +96,8 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         .product-layout { display:grid; grid-template-columns:1fr 1fr; gap:64px; align-items:start; }
         @media(max-width:768px){ .product-layout { grid-template-columns:1fr !important; gap:32px !important; } .guarantee-grid { grid-template-columns:1fr 1fr !important; } }
         @media(max-width:480px){ .guarantee-grid { grid-template-columns:1fr !important; } .product-cta-row { flex-direction:column !important; } }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+        .shake { animation: shake .4s ease; }
       `}</style>
 
       <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '32px 32px 80px' }}>
@@ -160,18 +175,54 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
 
             {product.sizes && product.sizes.length > 0 && (
               <div style={{ marginBottom: '20px' }}>
-                <p style={{ fontSize: '13px', fontWeight: '700', color: '#211f1e', marginBottom: '10px' }}>TALLA — <span style={{ color: '#c1692b' }}>{selectedSize}</span></p>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {product.sizes.map(s => <button key={s} onClick={() => setSelectedSize(s)} className={`size-btn ${selectedSize === s ? 'active' : ''}`}>{s}</button>)}
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
+                  <p style={{ fontSize:'13px', fontWeight:'700', color:'#211f1e', margin:0 }}>
+                    TALLA — <span style={{ color:'#c1692b' }}>{selectedSize || '—'}</span>
+                  </p>
+                  {sizeError && (
+                    <span style={{ fontSize:'12px', color:'#dc2626', fontWeight:'600', display:'flex', alignItems:'center', gap:'4px' }}>
+                      ⚠️ Selecciona una talla
+                    </span>
+                  )}
+                </div>
+                <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
+                  {product.sizes.map(s => (
+                    <button
+                      key={s}
+                      onClick={() => { setSelectedSize(s); setSizeError(false) }}
+                      className={`size-btn ${selectedSize === s ? 'active' : ''}`}
+                      style={{ borderColor: sizeError ? '#dc2626' : undefined }}
+                    >
+                      {s}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
 
             {product.colors && product.colors.length > 0 && (
               <div style={{ marginBottom: '24px' }}>
-                <p style={{ fontSize: '13px', fontWeight: '700', color: '#211f1e', marginBottom: '10px' }}>COLOR — <span style={{ color: '#c1692b' }}>{selectedColor}</span></p>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {product.colors.map(c => <button key={c} onClick={() => setSelectedColor(c)} className={`color-btn ${selectedColor === c ? 'active' : ''}`}>{c}</button>)}
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'10px' }}>
+                  <p style={{ fontSize:'13px', fontWeight:'700', color:'#211f1e', margin:0 }}>
+                    COLOR — <span style={{ color:'#c1692b' }}>{selectedColor || '—'}</span>
+                  </p>
+                  {colorError && (
+                    <span style={{ fontSize:'12px', color:'#dc2626', fontWeight:'600', display:'flex', alignItems:'center', gap:'4px' }}>
+                      ⚠️ Selecciona un color
+                    </span>
+                  )}
+                </div>
+                <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
+                  {product.colors.map(c => (
+                    <button
+                      key={c}
+                      onClick={() => { setSelectedColor(c); setColorError(false) }}
+                      className={`color-btn ${selectedColor === c ? 'active' : ''}`}
+                      style={{ borderColor: colorError ? '#dc2626' : undefined }}
+                    >
+                      {c}
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
@@ -190,7 +241,12 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
             </div>
 
             <div className="product-cta-row" style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
-              <button onClick={handleAdd} disabled={!product.inStock} className="btn-primary" style={{ flex: 1, padding: '16px', borderRadius: '12px', fontSize: '14px', border: 'none', opacity: product.inStock ? 1 : 0.5, cursor: product.inStock ? 'pointer' : 'not-allowed' }}>
+              <button
+                onClick={handleAdd}
+                disabled={!product.inStock}
+                className={`btn-primary ${(sizeError || colorError) ? 'shake' : ''}`}
+                style={{ flex: 1, padding: '16px', borderRadius: '12px', fontSize: '14px', border: 'none', opacity: product.inStock ? 1 : 0.5, cursor: product.inStock ? 'pointer' : 'not-allowed' }}
+              >
                 <ShoppingCart size={17} /> {product.inStock ? 'Agregar al carrito' : 'Agotado'}
               </button>
               <button onClick={() => setWishlisted(w => !w)} style={{ width: '52px', height: '52px', border: `1.5px solid ${wishlisted ? '#c1692b' : '#e8e5e2'}`, borderRadius: '12px', background: wishlisted ? '#fff7f3' : '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'all .2s' }}>
