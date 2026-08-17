@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volvemos en un momento — Punto Norte</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f9f7f5;
+      color: #211f1e;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+
+    /* Navbar mínimo */
+    .nav {
+      background: #211f1e;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nav img { height: 40px; filter: brightness(0) invert(1); }
+
+    /* Hero */
+    .hero {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 32px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Orbs decorativos */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .orb-1 {
+      top: -100px; right: -100px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(193,105,43,0.07) 0%, transparent 70%);
+    }
+    .orb-2 {
+      bottom: -80px; left: -80px;
+      width: 350px; height: 350px;
+      background: radial-gradient(circle, rgba(33,31,30,0.05) 0%, transparent 70%);
+    }
+
+    /* Número animado */
+    @keyframes float502 {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-12px); }
+    }
+    .number {
+      animation: float502 3s ease-in-out infinite;
+      font-size: clamp(80px, 15vw, 140px);
+      font-weight: 800;
+      color: #211f1e;
+      line-height: 1;
+      letter-spacing: -4px;
+      margin-bottom: 32px;
+      position: relative;
+      z-index: 1;
+    }
+    .number span {
+      background: linear-gradient(135deg, #c1692b 0%, #e88c4a 50%, #c1692b 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    h1 {
+      font-size: clamp(22px, 4vw, 32px);
+      font-weight: 800;
+      color: #211f1e;
+      margin-bottom: 14px;
+      letter-spacing: -0.5px;
+      position: relative; z-index: 1;
+    }
+    p {
+      color: #7a7675;
+      font-size: 16px;
+      max-width: 420px;
+      line-height: 1.7;
+      margin-bottom: 40px;
+      position: relative; z-index: 1;
+    }
+
+    /* Botones */
+    .btns {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      position: relative; z-index: 1;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all .2s;
+      cursor: pointer;
+      border: none;
+      font-family: Arial, sans-serif;
+    }
+    .btn-dark {
+      background: #211f1e;
+      color: #fff;
+    }
+    .btn-dark:hover { background: #393738; transform: translateY(-1px); }
+
+    .btn-copper {
+      background: #c1692b;
+      color: #fff;
+    }
+    .btn-copper:hover { background: #a8541f; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(193,105,43,.4); }
+
+    .btn-wa {
+      background: #25d366;
+      color: #fff;
+    }
+    .btn-wa:hover { background: #1ebe5d; transform: translateY(-1px); }
+
+    /* Indicador de recarga automática */
+    .reload-bar {
+      margin-top: 40px;
+      position: relative; z-index: 1;
+    }
+    .reload-bar p {
+      font-size: 13px;
+      color: #7a7675;
+      margin-bottom: 8px;
+    }
+    @keyframes progress {
+      from { width: 0%; }
+      to   { width: 100%; }
+    }
+    .bar {
+      width: 200px;
+      height: 3px;
+      background: #e8e5e2;
+      border-radius: 100px;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c1692b, #e88c4a);
+      border-radius: 100px;
+      animation: progress 30s linear forwards;
+    }
+
+    /* Footer mínimo */
+    .footer {
+      background: #211f1e;
+      color: rgba(232,229,226,0.4);
+      text-align: center;
+      padding: 20px 32px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 480px) {
+      .btns { flex-direction: column; align-items: center; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="nav">
+    <img src="/logo-removebg-preview.png" alt="Punto Norte" />
+  </nav>
+
+  <!-- Hero -->
+  <main class="hero">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <div class="number">5<span>0</span>2</div>
+
+    <h1>Volvemos en un momento</h1>
+    <p>
+      Estamos realizando mantenimiento o actualizando la tienda.
+      En pocos minutos todo estará listo. ¡Gracias por tu paciencia!
+    </p>
+
+    <div class="btns">
+      <button class="btn btn-dark" onclick="location.reload()">
+        ↻ Intentar de nuevo
+      </button>
+      <a href="/tienda" class="btn btn-copper">
+        🛍️ Ver tienda
+      </a>
+      <a href="https://wa.me/584140906768?text=Hola%2C%20la%20p%C3%A1gina%20no%20carga" target="_blank" class="btn btn-wa">
+        💬 Contactar por WhatsApp
+      </a>
+    </div>
+
+    <!-- Barra de recarga automática en 30s -->
+    <div class="reload-bar">
+      <p>Recargando automáticamente en 30 segundos...</p>
+      <div class="bar"><div class="bar-fill"></div></div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    © 2025 Punto Norte · Barcelona, Anzoátegui · Venezuela
+  </footer>
+
+  <script>
+    // Recarga automática después de 30 segundos
+    setTimeout(() => location.reload(), 30000);
+  </script>
+
+</body>
+</html>
