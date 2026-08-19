@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { ChevronLeft, Plus, X } from 'lucide-react'
 import Link from 'next/link'
 
@@ -63,7 +62,6 @@ export default function NuevoProducto() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f2f0', fontFamily: 'Arial, sans-serif' }}>
-      <AdminSidebar />
       <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto' }}>
 

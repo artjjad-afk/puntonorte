@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { Plus, Pencil, Trash2, Eye, EyeOff, Search, Package } from 'lucide-react'
 import Link from 'next/link'
 
@@ -64,7 +63,6 @@ export default function AdminProductos() {
 
   return (
     <div className="admin-root" style={{ display: 'flex' }}>
-      <AdminSidebar />
       <main style={{ flex: 1, padding: '32px', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
         <div style={{ maxWidth: '1140px', margin: '0 auto' }}>
 

@@ -1,7 +1,6 @@
 'use client'
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { ChevronLeft, Plus, X } from 'lucide-react'
 import Link from 'next/link'
 
@@ -86,7 +85,6 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
 
   if (fetching) return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f2f0' }}>
-      <AdminSidebar />
       <main style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ textAlign: 'center', color: '#7a7675' }}>
           <div style={{ width: '40px', height: '40px', border: '3px solid #e8e5e2', borderTopColor: '#c1692b', borderRadius: '50%', margin: '0 auto 12px', animation: 'spin .8s linear infinite' }} />
@@ -99,7 +97,6 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f2f0', fontFamily: 'Arial, sans-serif' }}>
-      <AdminSidebar />
       <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
         <div style={{ maxWidth: '860px', margin: '0 auto' }}>
           <Link href="/admin/productos" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#c1692b', textDecoration: 'none', fontSize: '13px', fontWeight: '700', marginBottom: '24px' }}>

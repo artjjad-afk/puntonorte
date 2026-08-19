@@ -1,6 +1,5 @@
 'use client'
 import { useEffect, useState } from 'react'
-import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check } from 'lucide-react'
 
 interface Category {
@@ -110,7 +109,6 @@ export default function AdminCategorias() {
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f4f2f0', fontFamily: 'Arial, sans-serif' }}>
-      <AdminSidebar />
       <main style={{ flex: 1, padding: '32px', overflowY: 'auto' }}>
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
           <div style={{ marginBottom: '32px' }}>
