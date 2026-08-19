@@ -34,9 +34,14 @@ function BgCanvas() {
 
     let t = 0
     const draw = (now: number) => {
-      raf = requestAnimationFrame(draw)
-      if (!visible) return
-      if (now - lastFrame < FRAME_MS) return
+      if (!visible) {
+        raf = requestAnimationFrame(draw)
+        return
+      }
+      if (now - lastFrame < FRAME_MS) {
+        raf = requestAnimationFrame(draw)
+        return
+      }
       lastFrame = now
       t += 0.008
       const W = c.width, H = c.height
@@ -130,7 +135,7 @@ function BgCanvas() {
       }
       raf = requestAnimationFrame(draw)
     }
-    draw(0)
+    raf = requestAnimationFrame(draw)
     return () => {
       cancelAnimationFrame(raf)
       window.removeEventListener('resize', resize)
