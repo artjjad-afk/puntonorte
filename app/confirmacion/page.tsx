@@ -54,19 +54,23 @@ function ConfirmacionContent() {
   const orderId = searchParams.get('orderId')
   const token   = searchParams.get('token')
 
+  // Validar que orderId sea un número entero positivo
+  const orderIdNum = orderId ? parseInt(orderId, 10) : NaN
+  const validOrderId = !isNaN(orderIdNum) && orderIdNum > 0 && String(orderIdNum) === orderId
+
   const [order, setOrder]     = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState(false)
 
-  // Redirigir si no hay orderId
+  // Redirigir si no hay orderId válido
   useEffect(() => {
-    if (!orderId) router.replace('/tienda')
-  }, [orderId, router])
+    if (!orderId || !validOrderId) router.replace('/tienda')
+  }, [orderId, validOrderId, router])
 
   // Cargar pedido desde la API
   useEffect(() => {
-    if (!orderId) return
-    fetch(`/api/orders/${orderId}?token=${token ?? ''}`)
+    if (!orderId || !validOrderId) return
+    fetch(`/api/orders/${orderIdNum}?token=${token ?? ''}`)
       .then(r => {
         if (!r.ok) throw new Error('not found')
         return r.json()
@@ -89,7 +93,7 @@ function ConfirmacionContent() {
     return () => clearTimeout(t)
   }, [order])
 
-  if (!orderId) return null
+  if (!orderId || !validOrderId) return null
 
   const waUrl = order ? `https://wa.me/584140906768?text=${buildWAMessage(order)}` : '#'
 

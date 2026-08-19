@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { prisma } from '@/lib/db'
 
 const BASE = 'https://puntonorteshop.com'
 
@@ -8,39 +9,35 @@ export async function generateMetadata(
   const { id } = await params
 
   try {
-    // Buscar por slug en la API real — no en datos estáticos
-    const res = await fetch(`${BASE}/api/products/${id}`, {
-      next: { revalidate: 3600 },
+    // Consulta directa a la DB — no depende de que el servidor HTTP esté corriendo
+    const isNumeric = /^\d+$/.test(id)
+    const product = await prisma.product.findFirst({
+      where: isNumeric ? { id: parseInt(id) } : { slug: id, active: true },
+      select: {
+        name: true, slug: true, description: true,
+        category: true, images: true,
+      },
     })
 
-    if (!res.ok) {
+    if (!product) {
       return {
         title: 'Producto no encontrado | Punto Norte',
         description: 'Este producto no está disponible. Visita nuestra tienda para ver más opciones.',
       }
     }
 
-    const product = await res.json()
+    const images = JSON.parse(product.images || '[]') as string[]
+    const desc = product.description?.slice(0, 140)
 
     return {
       title: `${product.name} | Punto Norte`,
-      description: `${product.description?.slice(0, 140)}... Disponible en Punto Norte. Envíos a toda Venezuela.`,
-      keywords: [
-        product.name,
-        product.category,
-        'moda Venezuela',
-        'Punto Norte',
-        'comprar online Venezuela',
-      ],
-      alternates: {
-        canonical: `${BASE}/tienda/${product.slug}`,
-      },
+      description: `${desc}... Disponible en Punto Norte. Envíos a toda Venezuela.`,
+      keywords: [product.name, product.category, 'moda Venezuela', 'Punto Norte', 'comprar online Venezuela'],
+      alternates: { canonical: `${BASE}/tienda/${product.slug}` },
       openGraph: {
         title: `${product.name} — Punto Norte`,
         description: `${product.description?.slice(0, 120)}...`,
-        images: product.images?.[0]
-          ? [{ url: product.images[0], width: 600, height: 800, alt: product.name }]
-          : [],
+        images: images[0] ? [{ url: images[0], width: 600, height: 800, alt: product.name }] : [],
         url: `${BASE}/tienda/${product.slug}`,
         siteName: 'Punto Norte',
         locale: 'es_VE',
@@ -50,7 +47,7 @@ export async function generateMetadata(
         card: 'summary_large_image',
         title: `${product.name} — Punto Norte`,
         description: product.description?.slice(0, 120),
-        images: product.images?.[0] ? [product.images[0]] : [],
+        images: images[0] ? [images[0]] : [],
       },
     }
   } catch {
