@@ -36,9 +36,9 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: `${BASE}/og-image.jpg`,
-        width: 1200,
-        height: 630,
+        url: `${BASE}/logo.png`,
+        width: 512,
+        height: 512,
         alt: 'Punto Norte — Moda y Accesorios Venezuela',
       },
     ],
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Punto Norte — Moda y Accesorios Venezuela',
     description: 'Ropa, accesorios y perfumes premium. Envíos a toda Venezuela.',
-    images: [`${BASE}/og-image.jpg`],
+    images: [`${BASE}/logo.png`],
   },
   icons: {
     icon: [
@@ -76,10 +76,8 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" className="h-full">
-      <head>
-        <StoreJsonLd />
-      </head>
       <body className="min-h-full flex flex-col" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
+        <StoreJsonLd />
         <ToastProvider>
           <ConditionalLayout>
             {children}
