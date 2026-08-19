@@ -1,5 +1,4 @@
 'use client'
-import Link from 'next/link'
 import { Truck, Clock, MapPin, Package, AlertCircle, MessageCircle, CheckCircle } from 'lucide-react'
 
 const zonas = [
