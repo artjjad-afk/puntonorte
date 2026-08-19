@@ -24,6 +24,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     <ToastContext.Provider value={{ show }}>
       {children}
       <div style={{ position:'fixed', bottom:'90px', right:'24px', zIndex:999, display:'flex', flexDirection:'column', gap:'10px', pointerEvents:'none' }}>
+        <style>{`@keyframes toastIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }`}</style>
         {toasts.map(t => (
           <div key={t.id} style={{
             display:'flex', alignItems:'center', gap:'12px',
@@ -34,9 +35,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             animation:'toastIn .3s cubic-bezier(0.34,1.56,0.64,1) both',
             pointerEvents:'all',
           }}>
-            <style>{`
-              @keyframes toastIn { from{opacity:0;transform:translateX(60px)} to{opacity:1;transform:translateX(0)} }
-            `}</style>
             <div style={{ width:'36px', height:'36px', borderRadius:'10px', flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center',
               background: t.type === 'cart' ? 'rgba(193,105,43,0.2)' : t.type === 'error' ? 'rgba(229,62,62,0.2)' : 'rgba(37,211,102,0.2)' }}>
               {t.type === 'cart' && <ShoppingCart size={17} color="#c1692b" />}
