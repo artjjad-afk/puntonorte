@@ -316,6 +316,45 @@
   100% { transform: translate(0, 0); }
 }
 
+/* ── NUEVAS animaciones WOW ── */
+
+/* Entrada de stat card con rebote */
+@keyframes card-pop {
+  0%   { opacity:0; transform:translateY(24px) scale(.94); }
+  65%  { transform:translateY(-4px) scale(1.02); }
+  100% { opacity:1; transform:translateY(0) scale(1); }
+}
+
+/* Sweep de luz horizontal en cards */
+@keyframes light-sweep {
+  0%   { transform:translateX(-100%) skewX(-15deg); opacity:0; }
+  30%  { opacity:1; }
+  100% { transform:translateX(300%) skewX(-15deg); opacity:0; }
+}
+
+/* Pulso de borde neon */
+@keyframes neon-border {
+  0%,100% { border-color:rgba(193,105,43,0.15); box-shadow:0 0 0 rgba(193,105,43,0); }
+  50%     { border-color:rgba(193,105,43,0.45); box-shadow:0 0 20px rgba(193,105,43,0.15); }
+}
+
+/* Número que cuenta hacia arriba */
+@keyframes num-rise {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+/* Línea de progreso animada */
+@keyframes bar-fill {
+  from { width:0%; }
+}
+
+/* Fade + slide desde abajo para filas de tabla */
+@keyframes row-in {
+  from { opacity:0; transform:translateX(-8px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+
 /* Respeto a accesibilidad — sin movimiento si el usuario lo pide */
 @media (prefers-reduced-motion: reduce) {
   :root {
