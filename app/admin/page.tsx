@@ -27,23 +27,25 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     Promise.all([
-      fetch('/api/products').then(r => r.ok ? r.json() : []),
+      fetch('/api/products?all=true').then(r => r.ok ? r.json() : []),
       fetch('/api/orders').then(r => r.ok ? r.json() : []),
     ]).then(([products, orders]) => {
+      const activeProducts = products.filter((p: { active: boolean }) => p.active).length
+      const totalProducts  = products.length
       setStats({
-        totalProducts: products.length,
-        activeProducts: products.filter((p: { active: boolean }) => p.active).length,
-        totalOrders: orders.length,
+        totalProducts,
+        activeProducts,
+        totalOrders:   orders.length,
         pendingOrders: orders.filter((o: { status: string }) => o.status === 'pending').length,
-        totalRevenue: orders.reduce((a: number, o: { total: number }) => a + o.total, 0),
-        recentOrders: orders.slice(0, 6),
+        totalRevenue:  orders.reduce((a: number, o: { total: number }) => a + o.total, 0),
+        recentOrders:  orders.slice(0, 6),
       })
     }).catch(console.error)
     .finally(() => setLoading(false))
   }, [])
 
   const statCards = [
-    { label: 'Productos activos', value: stats?.activeProducts ?? 0, icon: <Package size={20} />, cls: 'stat-copper', color: '#c1692b', link: '/admin/productos' },
+    { label: 'Productos activos', value: `${stats?.activeProducts ?? 0} / ${stats?.totalProducts ?? 0}`, icon: <Package size={20} />, cls: 'stat-copper', color: '#c1692b', link: '/admin/productos' },
     { label: 'Pedidos totales',   value: stats?.totalOrders ?? 0,    icon: <ShoppingBag size={20} />, cls: 'stat-blue',   color: '#3b82f6', link: '/admin/pedidos' },
     { label: 'Pendientes pago',   value: stats?.pendingOrders ?? 0,  icon: <AlertCircle size={20} />, cls: 'stat-yellow', color: '#f59e0b', link: '/admin/pedidos' },
     { label: 'Ingresos totales',  value: `$${(stats?.totalRevenue ?? 0).toFixed(2)}`, icon: <DollarSign size={20} />, cls: 'stat-green', color: '#25d366', link: '/admin/pedidos' },
