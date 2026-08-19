@@ -50,7 +50,11 @@ export function NavDock() {
   }
 
   const handleLogout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST' })
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // Si falla el fetch igualmente redirigimos — el middleware bloqueará el acceso
+    }
     router.push('/admin/login')
     router.refresh()
   }
