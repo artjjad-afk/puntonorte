@@ -424,7 +424,7 @@ export default function AdminDashboard() {
                     <Tooltip content={<CustomTooltip />} />
                     <Area type="monotone" dataKey="ingresos" stroke="#c1692b" strokeWidth={2.5}
                       fill="url(#incomeGrad)" dot={{ fill:'#c1692b', r:3, strokeWidth:0 }}
-                      activeDot={{ fill:'#e88c4a', r:5, strokeWidth:0, boxShadow:'0 0 12px #c1692b' }} />
+                      activeDot={{ fill:'#e88c4a', r:5, strokeWidth:0 }} />
                   </AreaChart>
                 </ResponsiveContainer>
               ) : (
