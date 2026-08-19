@@ -4,16 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { ProductCard } from '@/components/ui/ProductCard'
 import { SlidersHorizontal, X, Search, Package } from 'lucide-react'
-
-interface Product {
-  id: number; name: string; slug: string; price: number
-  originalPrice: number | null; category: string; images: string[]
-  badge: string | null; inStock: boolean; featured: boolean; active: boolean
-  description: string; sizes: string[]; colors: string[]
-}
-
-
-
+import { Product } from '@/types'
 
 function TiendaContent() {
   const searchParams = useSearchParams()

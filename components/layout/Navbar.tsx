@@ -28,7 +28,8 @@ export function Navbar() {
   }, [])
 
   useEffect(() => {
-    fetch('/api/categories')
+    const controller = new AbortController()
+    fetch('/api/categories', { signal: controller.signal })
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
@@ -43,6 +44,7 @@ export function Navbar() {
         }
       })
       .catch(() => {})
+    return () => controller.abort()
   }, [])
 
   // Lock body scroll when menu open

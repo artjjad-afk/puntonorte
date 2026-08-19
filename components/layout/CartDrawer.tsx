@@ -49,8 +49,8 @@ export function CartDrawer() {
             </div>
           ) : (
             <div style={{ display:'flex', flexDirection:'column', gap:'12px' }}>
-              {items.map((item, idx) => (
-                <div key={idx} style={{ display:'flex', gap:'12px', padding:'14px', background:'#f9f7f5', borderRadius:'14px', border:'1px solid #e8e5e2' }}>
+              {items.map((item) => (
+                <div key={`${item.product.id}-${item.selectedSize ?? ''}-${item.selectedColor ?? ''}`} style={{ display:'flex', gap:'12px', padding:'14px', background:'#f9f7f5', borderRadius:'14px', border:'1px solid #e8e5e2' }}>
                   {/* Imagen */}
                   <div style={{ width:'72px', height:'72px', flexShrink:0, borderRadius:'10px', overflow:'hidden', background:'#e8e5e2' }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}

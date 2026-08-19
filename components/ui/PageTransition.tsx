@@ -4,7 +4,7 @@ import { usePathname } from 'next/navigation'
 
 export function PageTransition({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const [visible, setVisible] = useState(false)
+  const [visible, setVisible] = useState(true) // inicia visible — sin flash en primera carga
 
   useEffect(() => {
     setVisible(false)
