@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { Clock, CheckCircle, XCircle, TrendingUp, ShoppingBag, MessageCircle, ChevronDown } from 'lucide-react'
 import { formatWAPhone } from '@/lib/config'
@@ -36,11 +36,34 @@ export default function AdminPedidos() {
   useEffect(() => { fetchOrders() }, [])
 
   const updateStatus = async (id: number, status: string) => {
-    await fetch(`/api/orders/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ status }) })
-    fetchOrders()
+    try {
+      const res = await fetch(`/api/orders/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      })
+      if (!res.ok) throw new Error('Error al actualizar')
+      fetchOrders()
+    } catch (e) {
+      console.error(e)
+      alert('No se pudo actualizar el estado. Intenta de nuevo.')
+    }
   }
 
-  const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter)
+  // Memoizado — no recalcula en cada render, solo cuando cambian orders o filter
+  const filtered = useMemo(
+    () => filter === 'all' ? orders : orders.filter(o => o.status === filter),
+    [orders, filter]
+  )
+
+  // Conteos memoizados para los badges de filtro
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: orders.length }
+    for (const o of orders) {
+      counts[o.status] = (counts[o.status] ?? 0) + 1
+    }
+    return counts
+  }, [orders])
 
   return (
     <div className="admin-root" style={{ display: 'flex' }}>
@@ -57,7 +80,7 @@ export default function AdminPedidos() {
 
           {/* Filtros */}
           <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
-            {[['all', 'Todos', orders.length], ...Object.entries(STATUS).map(([k, v]) => [k, v.label, orders.filter(o => o.status === k).length])].map(([key, label, count]) => (
+            {[['all', 'Todos', statusCounts.all ?? 0], ...Object.entries(STATUS).map(([k, v]) => [k, v.label, statusCounts[k] ?? 0])].map(([key, label, count]) => (
               <button key={String(key)} onClick={() => setFilter(String(key))} style={{
                 padding: '7px 16px', borderRadius: '100px', cursor: 'pointer', fontSize: '12px',
                 fontWeight: '600', transition: 'all .2s', fontFamily: 'Arial,sans-serif',
