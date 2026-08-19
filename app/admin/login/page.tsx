@@ -2,6 +2,10 @@
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff } from 'lucide-react'
+import { Inter, Syne } from 'next/font/google'
+
+const inter = Inter({ subsets: ['latin'], weight: ['300','400','500','600','700','800'], display: 'swap' })
+const syne  = Syne({ subsets: ['latin'], weight: ['600','700','800'], display: 'swap' })
 
 function BgCanvas() {
   const ref = useRef<HTMLCanvasElement>(null)
@@ -9,8 +13,17 @@ function BgCanvas() {
     const c = ref.current; if (!c) return
     const ctx = c.getContext('2d'); if (!ctx) return
     let raf: number
+    let visible = true
+    let lastFrame = 0
+    const FPS_CAP = 30
+    const FRAME_MS = 1000 / FPS_CAP
+
     const resize = () => { c.width = window.innerWidth; c.height = window.innerHeight }
     resize(); window.addEventListener('resize', resize)
+
+    // Pausar cuando la pestaña está oculta — ahorra CPU significativamente
+    const onVisibility = () => { visible = document.visibilityState === 'visible' }
+    document.addEventListener('visibilitychange', onVisibility)
 
     const pts = Array.from({ length: 80 }, () => ({
       x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight,
@@ -20,7 +33,11 @@ function BgCanvas() {
     }))
 
     let t = 0
-    const draw = () => {
+    const draw = (now: number) => {
+      raf = requestAnimationFrame(draw)
+      if (!visible) return
+      if (now - lastFrame < FRAME_MS) return
+      lastFrame = now
       t += 0.008
       const W = c.width, H = c.height
       ctx.clearRect(0, 0, W, H)
@@ -113,8 +130,12 @@ function BgCanvas() {
       }
       raf = requestAnimationFrame(draw)
     }
-    draw()
-    return () => { cancelAnimationFrame(raf); window.removeEventListener('resize', resize) }
+    draw(0)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', resize)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [])
   return <canvas ref={ref} style={{ position: 'fixed', inset: 0, zIndex: 0 }} />
 }
@@ -151,13 +172,11 @@ export default function AdminLogin() {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,300&family=Syne:wght@600;700;800&display=swap');
-
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         html, body { height: 100%; }
         body {
           background: #0d0a1a !important;
-          font-family: 'Inter', -apple-system, sans-serif;
+          font-family: var(--font-inter, Inter, -apple-system, sans-serif);
           -webkit-font-smoothing: antialiased;
         }
 
@@ -202,7 +221,7 @@ export default function AdminLogin() {
           50%    { filter: brightness(0) invert(1) drop-shadow(0 0 24px rgba(193,105,43,.7)) drop-shadow(0 0 48px rgba(193,105,43,.25)); }
         }
         .brand {
-          font-family: 'Syne', sans-serif;
+          font-family: var(--font-syne, Syne, sans-serif);
           font-size: 20px; font-weight: 800;
           letter-spacing: 7px; text-transform: uppercase;
           color: rgba(255,255,255,0.9);
@@ -403,7 +422,7 @@ export default function AdminLogin() {
       <BgCanvas />
       <div className="screen-scan" />
 
-      <div className="pg">
+      <div className={`pg ${inter.className}`} style={{ ['--font-syne' as string]: syne.style.fontFamily }}>
 
         {/* Logo */}
         <div className="logo-section">

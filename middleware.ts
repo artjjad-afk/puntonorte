@@ -24,7 +24,15 @@ async function verifyJWT(token: string, secret: string): Promise<boolean> {
     if (!valid) return false
 
     // Verificar expiración
-    const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')))
+    const payloadBase64 = parts[1].replace(/-/g, '+').replace(/_/g, '/')
+    // Padding necesario para atob
+    const padded = payloadBase64 + '='.repeat((4 - payloadBase64.length % 4) % 4)
+    let payload: { exp?: number }
+    try {
+      payload = JSON.parse(atob(padded))
+    } catch {
+      return false
+    }
     const now = Math.floor(Date.now() / 1000)
     if (payload.exp && payload.exp < now) return false
 
