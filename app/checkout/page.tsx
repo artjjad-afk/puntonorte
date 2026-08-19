@@ -397,10 +397,11 @@ export default function CheckoutPage() {
                           </p>
                           <div style={{ display:'flex', gap:'8px', flexWrap:'wrap' }}>
                             <button
-                              onClick={() => { setOrderError(false); handleConfirm() }}
-                              style={{ padding:'8px 16px', borderRadius:'8px', border:'1.5px solid #dc2626', background:'#dc2626', color:'#fff', cursor:'pointer', fontWeight:'700', fontSize:'12px' }}
+                              onClick={() => { if (!loading) { setOrderError(false); handleConfirm() } }}
+                              disabled={loading}
+                              style={{ padding:'8px 16px', borderRadius:'8px', border:'1.5px solid #dc2626', background: loading ? '#7a7675' : '#dc2626', color:'#fff', cursor: loading ? 'not-allowed' : 'pointer', fontWeight:'700', fontSize:'12px' }}
                             >
-                              Reintentar
+                              {loading ? 'Procesando...' : 'Reintentar'}
                             </button>
                             <a
                               href={`https://wa.me/584140906768?text=${buildMsg()}`}
@@ -425,7 +426,9 @@ export default function CheckoutPage() {
                           display:'inline-flex', alignItems:'center', gap:'10px',
                           padding:'14px 32px', borderRadius:'12px', border:'none',
                           background: loading ? '#7a7675' : '#25d366',
-                          color:'#fff', cursor: loading ? 'not-allowed' : 'pointer',
+                          color:'#fff',
+                          cursor: loading ? 'not-allowed' : 'pointer',
+                          pointerEvents: loading ? 'none' : 'auto',
                           fontWeight:'700', fontSize:'14px', transition:'all .2s',
                         }}
                       >
