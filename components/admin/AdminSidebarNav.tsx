@@ -271,7 +271,7 @@ export function AdminSidebarNav() {
         position: 'relative', zIndex: 1,
       }}>
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden', flex: 1, minWidth: 0 }}>
           <div style={{
             width: 34, height: 34, borderRadius: 10, flexShrink: 0,
             background: 'linear-gradient(135deg, #f97316, #c1692b)',
@@ -300,23 +300,35 @@ export function AdminSidebarNav() {
           </AnimatePresence>
         </div>
 
-        {/* Botón colapsar */}
+        {/* Botón colapsar — siempre visible */}
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.92 }}
+          whileHover={{ scale: 1.12 }}
+          whileTap={{ scale: 0.90 }}
           onClick={() => setCollapsed(c => !c)}
           style={{
             width: 28, height: 28, borderRadius: 8, flexShrink: 0,
-            background: 'rgba(255,255,255,0.07)',
-            border: '1px solid rgba(255,255,255,0.1)',
+            background: 'rgba(249,115,22,0.15)',
+            border: '1px solid rgba(249,115,22,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            cursor: 'pointer', color: 'rgba(148,163,184,0.8)',
+            cursor: 'pointer', color: '#f97316',
             transition: 'color .2s, background .2s',
+            boxShadow: '0 0 10px rgba(249,115,22,0.2)',
           }}
-          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#f97316'; (e.currentTarget as HTMLElement).style.background = 'rgba(249,115,22,0.1)' }}
-          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(148,163,184,0.8)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.07)' }}
+          onMouseEnter={e => {
+            (e.currentTarget as HTMLElement).style.background = 'rgba(249,115,22,0.25)'
+            ;(e.currentTarget as HTMLElement).style.boxShadow = '0 0 16px rgba(249,115,22,0.4)'
+          }}
+          onMouseLeave={e => {
+            (e.currentTarget as HTMLElement).style.background = 'rgba(249,115,22,0.15)'
+            ;(e.currentTarget as HTMLElement).style.boxShadow = '0 0 10px rgba(249,115,22,0.2)'
+          }}
         >
-          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+          <motion.div
+            animate={{ rotate: collapsed ? 0 : 180 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+          >
+            <ChevronRight size={14} />
+          </motion.div>
         </motion.button>
       </div>
 
