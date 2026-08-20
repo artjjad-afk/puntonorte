@@ -108,20 +108,24 @@ export function AdminSidebarNav() {
           padding: 0 20px; margin-bottom: 3px;
         }
 
-        /* Toggle button */
+        /* Toggle button — flecha dentro del sidebar, no solapada */
         .pn-sb-toggle {
-          position: absolute; top: 22px; right: -13px;
-          width: 26px; height: 26px; border-radius: 50%;
-          background: #1e2a45; border: 1px solid rgba(255,255,255,0.12);
-          display: flex; align-items: center; justify-content: center;
-          cursor: pointer; color: rgba(148,163,184,0.8);
-          transition: all .2s; z-index: 30;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          padding: 8px 0;
+          background: none;
+          border: none;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          cursor: pointer;
+          color: rgba(100,116,139,0.7);
+          transition: color .2s, background .2s;
+          flex-shrink: 0;
         }
         .pn-sb-toggle:hover {
-          background: #253352; color: #f97316;
-          border-color: rgba(249,115,22,0.4);
-          box-shadow: 0 0 12px rgba(249,115,22,0.25);
+          color: #f97316;
+          background: rgba(249,115,22,0.05);
         }
       `}</style>
 
@@ -150,13 +154,6 @@ export function AdminSidebarNav() {
           background: 'linear-gradient(90deg, transparent, rgba(249,115,22,0.6), transparent)',
           pointerEvents: 'none',
         }} />
-
-        {/* Botón colapsar */}
-        <button className="pn-sb-toggle" onClick={() => setCollapsed(c => !c)}>
-          <motion.div animate={{ rotate: collapsed ? 0 : 180 }} transition={{ type: 'spring', stiffness: 300, damping: 25 }}>
-            <ChevronRight size={13} />
-          </motion.div>
-        </button>
 
         {/* ── Logo ── */}
         <div style={{
@@ -322,6 +319,34 @@ export function AdminSidebarNav() {
           display: 'flex', flexDirection: 'column', gap: 2,
           flexShrink: 0,
         }}>
+          {/* Botón colapsar — integrado en el footer */}
+          <motion.button
+            whileHover={{ backgroundColor: 'rgba(249,115,22,0.06)' }}
+            onClick={() => setCollapsed(c => !c)}
+            className="pn-sb-toggle"
+            title={collapsed ? 'Expandir menú' : 'Colapsar menú'}
+          >
+            <motion.div
+              animate={{ rotate: collapsed ? 0 : 180 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 8 }}
+            >
+              <ChevronRight size={15} />
+            </motion.div>
+            <AnimatePresence>
+              {!collapsed && (
+                <motion.span
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -6 }}
+                  transition={{ duration: 0.18 }}
+                  style={{ fontSize: 11, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', marginLeft: 8 }}
+                >
+                  COLAPSAR
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </motion.button>
           {/* Ver tienda */}
           <a href="/" target="_blank" rel="noopener noreferrer"
             className="pn-sb-item"
