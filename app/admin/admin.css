@@ -4,21 +4,21 @@
    ═══════════════════════════════════════════════════ */
 
 :root {
-  --adm-bg:        #0a0908;
-  --adm-bg2:       #111010;
-  --adm-surface:   rgba(255,255,255,0.04);
-  --adm-surface2:  rgba(255,255,255,0.07);
-  --adm-border:    rgba(255,255,255,0.08);
-  --adm-border2:   rgba(255,255,255,0.14);
-  --adm-copper:    #c1692b;
-  --adm-copper-glow: rgba(193,105,43,0.25);
-  --adm-text:      rgba(232,229,226,0.92);
-  --adm-text-muted:rgba(232,229,226,0.45);
-  --adm-text-dim:  rgba(232,229,226,0.25);
-  --adm-green:     #25d366;
+  --adm-bg:        #0f1117;
+  --adm-bg2:       #161b27;
+  --adm-surface:   rgba(255,255,255,0.06);
+  --adm-surface2:  rgba(255,255,255,0.10);
+  --adm-border:    rgba(255,255,255,0.10);
+  --adm-border2:   rgba(255,255,255,0.18);
+  --adm-copper:    #f97316;
+  --adm-copper-glow: rgba(249,115,22,0.28);
+  --adm-text:      rgba(241,245,249,0.95);
+  --adm-text-muted:rgba(148,163,184,0.85);
+  --adm-text-dim:  rgba(100,116,139,0.70);
+  --adm-green:     #22c55e;
   --adm-blue:      #3b82f6;
   --adm-red:       #ef4444;
-  --adm-yellow:    #f59e0b;
+  --adm-yellow:    #eab308;
 }
 
 /* Base

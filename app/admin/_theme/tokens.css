@@ -21,20 +21,20 @@
      El 92% de la UI vive aquí. Valores hex únicos, no repetidos, para permitir
      mezclas de profundidad reales (nunca opacidades de un mismo gris).
      ========================================================================== */
-  --void:        #050505;   /* base absoluta — el vacío del que emerge todo   */
-  --abyss:       #0a0a0b;   /* fondo de secciones hundidas                    */
-  --graphite-1:  #101012;   /* superficie estructural base (L1)               */
-  --graphite-2:  #16161a;   /* superficie estructural elevada                 */
-  --graphite-3:  #1d1d22;   /* borde interno / divisores densos               */
-  --iron:        #26262c;   /* trazo estructural visible                      */
-  --steel:       #35353d;   /* borde de reposo del vidrio                     */
-  --ash:         #4a4a54;   /* iconografía inactiva                           */
-  --pewter:      #6d6d78;   /* texto terciario / metadatos                    */
-  --nickel:      #8f8f9a;   /* texto secundario                               */
-  --silver:      #b8b8c0;   /* texto de cuerpo estándar                       */
-  --chrome:      #d6d6db;   /* texto de énfasis                               */
-  --smoke:       #ededf0;   /* titulares / valores primarios                  */
-  --white-hot:   #fbfbfd;   /* dato crítico máximo (casi nunca)               */
+  --void:        #0b0f19;   /* base absoluta — pizarra profunda              */
+  --abyss:       #0f1421;   /* fondo de secciones hundidas                    */
+  --graphite-1:  #141929;   /* superficie estructural base (L1)               */
+  --graphite-2:  #1a2035;   /* superficie estructural elevada                 */
+  --graphite-3:  #1e263d;   /* borde interno / divisores densos               */
+  --iron:        #253047;   /* trazo estructural visible                      */
+  --steel:       #2e3d58;   /* borde de reposo del vidrio                     */
+  --ash:         #3d5070;   /* iconografía inactiva                           */
+  --pewter:      #5a7090;   /* texto terciario / metadatos                    */
+  --nickel:      #7a90ac;   /* texto secundario                               */
+  --silver:      #a0b4c8;   /* texto de cuerpo estándar                       */
+  --chrome:      #c8d8e8;   /* texto de énfasis                               */
+  --smoke:       #e8f0f8;   /* titulares / valores primarios                  */
+  --white-hot:   #f8fbff;   /* dato crítico máximo (casi nunca)               */
 
   /* ==========================================================================
      02 · ACENTOS  —  se ganan por ESTADO, nunca decorativos
@@ -157,14 +157,14 @@
      ========================================================================== */
   --bg-console:
       radial-gradient(120% 90% at 12% -8%,
-          rgba(59,139,255,0.06) 0%,
-          rgba(59,139,255,0.02) 22%,
+          rgba(59,130,246,0.10) 0%,
+          rgba(59,130,246,0.04) 22%,
           transparent 48%),
       radial-gradient(90% 80% at 108% 112%,
-          rgba(193,105,43,0.055) 0%,
+          rgba(249,115,22,0.07) 0%,
           transparent 46%),
       radial-gradient(60% 50% at 50% 40%,
-          #0b0b0d 0%,
+          #111827 0%,
           var(--void) 70%),
       var(--void);
 
