@@ -6,81 +6,92 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   LayoutDashboard, Package, ShoppingBag, Tag,
-  ExternalLink, LogOut, ChevronRight, Store,
-  TrendingUp, Zap,
+  ExternalLink, LogOut, Store, Moon, Sun,
+  ChevronLeft, ChevronRight,
 } from 'lucide-react'
 
 const NAV = [
-  {
-    group: 'Principal',
-    items: [
-      { href: '/admin',           label: 'Dashboard',  icon: LayoutDashboard, exact: true  },
-      { href: '/admin/pedidos',   label: 'Pedidos',    icon: ShoppingBag,     exact: false },
-    ],
-  },
-  {
-    group: 'Catálogo',
-    items: [
-      { href: '/admin/productos',  label: 'Productos',  icon: Package, exact: false },
-      { href: '/admin/categorias', label: 'Categorías', icon: Tag,     exact: false },
-    ],
-  },
+  { href: '/admin',            label: 'Dashboard',  icon: LayoutDashboard, exact: true  },
+  { href: '/admin/productos',  label: 'Productos',  icon: Package,         exact: false },
+  { href: '/admin/categorias', label: 'Categorías', icon: Tag,             exact: false },
+  { href: '/admin/pedidos',    label: 'Pedidos',    icon: ShoppingBag,     exact: false },
+]
+
+const BOTTOM = [
+  { href: '/', label: 'Ver tienda', icon: ExternalLink, external: true },
 ]
 
 export function AdminSidebarNav() {
   const pathname  = usePathname()
   const router    = useRouter()
   const [collapsed, setCollapsed] = useState(false)
-  const [hoveredHref, setHoveredHref] = useState<string | null>(null)
+  const [dark, setDark] = useState(true)
 
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(href + '/')
 
   const handleLogout = async () => {
-    try { await fetch('/api/auth/logout', { method: 'POST' }) } catch { /* redirigimos igual */ }
+    try { await fetch('/api/auth/logout', { method: 'POST' }) } catch { /* igualmente redirigimos */ }
     router.push('/admin/login')
     router.refresh()
   }
 
-  const W = collapsed ? 72 : 240
+  const W = collapsed ? 80 : 256
 
   return (
-    <>
+    <motion.aside
+      animate={{ width: W }}
+      transition={{ type: 'spring', stiffness: 280, damping: 28 }}
+      style={{
+        height: '100vh',
+        background: '#1a1d2e',
+        display: 'flex',
+        flexDirection: 'column',
+        flexShrink: 0,
+        position: 'sticky',
+        top: 0,
+        overflow: 'hidden',
+        zIndex: 20,
+        boxShadow: '4px 0 24px rgba(0,0,0,0.4)',
+      }}
+    >
       <style>{`
-        .pn-sb-item {
+        .sb-item {
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 9px 12px;
-          margin: 1px 8px;
-          border-radius: 10px;
+          gap: 14px;
+          padding: 12px 20px;
+          border-radius: 0;
           text-decoration: none;
-          font-size: 13px;
+          font-size: 14px;
           font-weight: 500;
-          color: rgba(148,163,184,0.85);
-          transition: color .2s;
+          color: rgba(160,174,192,0.75);
+          transition: color .18s, background .18s;
           position: relative;
           cursor: pointer;
           white-space: nowrap;
-          z-index: 1;
-          justify-content: ${collapsed ? 'center' : 'flex-start'};
+          width: 100%;
           background: none;
           border: none;
-          width: calc(100% - 16px);
+          text-align: left;
           font-family: var(--font-display, 'Space Grotesk', sans-serif);
+          letter-spacing: 0.01em;
         }
-        .pn-sb-item:hover { color: #f1f5f9; }
-        .pn-sb-item.active { color: #fff; font-weight: 600; }
-
-        .pn-sb-label { overflow: hidden; text-overflow: ellipsis; }
-
-        /* Tooltip colapsado */
-        .pn-sb-tip {
+        .sb-item:hover {
+          color: #f1f5f9;
+          background: rgba(255,255,255,0.05);
+        }
+        .sb-item.active {
+          color: #fff;
+          font-weight: 600;
+          background: rgba(249,115,22,0.12);
+        }
+        .sb-tip {
           position: absolute;
-          left: calc(100% + 14px);
+          left: calc(100% + 16px);
           top: 50%; transform: translateY(-50%);
-          background: rgba(15,20,33,0.98);
-          border: 1px solid rgba(255,255,255,0.14);
+          background: #1a1d2e;
+          border: 1px solid rgba(255,255,255,0.12);
           color: #f1f5f9;
           font-size: 12px; font-weight: 600;
           padding: 6px 12px; border-radius: 8px;
@@ -90,346 +101,270 @@ export function AdminSidebarNav() {
           transition: opacity .15s ease;
           font-family: var(--font-display);
         }
-        .pn-sb-item:hover .pn-sb-tip { opacity: 1; }
-
-        /* Divider */
-        .pn-sb-div {
-          height: 1px;
-          background: rgba(255,255,255,0.05);
-          margin: 6px 16px;
-        }
-
-        /* Group label */
-        .pn-sb-group-label {
-          font-family: var(--font-mono, monospace);
-          font-size: 10px; font-weight: 700;
-          letter-spacing: 0.12em; text-transform: uppercase;
-          color: rgba(100,116,139,0.6);
-          padding: 0 20px; margin-bottom: 3px;
-        }
-
-        /* Toggle button — flecha dentro del sidebar, no solapada */
-        .pn-sb-toggle {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-          padding: 8px 0;
-          background: none;
-          border: none;
-          border-top: 1px solid rgba(255,255,255,0.06);
-          cursor: pointer;
-          color: rgba(100,116,139,0.7);
-          transition: color .2s, background .2s;
-          flex-shrink: 0;
-        }
-        .pn-sb-toggle:hover {
-          color: #f97316;
-          background: rgba(249,115,22,0.05);
-        }
+        .sb-item:hover .sb-tip { opacity: 1; }
       `}</style>
 
-      <motion.aside
-        animate={{ width: W }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        style={{
-          minHeight: '100vh',
-          background: 'rgba(11,15,25,0.97)',
-          backdropFilter: 'blur(24px)',
-          WebkitBackdropFilter: 'blur(24px)',
-          borderRight: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex',
-          flexDirection: 'column',
-          flexShrink: 0,
-          position: 'sticky',
-          top: 0,
-          height: '100vh',
-          overflow: 'hidden',
-          zIndex: 20,
-        }}
-      >
-        {/* Filo superior naranja */}
-        <div style={{
-          position: 'absolute', top: 0, left: 0, right: 0, height: '1px',
-          background: 'linear-gradient(90deg, transparent, rgba(249,115,22,0.6), transparent)',
-          pointerEvents: 'none',
-        }} />
-
-        {/* ── Logo ── */}
-        <div style={{
-          display: 'flex', alignItems: 'center',
-          gap: 10, padding: collapsed ? '20px 0' : '18px 16px',
-          justifyContent: collapsed ? 'center' : 'flex-start',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
-          flexShrink: 0,
-        }}>
-          {/* Icono con glow animado */}
-          <motion.div
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.95 }}
-            style={{
-              width: 36, height: 36, borderRadius: 11,
-              background: 'linear-gradient(135deg, #f97316, #c1692b)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0,
-              boxShadow: '0 4px 16px rgba(249,115,22,0.4)',
-            }}
-          >
-            <Store size={19} color="#fff" strokeWidth={2} />
-          </motion.div>
-
+      {/* ── Header — Logo + colapsar ── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: collapsed ? '20px 16px' : '20px 20px',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        flexShrink: 0,
+        minHeight: 64,
+      }}>
+        {/* Logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden' }}>
+          <div style={{
+            width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+            background: 'linear-gradient(135deg, #f97316, #c1692b)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 14px rgba(249,115,22,0.4)',
+          }}>
+            <Store size={18} color="#fff" strokeWidth={2.2} />
+          </div>
           <AnimatePresence>
             {!collapsed && (
-              <motion.div
+              <motion.span
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.2 }}
-                style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2, overflow: 'hidden' }}
+                transition={{ duration: 0.18 }}
+                style={{
+                  fontFamily: 'var(--font-display)',
+                  fontSize: 16, fontWeight: 700,
+                  color: '#f1f5f9', letterSpacing: '0.01em',
+                  whiteSpace: 'nowrap',
+                }}
               >
-                <span style={{ fontFamily: 'var(--font-display)', fontSize: 14, fontWeight: 700, color: '#f1f5f9', letterSpacing: '0.01em', whiteSpace: 'nowrap' }}>
-                  Punto Norte
-                </span>
-                <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'rgba(148,163,184,0.55)', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>
-                  ADMIN PANEL
-                </span>
-              </motion.div>
+                PUNTO NORTE
+              </motion.span>
             )}
           </AnimatePresence>
         </div>
 
-        {/* ── Navegación ── */}
-        <nav style={{ flex: 1, padding: '10px 0', overflowY: 'auto', overflowX: 'hidden' }}>
-          {NAV.map(group => (
-            <div key={group.group} style={{ padding: '8px 0' }}>
+        {/* Botón colapsar */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.92 }}
+          onClick={() => setCollapsed(c => !c)}
+          style={{
+            width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+            background: 'rgba(255,255,255,0.07)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            cursor: 'pointer', color: 'rgba(148,163,184,0.8)',
+            transition: 'color .2s, background .2s',
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = '#f97316'; (e.currentTarget as HTMLElement).style.background = 'rgba(249,115,22,0.1)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(148,163,184,0.8)'; (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.07)' }}
+        >
+          {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+        </motion.button>
+      </div>
+
+      {/* ── Perfil de usuario ── */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 12,
+        padding: collapsed ? '16px 0' : '16px 20px',
+        justifyContent: collapsed ? 'center' : 'flex-start',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        flexShrink: 0,
+      }}>
+        {/* Avatar */}
+        <div style={{
+          width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+          background: 'linear-gradient(135deg, #1e293b, #334155)',
+          border: '2px solid rgba(249,115,22,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 16, fontWeight: 700, color: '#f97316',
+          boxShadow: '0 0 0 3px rgba(249,115,22,0.12)',
+          fontFamily: 'var(--font-display)',
+        }}>
+          A
+        </div>
+
+        <AnimatePresence>
+          {!collapsed && (
+            <motion.div
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -8 }}
+              transition={{ duration: 0.18 }}
+              style={{ overflow: 'hidden' }}
+            >
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#f1f5f9', whiteSpace: 'nowrap', fontFamily: 'var(--font-display)' }}>
+                Admin
+              </p>
+              <p style={{ margin: 0, fontSize: 11, color: 'rgba(148,163,184,0.6)', whiteSpace: 'nowrap', fontFamily: 'var(--font-mono)' }}>
+                Punto Norte
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* ── Navegación principal ── */}
+      <nav style={{ flex: 1, padding: '8px 0', overflowY: 'auto', overflowX: 'hidden' }}>
+        {NAV.map(({ href, label, icon: Icon, exact }) => {
+          const active = isActive(href, exact)
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={`sb-item${active ? ' active' : ''}`}
+              style={{ padding: collapsed ? '13px 0' : '12px 20px', justifyContent: collapsed ? 'center' : 'flex-start' }}
+            >
+              {/* Fondo activo deslizante */}
+              {active && (
+                <motion.div
+                  layoutId="activeBg"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  style={{
+                    position: 'absolute', inset: 0,
+                    background: 'rgba(249,115,22,0.1)',
+                    zIndex: 0,
+                  }}
+                />
+              )}
+
+              {/* Pill derecho — igual que en la referencia */}
+              {active && (
+                <motion.div
+                  layoutId="activePill"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  style={{
+                    position: 'absolute', right: 0, top: '15%', bottom: '15%',
+                    width: 4, borderRadius: '3px 0 0 3px',
+                    background: 'linear-gradient(to bottom, #f97316, #fb923c)',
+                    boxShadow: '0 0 12px rgba(249,115,22,0.8)',
+                    zIndex: 2,
+                  }}
+                />
+              )}
+
+              {/* Icono */}
+              <motion.span
+                animate={{ scale: active ? 1.08 : 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                style={{ display: 'grid', placeItems: 'center', width: 22, height: 22, flexShrink: 0, zIndex: 1 }}
+              >
+                <Icon
+                  size={19}
+                  strokeWidth={active ? 2.25 : 1.75}
+                  color={active ? '#f97316' : undefined}
+                />
+              </motion.span>
+
+              {/* Label */}
               <AnimatePresence>
                 {!collapsed && (
                   <motion.span
-                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                    className="pn-sb-group-label"
-                    style={{ display: 'block' }}
+                    initial={{ opacity: 0, x: -6 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -6 }}
+                    transition={{ duration: 0.16 }}
+                    style={{ zIndex: 1 }}
                   >
-                    {group.group}
+                    {label}
                   </motion.span>
                 )}
               </AnimatePresence>
 
-              {group.items.map(({ href, label, icon: Icon, exact }) => {
-                const active = isActive(href, exact)
-                const hovered = hoveredHref === href
+              {/* Tooltip colapsado */}
+              {collapsed && <span className="sb-tip">{label}</span>}
+            </Link>
+          )
+        })}
+      </nav>
 
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={`pn-sb-item${active ? ' active' : ''}`}
-                    onMouseEnter={() => setHoveredHref(href)}
-                    onMouseLeave={() => setHoveredHref(null)}
-                    style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
-                  >
-                    {/* Fondo hover con motion */}
-                    {hovered && !active && (
-                      <motion.div
-                        layoutId="hoverBg"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-                        style={{
-                          position: 'absolute', inset: 0, borderRadius: 10,
-                          background: 'rgba(255,255,255,0.06)',
-                          zIndex: 0,
-                        }}
-                      />
-                    )}
+      {/* ── Separador ── */}
+      <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', margin: '0 16px' }} />
 
-                    {/* Fondo activo con motion — se desliza entre items */}
-                    {active && (
-                      <motion.div
-                        layoutId="activeBg"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                        style={{
-                          position: 'absolute', inset: 0, borderRadius: 10,
-                          background: 'linear-gradient(135deg, rgba(249,115,22,0.18), rgba(249,115,22,0.06))',
-                          border: '1px solid rgba(249,115,22,0.28)',
-                          zIndex: 0,
-                        }}
-                      />
-                    )}
+      {/* ── Footer — acciones ── */}
+      <div style={{ padding: '8px 0 12px', flexShrink: 0 }}>
 
-                    {/* Borde izquierdo activo */}
-                    {active && (
-                      <motion.div
-                        layoutId="activeBar"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                        style={{
-                          position: 'absolute', left: 0, top: '18%', bottom: '18%',
-                          width: 3, borderRadius: '0 3px 3px 0',
-                          background: 'linear-gradient(to bottom, #f97316, #fb923c)',
-                          boxShadow: '0 0 10px rgba(249,115,22,0.7)',
-                          zIndex: 2,
-                        }}
-                      />
-                    )}
-
-                    {/* Icono */}
-                    <motion.span
-                      animate={{ scale: active ? 1.1 : 1 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                      style={{ display: 'grid', placeItems: 'center', width: 20, height: 20, flexShrink: 0, zIndex: 1 }}
-                    >
-                      <Icon
-                        size={18}
-                        strokeWidth={active ? 2.25 : 1.75}
-                        color={active ? '#fb923c' : undefined}
-                      />
-                    </motion.span>
-
-                    {/* Label */}
-                    <AnimatePresence>
-                      {!collapsed && (
-                        <motion.span
-                          initial={{ opacity: 0, x: -6 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          exit={{ opacity: 0, x: -6 }}
-                          transition={{ duration: 0.18 }}
-                          className="pn-sb-label"
-                          style={{ zIndex: 1 }}
-                        >
-                          {label}
-                        </motion.span>
-                      )}
-                    </AnimatePresence>
-
-                    {/* Tooltip (solo colapsado) */}
-                    {collapsed && <span className="pn-sb-tip">{label}</span>}
-                  </Link>
-                )
-              })}
-
-              <div className="pn-sb-div" />
-            </div>
-          ))}
-        </nav>
-
-        {/* ── Footer ── */}
-        <div style={{
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          padding: '10px 8px',
-          display: 'flex', flexDirection: 'column', gap: 2,
-          flexShrink: 0,
-        }}>
-          {/* Botón colapsar — integrado en el footer */}
-          <motion.button
-            whileHover={{ backgroundColor: 'rgba(249,115,22,0.06)' }}
-            onClick={() => setCollapsed(c => !c)}
-            className="pn-sb-toggle"
-            title={collapsed ? 'Expandir menú' : 'Colapsar menú'}
-          >
-            <motion.div
-              animate={{ rotate: collapsed ? 0 : 180 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              style={{ display: 'flex', alignItems: 'center', gap: 8 }}
-            >
-              <ChevronRight size={15} />
-            </motion.div>
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0, x: -6 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -6 }}
-                  transition={{ duration: 0.18 }}
-                  style={{ fontSize: 11, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', marginLeft: 8 }}
-                >
-                  COLAPSAR
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </motion.button>
-          {/* Ver tienda */}
-          <a href="/" target="_blank" rel="noopener noreferrer"
-            className="pn-sb-item"
-            onMouseEnter={() => setHoveredHref('web')}
-            onMouseLeave={() => setHoveredHref(null)}
-            style={{ justifyContent: collapsed ? 'center' : 'flex-start' }}
-          >
-            <span style={{ display: 'grid', placeItems: 'center', width: 20, height: 20, flexShrink: 0 }}>
-              <ExternalLink size={15} strokeWidth={1.75} />
-            </span>
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.18 }}
-                  style={{ fontSize: 12 }}
-                >
-                  Ver tienda
-                </motion.span>
-              )}
-            </AnimatePresence>
-            {collapsed && <span className="pn-sb-tip">Ver tienda</span>}
-          </a>
-
-          {/* Logout */}
-          <motion.button
-            whileHover={{ color: '#f87171' }}
-            onClick={handleLogout}
-            className="pn-sb-item"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', justifyContent: collapsed ? 'center' : 'flex-start' }}
-          >
-            <span style={{ display: 'grid', placeItems: 'center', width: 20, height: 20, flexShrink: 0 }}>
-              <LogOut size={15} strokeWidth={1.75} />
-            </span>
-            <AnimatePresence>
-              {!collapsed && (
-                <motion.span
-                  initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.18 }}
-                  style={{ fontSize: 12 }}
-                >
-                  Cerrar sesión
-                </motion.span>
-              )}
-            </AnimatePresence>
-            {collapsed && <span className="pn-sb-tip">Cerrar sesión</span>}
-          </motion.button>
-
-          {/* Badge sistema activo */}
+        {/* Modo oscuro toggle */}
+        <button
+          onClick={() => setDark(d => !d)}
+          className="sb-item"
+          style={{ padding: collapsed ? '12px 0' : '12px 20px', justifyContent: collapsed ? 'center' : 'flex-start' }}
+        >
+          <span style={{ display: 'grid', placeItems: 'center', width: 22, height: 22, flexShrink: 0 }}>
+            {dark ? <Moon size={18} strokeWidth={1.75} /> : <Sun size={18} strokeWidth={1.75} />}
+          </span>
           <AnimatePresence>
             {!collapsed && (
               <motion.div
-                initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }} transition={{ duration: 0.25 }}
-                style={{
-                  margin: '6px 6px 0',
-                  padding: '10px 12px',
-                  borderRadius: 10,
-                  background: 'rgba(249,115,22,0.06)',
-                  border: '1px solid rgba(249,115,22,0.14)',
-                }}
+                initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.16 }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                <span>Modo oscuro</span>
+                {/* Toggle pill */}
+                <motion.div
+                  animate={{ background: dark ? '#f97316' : '#334155' }}
+                  style={{ width: 36, height: 20, borderRadius: 10, position: 'relative', flexShrink: 0 }}
+                >
                   <motion.div
-                    animate={{ opacity: [1, 0.3, 1] }}
-                    transition={{ duration: 2, repeat: Infinity }}
-                    style={{ width: 6, height: 6, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e' }}
+                    animate={{ x: dark ? 18 : 2 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                    style={{ position: 'absolute', top: 2, width: 16, height: 16, borderRadius: '50%', background: '#fff' }}
                   />
-                  <span style={{ fontSize: 10, fontFamily: 'var(--font-mono)', color: 'rgba(148,163,184,0.65)', letterSpacing: '0.08em' }}>
-                    SISTEMA ACTIVO
-                  </span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <TrendingUp size={11} color="rgba(249,115,22,0.7)" />
-                  <span style={{ fontSize: 10, color: 'rgba(148,163,184,0.5)', fontFamily: 'var(--font-mono)' }}>
-                    puntonorteshop.com
-                  </span>
-                </div>
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-      </motion.aside>
-    </>
+          {collapsed && <span className="sb-tip">Modo oscuro</span>}
+        </button>
+
+        {/* Ver tienda */}
+        <a href="/" target="_blank" rel="noopener noreferrer"
+          className="sb-item"
+          style={{ padding: collapsed ? '12px 0' : '12px 20px', justifyContent: collapsed ? 'center' : 'flex-start' }}
+        >
+          <span style={{ display: 'grid', placeItems: 'center', width: 22, height: 22, flexShrink: 0 }}>
+            <ExternalLink size={18} strokeWidth={1.75} />
+          </span>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.16 }}
+              >
+                Ver tienda
+              </motion.span>
+            )}
+          </AnimatePresence>
+          {collapsed && <span className="sb-tip">Ver tienda</span>}
+        </a>
+
+        {/* Logout */}
+        <motion.button
+          onClick={handleLogout}
+          className="sb-item"
+          whileHover={{ color: '#f87171' }}
+          style={{ padding: collapsed ? '12px 0' : '12px 20px', justifyContent: collapsed ? 'center' : 'flex-start' }}
+        >
+          <span style={{ display: 'grid', placeItems: 'center', width: 22, height: 22, flexShrink: 0 }}>
+            <LogOut size={18} strokeWidth={1.75} />
+          </span>
+          <AnimatePresence>
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.16 }}
+              >
+                Cerrar sesión
+              </motion.span>
+            )}
+          </AnimatePresence>
+          {collapsed && <span className="sb-tip">Cerrar sesión</span>}
+        </motion.button>
+      </div>
+    </motion.aside>
   )
 }
