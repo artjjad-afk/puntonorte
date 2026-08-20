@@ -263,42 +263,43 @@ export function AdminSidebarNav() {
       <div style={{
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: collapsed ? '20px 16px' : '20px 20px',
+        justifyContent: collapsed ? 'center' : 'space-between',
+        padding: '16px 14px',
         borderBottom: '1px solid rgba(255,255,255,0.07)',
         flexShrink: 0,
         minHeight: 64,
         position: 'relative', zIndex: 1,
+        gap: 8,
       }}>
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden', flex: 1, minWidth: 0 }}>
-          <div style={{
-            width: 34, height: 34, borderRadius: 10, flexShrink: 0,
-            background: 'linear-gradient(135deg, #f97316, #c1692b)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 14px rgba(249,115,22,0.4)',
-          }}>
-            <Store size={18} color="#fff" strokeWidth={2.2} />
-          </div>
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.span
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -8 }}
-                transition={{ duration: 0.18 }}
-                style={{
-                  fontFamily: 'var(--font-display)',
-                  fontSize: 16, fontWeight: 700,
-                  color: '#f1f5f9', letterSpacing: '0.01em',
-                  whiteSpace: 'nowrap',
-                }}
-              >
+        {/* Logo — oculto cuando colapsa */}
+        <AnimatePresence>
+          {!collapsed && (
+            <motion.div
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -8 }}
+              transition={{ duration: 0.18 }}
+              style={{ display: 'flex', alignItems: 'center', gap: 10, overflow: 'hidden', minWidth: 0 }}
+            >
+              <div style={{
+                width: 34, height: 34, borderRadius: 10, flexShrink: 0,
+                background: 'linear-gradient(135deg, #f97316, #c1692b)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 14px rgba(249,115,22,0.4)',
+              }}>
+                <Store size={18} color="#fff" strokeWidth={2.2} />
+              </div>
+              <span style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 15, fontWeight: 700,
+                color: '#f1f5f9', letterSpacing: '0.01em',
+                whiteSpace: 'nowrap',
+              }}>
                 PUNTO NORTE
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </div>
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Botón colapsar — siempre visible */}
         <motion.button
@@ -306,17 +307,16 @@ export function AdminSidebarNav() {
           whileTap={{ scale: 0.90 }}
           onClick={() => setCollapsed(c => !c)}
           style={{
-            width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+            width: 32, height: 32, borderRadius: 9, flexShrink: 0,
             background: 'rgba(249,115,22,0.15)',
             border: '1px solid rgba(249,115,22,0.3)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', color: '#f97316',
-            transition: 'color .2s, background .2s',
             boxShadow: '0 0 10px rgba(249,115,22,0.2)',
           }}
           onMouseEnter={e => {
-            (e.currentTarget as HTMLElement).style.background = 'rgba(249,115,22,0.25)'
-            ;(e.currentTarget as HTMLElement).style.boxShadow = '0 0 16px rgba(249,115,22,0.4)'
+            (e.currentTarget as HTMLElement).style.background = 'rgba(249,115,22,0.28)'
+            ;(e.currentTarget as HTMLElement).style.boxShadow = '0 0 16px rgba(249,115,22,0.5)'
           }}
           onMouseLeave={e => {
             (e.currentTarget as HTMLElement).style.background = 'rgba(249,115,22,0.15)'
@@ -327,7 +327,7 @@ export function AdminSidebarNav() {
             animate={{ rotate: collapsed ? 0 : 180 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
-            <ChevronRight size={14} />
+            <ChevronRight size={15} />
           </motion.div>
         </motion.button>
       </div>
