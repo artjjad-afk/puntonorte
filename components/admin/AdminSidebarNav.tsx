@@ -206,7 +206,6 @@ export function AdminSidebarNav() {
         overflow: 'hidden',
         zIndex: 20,
         boxShadow: '4px 0 24px rgba(0,0,0,0.4)',
-        position: 'relative',
       }}
     >
       {/* ── Canvas de efectos ── */}
