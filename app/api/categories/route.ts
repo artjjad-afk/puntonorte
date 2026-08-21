@@ -17,7 +17,14 @@ export async function GET(req: NextRequest) {
       where: showAll ? undefined : { active: true },
       orderBy: { order: 'asc' },
     })
-    return NextResponse.json(cats)
+
+    // Si la categoría tiene imageData (base64), usarla como image
+    const parsed = cats.map(c => ({
+      ...c,
+      image: c.imageData ?? c.image ?? null,
+    }))
+
+    return NextResponse.json(parsed)
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: 'Error' }, { status: 500 })
@@ -28,20 +35,30 @@ export async function POST(req: NextRequest) {
   if (!isAdmin(req)) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   try {
-    const { name, slug, image, order } = await req.json()
+    const { name, slug, image, imageData, order } = await req.json()
 
-    // Validación
     if (!name?.trim()) return NextResponse.json({ error: 'El nombre es requerido' }, { status: 400 })
     if (!slug?.trim()) return NextResponse.json({ error: 'El slug es requerido' }, { status: 400 })
 
-    // Verificar slug único
     const existing = await prisma.category.findUnique({ where: { slug: slug.trim() } })
     if (existing) return NextResponse.json({ error: 'Ya existe una categoría con ese slug' }, { status: 400 })
 
+    // Limitar tamaño base64 — máx 2MB
+    if (imageData && imageData.length > 2_800_000) {
+      return NextResponse.json({ error: 'La imagen es demasiado grande. Máximo 2MB.' }, { status: 400 })
+    }
+
     const cat = await prisma.category.create({
-      data: { name: name.trim(), slug: slug.trim(), image: image || null, order: order || 0 },
+      data: {
+        name: name.trim(),
+        slug: slug.trim(),
+        image: imageData ? null : (image || null),
+        imageData: imageData || null,
+        order: order || 0,
+      },
     })
-    return NextResponse.json(cat, { status: 201 })
+
+    return NextResponse.json({ ...cat, image: cat.imageData ?? cat.image ?? null }, { status: 201 })
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: 'Error al crear categoría' }, { status: 500 })

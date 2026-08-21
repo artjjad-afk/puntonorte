@@ -18,7 +18,11 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       data: {
         ...(body.name  !== undefined && { name:   body.name }),
         ...(body.slug  !== undefined && { slug:   body.slug }),
-        ...(body.image !== undefined && { image:  body.image }),
+        ...(body.image !== undefined && { image:  body.imageData ? null : body.image }),
+        ...(body.imageData !== undefined && {
+          imageData: body.imageData || null,
+          image: body.imageData ? null : (body.image || null),
+        }),
         ...(body.order !== undefined && {
           order: Number.isFinite(parseInt(body.order))
             ? parseInt(body.order)

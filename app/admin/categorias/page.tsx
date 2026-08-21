@@ -1,6 +1,6 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check, GripVertical } from 'lucide-react'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check, GripVertical, Upload, Link as LinkIcon } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 
 interface Category {
@@ -32,10 +32,45 @@ export default function AdminCategorias() {
   const [cats, setCats]           = useState<Category[]>([])
   const [loading, setLoading]     = useState(true)
   const [form, setForm]           = useState({ name: '', image: '', order: '0' })
+  const [imageData, setImageData] = useState<string | null>(null) // base64
+  const [imgMode, setImgMode]     = useState<'url' | 'upload'>('upload')
+  const [dragging, setDragging]   = useState(false)
+  const fileRef                   = useRef<HTMLInputElement>(null)
   const [saving, setSaving]       = useState(false)
   const [error, setError]         = useState('')
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editForm, setEditForm]   = useState({ name: '', image: '', order: '0' })
+  const [editImageData, setEditImageData] = useState<string | null>(null)
+
+  /* Convierte archivo a base64 */
+  const fileToBase64 = useCallback((file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (file.size > 2_097_152) { reject(new Error('La imagen debe ser menor a 2MB')); return }
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result as string)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }, [])
+
+  const handleFileDrop = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) { setError('Solo se aceptan imágenes'); return }
+    try {
+      const b64 = await fileToBase64(file)
+      setImageData(b64)
+      setError('')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Error al procesar imagen')
+    }
+  }, [fileToBase64])
+
+  const handleEditFileDrop = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) return
+    try {
+      const b64 = await fileToBase64(file)
+      setEditImageData(b64)
+    } catch { /* ignorar */ }
+  }, [fileToBase64])
 
   const fetchCats = async () => {
     setLoading(true)
@@ -55,10 +90,21 @@ export default function AdminCategorias() {
       const res = await fetch('/api/categories', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: form.name.trim(), slug: slugify(form.name), image: form.image.trim() || null, order: parseInt(form.order) || 0 }),
+        body: JSON.stringify({
+          name: form.name.trim(),
+          slug: slugify(form.name),
+          image: imgMode === 'url' ? (form.image.trim() || null) : null,
+          imageData: imgMode === 'upload' ? imageData : null,
+          order: parseInt(form.order) || 0,
+        }),
       })
-      if (res.ok) { setForm({ name: '', image: '', order: '0' }); fetchCats() }
-      else { const d = await res.json(); setError(d.error || 'Error al crear') }
+      if (res.ok) {
+        setForm({ name: '', image: '', order: '0' })
+        setImageData(null)
+        fetchCats()
+      } else {
+        const d = await res.json(); setError(d.error || 'Error al crear')
+      }
     } catch { setError('Error de conexión') }
     finally { setSaving(false) }
   }
@@ -83,13 +129,26 @@ export default function AdminCategorias() {
   const startEdit = (cat: Category) => {
     setEditingId(cat.id)
     setEditForm({ name: cat.name, image: cat.image || '', order: String(cat.order) })
+    setEditImageData(null)
   }
 
   const handleEdit = async (id: number) => {
     try {
-      const res = await fetch(`/api/categories/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: editForm.name.trim(), slug: slugify(editForm.name), image: editForm.image.trim() || null, order: parseInt(editForm.order) || 0 }) })
+      const res = await fetch(`/api/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: editForm.name.trim(),
+          slug: slugify(editForm.name),
+          image: editImageData ? null : (editForm.image.trim() || null),
+          imageData: editImageData || null,
+          order: parseInt(editForm.order) || 0,
+        }),
+      })
       if (!res.ok) throw new Error()
-      setEditingId(null); fetchCats()
+      setEditingId(null)
+      setEditImageData(null)
+      fetchCats()
     } catch { alert('No se pudo guardar los cambios.') }
   }
 
@@ -153,20 +212,75 @@ export default function AdminCategorias() {
               )}
             </div>
 
+            {/* ── Imagen: toggle Upload / URL ── */}
             <div>
-              <label style={lbl}>URL de imagen (opcional)</label>
-              <input
-                className="cat-input"
-                value={form.image}
-                onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
-                placeholder="https://..."
-                style={inp}
-              />
-              {form.image && (
-                <div style={{ marginTop: 8, width: '100%', height: 80, borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={form.image} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => (e.currentTarget.style.display = 'none')} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                <label style={lbl}>Imagen (opcional)</label>
+                <div style={{ display: 'flex', gap: 4 }}>
+                  {(['upload', 'url'] as const).map(mode => (
+                    <button key={mode} type="button" onClick={() => { setImgMode(mode); setImageData(null); setForm(f => ({ ...f, image: '' })) }}
+                      style={{ padding: '3px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', fontFamily: 'var(--font-mono)', letterSpacing: '0.06em', border: 'none', background: imgMode === mode ? 'rgba(249,115,22,0.2)' : 'rgba(255,255,255,0.06)', color: imgMode === mode ? '#f97316' : 'rgba(148,163,184,0.6)' }}>
+                      {mode === 'upload' ? <><Upload size={9} style={{ display: 'inline', marginRight: 4 }} />SUBIR</> : <><LinkIcon size={9} style={{ display: 'inline', marginRight: 4 }} />URL</>}
+                    </button>
+                  ))}
                 </div>
+              </div>
+
+              {imgMode === 'upload' ? (
+                /* ── Zona Drag & Drop ── */
+                <div
+                  onDragOver={e => { e.preventDefault(); setDragging(true) }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFileDrop(f) }}
+                  onClick={() => fileRef.current?.click()}
+                  style={{
+                    border: `2px dashed ${dragging ? 'rgba(249,115,22,0.7)' : imageData ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.12)'}`,
+                    borderRadius: 12, padding: imageData ? 0 : '24px 16px',
+                    textAlign: 'center', cursor: 'pointer',
+                    background: dragging ? 'rgba(249,115,22,0.06)' : 'rgba(255,255,255,0.03)',
+                    transition: 'all .2s', overflow: 'hidden', position: 'relative',
+                  }}
+                >
+                  {imageData ? (
+                    <div style={{ position: 'relative' }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={imageData} alt="preview" style={{ width: '100%', height: 120, objectFit: 'cover', display: 'block' }} />
+                      <button type="button" onClick={e => { e.stopPropagation(); setImageData(null) }}
+                        style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <X size={13} />
+                      </button>
+                      <div style={{ position: 'absolute', bottom: 8, left: 8, background: 'rgba(34,197,94,0.9)', borderRadius: 6, padding: '2px 8px', fontSize: 10, fontWeight: 700, color: '#fff', fontFamily: 'var(--font-mono)' }}>
+                        ✓ IMAGEN LISTA
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload size={24} color={dragging ? '#f97316' : 'rgba(148,163,184,0.4)'} style={{ margin: '0 auto 8px', display: 'block' }} />
+                      <p style={{ margin: 0, fontSize: 13, color: dragging ? '#f97316' : 'rgba(148,163,184,0.6)', fontWeight: 600 }}>
+                        {dragging ? 'Suelta aquí' : 'Arrastra o haz clic'}
+                      </p>
+                      <p style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.35)', fontFamily: 'var(--font-mono)' }}>
+                        JPG, PNG, WEBP · máx 2MB
+                      </p>
+                    </>
+                  )}
+                  <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleFileDrop(f) }} />
+                </div>
+              ) : (
+                /* ── Modo URL ── */
+                <>
+                  <input className="cat-input" value={form.image}
+                    onChange={e => setForm(f => ({ ...f, image: e.target.value }))}
+                    placeholder="https://..." style={inp} />
+                  {form.image && (
+                    <div style={{ marginTop: 8, height: 80, borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={form.image} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={e => (e.currentTarget.style.display = 'none')} />
+                    </div>
+                  )}
+                </>
               )}
             </div>
 
@@ -266,8 +380,26 @@ export default function AdminCategorias() {
                         <input className="cat-input" value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} style={{ ...inp, padding: '8px 12px' }} />
                       </div>
                       <div style={{ flex: 2, minWidth: 180 }}>
-                        <label style={lbl}>URL imagen</label>
-                        <input className="cat-input" value={editForm.image} onChange={e => setEditForm(f => ({ ...f, image: e.target.value }))} placeholder="https://..." style={{ ...inp, padding: '8px 12px' }} />
+                        <label style={lbl}>URL imagen / subir</label>
+                        <div style={{ display: 'flex', gap: 6 }}>
+                          <input className="cat-input" value={editForm.image}
+                            onChange={e => { setEditForm(f => ({ ...f, image: e.target.value })); setEditImageData(null) }}
+                            placeholder="https://..." style={{ ...inp, padding: '8px 12px', flex: 1 }} />
+                          <label style={{ width: 34, height: 34, borderRadius: 8, background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', flexShrink: 0 }}>
+                            <Upload size={14} color="#f97316" />
+                            <input type="file" accept="image/*" style={{ display: 'none' }}
+                              onChange={e => { const f = e.target.files?.[0]; if (f) handleEditFileDrop(f) }} />
+                          </label>
+                        </div>
+                        {editImageData && (
+                          <div style={{ marginTop: 6, height: 50, borderRadius: 6, overflow: 'hidden', border: '1px solid rgba(34,197,94,0.3)', position: 'relative' }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={editImageData} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            <button type="button" onClick={() => setEditImageData(null)} style={{ position: 'absolute', top: 3, right: 3, width: 18, height: 18, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <X size={10} />
+                            </button>
+                          </div>
+                        )}
                       </div>
                       <div style={{ width: 70 }}>
                         <label style={lbl}>Orden</label>
