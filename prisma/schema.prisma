@@ -20,7 +20,8 @@ model Product {
   sizes         String?  @db.Text
   colors        String?  @db.Text
   badge         String?  @db.VarChar(50)
-  inStock       Boolean  @default(true)
+  stock         Int      @default(0)   // unidades disponibles — manejado por el sistema
+  inStock       Boolean  @default(true) // calculado: stock > 0 (se actualiza automáticamente)
   featured      Boolean  @default(false)
   active        Boolean  @default(true)
   createdAt     DateTime @default(now())
