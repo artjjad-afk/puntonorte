@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'motion/react'
 
 interface Category {
   id: number; name: string; slug: string
-  image: string | null; active: boolean; order: number
+  image: string | null; active: boolean
+  showInNav: boolean; order: number
 }
 
 function slugify(str: string) {
@@ -115,6 +116,14 @@ export default function AdminCategorias() {
       if (!res.ok) throw new Error()
       fetchCats()
     } catch { alert('No se pudo actualizar la categoría.') }
+  }
+
+  const handleToggleNav = async (cat: Category) => {
+    try {
+      const res = await fetch(`/api/categories/${cat.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ showInNav: !cat.showInNav }) })
+      if (!res.ok) throw new Error()
+      fetchCats()
+    } catch { alert('No se pudo actualizar.') }
   }
 
   const handleDelete = async (id: number, name: string) => {
@@ -451,6 +460,14 @@ export default function AdminCategorias() {
 
                       {/* Acciones */}
                       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                        {/* Toggle acceso rápido en navbar */}
+                        <button
+                          onClick={() => handleToggleNav(cat)}
+                          title={cat.showInNav ? 'Quitar del menú' : 'Mostrar en menú'}
+                          style={{ height: 32, padding: '0 10px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 5, background: cat.showInNav ? 'rgba(249,115,22,0.15)' : 'rgba(148,163,184,0.08)', border: `1px solid ${cat.showInNav ? 'rgba(249,115,22,0.3)' : 'rgba(148,163,184,0.15)'}`, color: cat.showInNav ? '#f97316' : 'rgba(148,163,184,0.5)', cursor: 'pointer', fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}
+                        >
+                          {cat.showInNav ? '★ MENÚ' : '☆ MENÚ'}
+                        </button>
                         <button onClick={() => startEdit(cat)} title="Editar" style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', cursor: 'pointer' }}>
                           <Pencil size={13} />
                         </button>

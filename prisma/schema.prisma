@@ -30,14 +30,15 @@ model Product {
 }
 
 model Category {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique @db.VarChar(100)
-  slug      String   @unique @db.VarChar(100)
-  image     String?  @db.VarChar(500)
-  imageData String?  @db.LongText
-  active    Boolean  @default(true)
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  image       String?  @db.VarChar(500)
+  imageData   String?  @db.LongText
+  active      Boolean  @default(true)
+  showInNav   Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
 
   @@map("categories")
 }

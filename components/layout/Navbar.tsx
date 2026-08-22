@@ -5,13 +5,8 @@ import { ShoppingCart, Menu, X, Search, ChevronRight } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { SearchDropdown } from '@/components/ui/SearchDropdown'
 
-const FALLBACK_LINKS = [
-  { href: '/tienda', label: 'Tienda' },
-  { href: '/tienda?cat=dama', label: 'Dama' },
-  { href: '/tienda?cat=caballero', label: 'Caballero' },
-  { href: '/tienda?cat=accesorios', label: 'Accesorios' },
-  { href: '/tienda?cat=perfumes', label: 'Perfumes' },
-]
+const FALLBACK_LINKS: { href: string; label: string }[] = []
+// Sin fallback — si no hay categorías en la DB, el menú queda vacío
 
 export function Navbar() {
   const [scrolled, setScrolled] = useState(false)
@@ -35,12 +30,18 @@ export function Navbar() {
         if (Array.isArray(data) && data.length > 0) {
           const links = [
             { href: '/tienda', label: 'Tienda' },
-            ...data.slice(0, 6).map((c: { slug: string; name: string }) => ({
-              href: `/tienda?cat=${c.slug}`,
-              label: c.name,
-            }))
+            ...data
+              .filter((c: { slug: string; name: string; showInNav?: boolean }) => c.showInNav !== false)
+              .slice(0, 6)
+              .map((c: { slug: string; name: string }) => ({
+                href: `/tienda?cat=${c.slug}`,
+                label: c.name,
+              }))
           ]
           setNavLinks(links)
+        } else {
+          // Sin categorías — solo mostrar Tienda
+          setNavLinks([{ href: '/tienda', label: 'Tienda' }])
         }
       })
       .catch(() => {})

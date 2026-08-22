@@ -55,6 +55,7 @@ export async function POST(req: NextRequest) {
         image: imageData ? null : (image || null),
         imageData: imageData || null,
         order: order || 0,
+        showInNav: true,
       },
     })
 
