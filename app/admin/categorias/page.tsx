@@ -86,6 +86,12 @@ export default function AdminCategorias() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name.trim()) return
+    
+    // Validar orden
+    const orderNum = parseInt(form.order)
+    if (!orderNum || orderNum < 1) { setError('El orden debe ser un número mayor a 0'); return }
+    if (cats.some(c => c.order === orderNum)) { setError(`Ya existe una categoría con orden ${orderNum}`); return }
+
     setSaving(true); setError('')
     try {
       const res = await fetch('/api/categories', {
@@ -294,14 +300,18 @@ export default function AdminCategorias() {
             </div>
 
             <div>
-              <label style={lbl}>Orden de aparición</label>
+              <label style={lbl}>Orden de aparición *</label>
               <input
                 className="cat-input"
                 type="number"
+                min="1"
                 value={form.order}
                 onChange={e => setForm(f => ({ ...f, order: e.target.value }))}
                 style={{ ...inp, width: '80px' }}
               />
+              <p style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.4)', fontFamily: 'var(--font-mono)' }}>
+                Órdenes usados: {cats.map(c => c.order).sort((a,b) => a-b).join(', ') || 'ninguno'}
+              </p>
             </div>
 
             <AnimatePresence>

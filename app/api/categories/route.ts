@@ -40,6 +40,18 @@ export async function POST(req: NextRequest) {
     if (!name?.trim()) return NextResponse.json({ error: 'El nombre es requerido' }, { status: 400 })
     if (!slug?.trim()) return NextResponse.json({ error: 'El slug es requerido' }, { status: 400 })
 
+    // Validar orden
+    const orderNum = parseInt(order)
+    if (!orderNum || orderNum < 1) {
+      return NextResponse.json({ error: 'El orden debe ser mayor a 0' }, { status: 400 })
+    }
+
+    // Verificar orden único
+    const orderExists = await prisma.category.findFirst({ where: { order: orderNum } })
+    if (orderExists) {
+      return NextResponse.json({ error: `Ya existe una categoría con orden ${orderNum}` }, { status: 400 })
+    }
+
     const existing = await prisma.category.findUnique({ where: { slug: slug.trim() } })
     if (existing) return NextResponse.json({ error: 'Ya existe una categoría con ese slug' }, { status: 400 })
 
