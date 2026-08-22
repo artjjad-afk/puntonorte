@@ -29,6 +29,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
             : 0
         }),
         ...(body.active !== undefined && { active: body.active }),
+        ...(body.showInNav !== undefined && { showInNav: body.showInNav }),
       },
     })
     return NextResponse.json(cat)
