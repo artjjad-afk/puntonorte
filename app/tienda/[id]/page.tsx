@@ -79,6 +79,10 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
     setSizeError(false)
     setColorError(false)
 
+    // Validar stock suficiente
+    if (product.stock === 0) return
+    if (quantity > product.stock) { setQuantity(product.stock); return }
+
     addItem(product, selectedSize || undefined, selectedColor || undefined)
     if (quantity > 1) {
       for (let i = 1; i < quantity; i++) addItem(product, selectedSize || undefined, selectedColor || undefined)
@@ -240,20 +244,29 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   <Minus size={14} />
                 </button>
                 <span style={{ width: '52px', textAlign: 'center', fontWeight: '800', fontSize: '16px', color: '#211f1e' }}>{quantity}</span>
-                <button onClick={() => setQuantity(quantity + 1)} style={{ width: '44px', height: '44px', border: 'none', background: '#f9f7f5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <button
+                  onClick={() => setQuantity(Math.min(quantity + 1, product.stock > 0 ? product.stock : 1))}
+                  style={{ width: '44px', height: '44px', border: 'none', background: '#f9f7f5', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <Plus size={14} />
                 </button>
               </div>
+
+              {/* Últimas unidades — urgencia */}
+              {product.stock > 0 && product.stock <= 5 && (
+                <p style={{ margin: '8px 0 0', fontSize: '12px', fontWeight: '700', color: '#c1692b', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                  🔥 ¡Solo quedan {product.stock} {product.stock === 1 ? 'unidad' : 'unidades'}!
+                </p>
+              )}
             </div>
 
             <div className="product-cta-row" style={{ display: 'flex', gap: '10px', marginBottom: '16px' }}>
               <button
                 onClick={handleAdd}
-                disabled={!product.inStock}
+                disabled={product.stock === 0}
                 className={`btn-primary ${shaking ? 'shake' : ''}`}
-                style={{ flex: 1, padding: '16px', borderRadius: '12px', fontSize: '14px', border: 'none', opacity: product.inStock ? 1 : 0.5, cursor: product.inStock ? 'pointer' : 'not-allowed' }}
+                style={{ flex: 1, padding: '16px', borderRadius: '12px', fontSize: '14px', border: 'none', opacity: product.stock > 0 ? 1 : 0.5, cursor: product.stock > 0 ? 'pointer' : 'not-allowed' }}
               >
-                <ShoppingCart size={17} /> {product.inStock ? 'Agregar al carrito' : 'Agotado'}
+                <ShoppingCart size={17} /> {product.stock > 0 ? 'Agregar al carrito' : 'Agotado'}
               </button>
               <button
                 onClick={() => {
