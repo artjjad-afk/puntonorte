@@ -40,7 +40,8 @@ export default function NuevoProducto() {
   const [form, setForm] = useState({
     name: '', price: '', originalPrice: '',
     category: '', description: '', badge: '',
-    inStock: true, featured: false, active: true,
+    stock: '0',
+    featured: false, active: true,
     images: [] as string[],
     sizes: [] as string[],
     colors: [] as string[],
@@ -322,11 +323,27 @@ export default function NuevoProducto() {
             <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.35, delay: 0.1 }}
               className="card-top" style={card}>
               <p style={{ ...lbl, fontSize: 11, marginBottom: 16 }}>⚙️ Opciones</p>
+
+              {/* Stock numérico */}
+              <div style={{ marginBottom: 14, padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12 }}>
+                <label style={{ ...lbl, marginBottom: 6 }}>📦 Unidades en stock</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <input className="pn-inp" type="number" min="0" value={form.stock}
+                    onChange={e => set('stock', e.target.value)}
+                    style={{ ...inp, width: 90, padding: '8px 12px' }} />
+                  <p style={{ margin: 0, fontSize: 11, fontFamily: 'var(--font-mono)', flex: 1 }}>
+                    {parseInt(form.stock) > 0
+                      ? <span style={{ color: '#4ade80' }}>✓ Disponible</span>
+                      : <span style={{ color: '#f87171' }}>✗ Agotado</span>
+                    }
+                  </p>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
-                  { key: 'inStock',  label: 'Disponible en stock',         sub: 'El cliente puede comprarlo' },
-                  { key: 'featured', label: 'Destacado en inicio',         sub: 'Aparece en la página principal' },
-                  { key: 'active',   label: 'Activo (visible en tienda)',  sub: 'Se muestra en el catálogo' },
+                  { key: 'featured', label: 'Destacado en inicio',        sub: 'Aparece en la página principal' },
+                  { key: 'active',   label: 'Activo (visible en tienda)', sub: 'Se muestra en el catálogo' },
                 ].map(({ key, label, sub }) => (
                   <div key={key}
                     onClick={() => set(key, !form[key as keyof typeof form])}
@@ -336,7 +353,6 @@ export default function NuevoProducto() {
                       <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: form[key as keyof typeof form] ? '#f1f5f9' : 'rgba(148,163,184,0.7)' }}>{label}</p>
                       <p style={{ margin: 0, fontSize: 11, color: 'rgba(148,163,184,0.4)', fontFamily: 'var(--font-mono)' }}>{sub}</p>
                     </div>
-                    {/* Toggle switch */}
                     <div style={{ width: 38, height: 22, borderRadius: 11, background: form[key as keyof typeof form] ? '#f97316' : 'rgba(255,255,255,0.12)', position: 'relative', flexShrink: 0, transition: 'background .2s' }}>
                       <div style={{ position: 'absolute', top: 3, left: form[key as keyof typeof form] ? 19 : 3, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left .2s', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }} />
                     </div>

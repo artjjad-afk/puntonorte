@@ -43,7 +43,8 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
   const [form, setForm] = useState({
     name: '', price: '', originalPrice: '',
     category: '', description: '', badge: '',
-    inStock: true, featured: false, active: true,
+    stock: '0',
+    featured: false, active: true,
     images: [] as string[],
     sizes: [] as string[],
     colors: [] as string[],
@@ -67,7 +68,7 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
           category:      p.category    || '',
           description:   p.description || '',
           badge:         p.badge       || '',
-          inStock:       p.inStock     ?? true,
+          stock:         String(p.stock ?? 0),
           featured:      p.featured    ?? false,
           active:        p.active      ?? true,
           images:        Array.isArray(p.images) ? p.images : [],
@@ -324,9 +325,25 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
             <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.35, delay: 0.1 }}
               className="card-top" style={card}>
               <p style={{ ...lbl, fontSize: 11, marginBottom: 16 }}>⚙️ Opciones</p>
+
+              {/* Stock numérico */}
+              <div style={{ marginBottom: 14, padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12 }}>
+                <label style={{ ...lbl, marginBottom: 6 }}>📦 Unidades en stock</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <input className="pn-inp" type="number" min="0" value={form.stock}
+                    onChange={e => set('stock', e.target.value)}
+                    style={{ ...inp, width: 90, padding: '8px 12px' }} />
+                  <p style={{ margin: 0, fontSize: 11, fontFamily: 'var(--font-mono)', flex: 1 }}>
+                    {parseInt(form.stock) > 0
+                      ? <span style={{ color: '#4ade80' }}>✓ Disponible</span>
+                      : <span style={{ color: '#f87171' }}>✗ Agotado</span>
+                    }
+                  </p>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {[
-                  { key: 'inStock',  label: 'Disponible en stock',        sub: 'El cliente puede comprarlo' },
                   { key: 'featured', label: 'Destacado en inicio',        sub: 'Aparece en la página principal' },
                   { key: 'active',   label: 'Activo (visible en tienda)', sub: 'Se muestra en el catálogo' },
                 ].map(({ key, label, sub }) => (
