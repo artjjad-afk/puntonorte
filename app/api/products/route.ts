@@ -72,10 +72,16 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { name, price, originalPrice, category, subcategory, description, images, sizes, colors, badge, inStock, featured } = body
+    const { name, price, originalPrice, category, subcategory, description, images, sizes, colors, badge, featured } = body
 
     if (!name || !price || !category || !description) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 })
+    }
+
+    // Validar stock
+    const stockNum = parseInt(body.stock ?? '0')
+    if (isNaN(stockNum) || stockNum < 0) {
+      return NextResponse.json({ error: 'El stock debe ser un número mayor o igual a 0' }, { status: 400 })
     }
 
     // Generar slug único
@@ -96,9 +102,10 @@ export async function POST(req: NextRequest) {
         sizes: sizes?.length ? JSON.stringify(sizes) : null,
         colors: colors?.length ? JSON.stringify(colors) : null,
         badge: badge || null,
-        inStock: inStock ?? true,
+        stock:    stockNum,
+        inStock:  stockNum > 0,  // calculado automáticamente
         featured: featured ?? false,
-        active: true,
+        active:   body.active ?? true,
       },
     })
 

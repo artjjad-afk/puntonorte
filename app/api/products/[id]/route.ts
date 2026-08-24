@@ -39,24 +39,34 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params
     const body = await req.json()
-    const { name, price, originalPrice, category, subcategory, description, images, sizes, colors, badge, inStock, featured, active } = body
+    const { name, price, originalPrice, category, subcategory, description, images, sizes, colors, badge, featured, active } = body
+
+    // Calcular inStock automáticamente si se envía stock
+    const stockNum = body.stock !== undefined ? parseInt(body.stock) : undefined
+    const inStockCalc = stockNum !== undefined ? stockNum > 0 : undefined
 
     const product = await prisma.product.update({
       where: { id: parseInt(id) },
       data: {
-        ...(name && { name: name.trim() }),
-        ...(price && { price: parseFloat(price) }),
+        ...(name        && { name: name.trim() }),
+        ...(price       && { price: parseFloat(price) }),
         originalPrice: originalPrice ? parseFloat(originalPrice) : null,
-        ...(category && { category }),
+        ...(category    && { category }),
         subcategory: subcategory || null,
         ...(description && { description: description.trim() }),
-        ...(images && { images: JSON.stringify(Array.isArray(images) ? images : [images]) }),
-        sizes: sizes?.length ? JSON.stringify(sizes) : null,
+        ...(images      && { images: JSON.stringify(Array.isArray(images) ? images : [images]) }),
+        sizes:  sizes?.length  ? JSON.stringify(sizes)  : null,
         colors: colors?.length ? JSON.stringify(colors) : null,
         badge: badge || null,
-        ...(inStock !== undefined && { inStock }),
+        // Stock — si se envía, actualizar y recalcular inStock
+        ...(stockNum !== undefined && !isNaN(stockNum) && stockNum >= 0 && {
+          stock:   stockNum,
+          inStock: inStockCalc,
+        }),
+        // inStock manual solo si no se envió stock
+        ...(body.inStock !== undefined && stockNum === undefined && { inStock: body.inStock }),
         ...(featured !== undefined && { featured }),
-        ...(active !== undefined && { active }),
+        ...(active   !== undefined && { active }),
       },
     })
 
