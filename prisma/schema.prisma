@@ -62,6 +62,8 @@ model Banner {
 
   @@map("banners")
 }
+
+model Order {
   id            Int      @id @default(autoincrement())
   customerName  String   @db.VarChar(200)
   customerPhone String   @db.VarChar(50)
