@@ -27,8 +27,6 @@ jobs:
             npm install --legacy-peer-deps
 
             echo "🔨 Construyendo..."
-            npx prisma db push --skip-generate
-            npx prisma generate
             if npm run build; then
               echo "✅ Build OK — reiniciando app"
               pm2 reload ecosystem.config.js --update-env
