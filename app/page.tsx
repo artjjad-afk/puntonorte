@@ -345,7 +345,7 @@ export default function HomePage() {
           <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
         </svg>
       </div>
-      </> /* fin condicional categorías */
+      </>{/* fin condicional categorias */}
       )}
 
       {/* Seccion productos destacados - visible si carga o si hay productos */}
@@ -416,7 +416,7 @@ export default function HomePage() {
           <path d="M0,0 C360,60 1080,0 1440,50 L1440,60 L0,60 Z" fill="#211f1e"/>
         </svg>
       </div>
-      </> /* fin condicional productos destacados */
+      </>{/* fin condicional productos destacados */}
       )}
 
       {/* ════════════════════════════════
