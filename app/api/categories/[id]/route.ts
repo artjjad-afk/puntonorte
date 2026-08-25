@@ -13,25 +13,27 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params
     const body = await req.json()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = {
+      ...(body.name  !== undefined && { name:   body.name }),
+      ...(body.slug  !== undefined && { slug:   body.slug }),
+      ...(body.image !== undefined && { image:  body.imageData ? null : body.image }),
+      ...(body.imageData !== undefined && {
+        imageData: body.imageData || null,
+        image: body.imageData ? null : (body.image || null),
+      }),
+      ...(body.order !== undefined && {
+        order: Number.isFinite(parseInt(body.order))
+          ? parseInt(body.order)
+          : 0
+      }),
+      ...(body.active     !== undefined && { active:      body.active }),
+      ...(body.showInNav  !== undefined && { showInNav:   body.showInNav }),
+      ...(body.showInHome !== undefined && { showInHome:  body.showInHome }),
+    }
     const cat = await prisma.category.update({
       where: { id: parseInt(id) },
-      data: {
-        ...(body.name  !== undefined && { name:   body.name }),
-        ...(body.slug  !== undefined && { slug:   body.slug }),
-        ...(body.image !== undefined && { image:  body.imageData ? null : body.image }),
-        ...(body.imageData !== undefined && {
-          imageData: body.imageData || null,
-          image: body.imageData ? null : (body.image || null),
-        }),
-        ...(body.order !== undefined && {
-          order: Number.isFinite(parseInt(body.order))
-            ? parseInt(body.order)
-            : 0
-        }),
-        ...(body.active !== undefined && { active: body.active }),
-        ...(body.showInNav !== undefined && { showInNav: body.showInNav }),
-        ...(body.showInHome !== undefined && { showInHome: body.showInHome }),
-      },
+      data,
     })
     return NextResponse.json(cat)
   } catch (e) {

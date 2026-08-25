@@ -14,12 +14,10 @@ export async function GET(req: NextRequest) {
     const showAll  = searchParams.get('all')    === 'true'
     const homeOnly = searchParams.get('home')   === 'true'
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: any = showAll ? undefined : homeOnly ? { active: true, showInHome: true } : { active: true }
     const cats = await prisma.category.findMany({
-      where: showAll
-        ? undefined
-        : homeOnly
-          ? { active: true, showInHome: true }
-          : { active: true },
+      where,
       orderBy: { order: 'asc' },
     })
 
