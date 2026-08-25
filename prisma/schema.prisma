@@ -44,7 +44,24 @@ model Category {
   @@map("categories")
 }
 
-model Order {
+model Banner {
+  id          Int      @id @default(autoincrement())
+  etiqueta    String?  @db.VarChar(100)
+  titulo      String   @db.VarChar(200)
+  subtitulo   String?  @db.VarChar(200)
+  descripcion String?  @db.Text
+  linkUrl     String   @db.VarChar(300)
+  linkTexto   String   @db.VarChar(100)
+  imagen      String?  @db.VarChar(500)
+  imageData   String?  @db.LongText
+  precioDesde Float?
+  active      Boolean  @default(true)
+  orden       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("banners")
+}
   id            Int      @id @default(autoincrement())
   customerName  String   @db.VarChar(200)
   customerPhone String   @db.VarChar(50)
