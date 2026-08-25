@@ -82,6 +82,11 @@ export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([])
   const [featuredLoaded, setFeaturedLoaded] = useState(false)
   const [dbCategories, setDbCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
+  const [activeBanner, setActiveBanner] = useState<{
+    etiqueta: string | null; titulo: string; subtitulo: string | null
+    descripcion: string | null; linkUrl: string; linkTexto: string
+    imagen: string | null; precioDesde: number | null
+  } | null | undefined>(undefined) // undefined = cargando, null = no hay banner
   const [scrollY, setScrollY] = useState(0)
 
   useEffect(() => {
@@ -90,6 +95,12 @@ export default function HomePage() {
       .then(d => setFeatured(Array.isArray(d) ? d.slice(0, 8) : []))
       .catch(() => setFeatured([]))
       .finally(() => setFeaturedLoaded(true))
+
+    // Cargar banner activo
+    fetch('/api/banners')
+      .then(r => r.json())
+      .then(data => setActiveBanner(data ?? null))
+      .catch(() => setActiveBanner(null))
 
     // Cargar categorías reales desde la DB
     fetch('/api/categories')
@@ -383,37 +394,34 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ════════════════════════════════
-          BANNER PERFUMES — sección OSCURA
-      ════════════════════════════════ */}
+      {/* BANNER PROMOCIONAL — solo si hay un banner activo en la DB */}
+      {activeBanner && (
       <section ref={sec3.ref} className="promo-strip" style={{ position:'relative' }}>
         {/* Izquierda */}
         <div style={{ background:'#211f1e', padding:'80px 60px', display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', overflow:'hidden' }}>
           <LightRays dark rayCount={5} />
           <BubblesCanvas count={8} dark />
-
           <div style={{ position:'absolute', top:'-60px', right:'-60px', width:'300px', height:'300px', borderRadius:'50%', border:'1px solid rgba(193,105,43,.12)', pointerEvents:'none', zIndex:2 }} />
           <div style={{ position:'absolute', bottom:'-40px', left:'-40px', width:'220px', height:'220px', borderRadius:'50%', background:'radial-gradient(circle,rgba(193,105,43,.12) 0%,transparent 70%)', pointerEvents:'none', zIndex:2 }} />
-
           <div style={{ position:'relative', zIndex:3 }}>
-            <p className="section-label" style={{ marginBottom:'18px' }}>Fragrancias</p>
-            <h2 style={{
-              color:'#fff', fontSize:'clamp(28px,3.5vw,50px)', fontWeight:'900',
-              letterSpacing:'-1.5px', lineHeight:'1.05', marginBottom:'18px',
-              opacity:sec3.inView?1:0, transform:sec3.inView?'translateX(0)':'translateX(-36px)',
-              transition:'opacity .8s ease, transform .8s ease',
-            }}>
-              Perfumes<br /><span className="text-shimmer">Premium</span><br />hasta 20% OFF
+            {activeBanner.etiqueta && (
+              <p className="section-label" style={{ marginBottom:'18px' }}>{activeBanner.etiqueta}</p>
+            )}
+            <h2 style={{ color:'#fff', fontSize:'clamp(28px,3.5vw,50px)', fontWeight:'900', letterSpacing:'-1.5px', lineHeight:'1.05', marginBottom:'18px', opacity:sec3.inView?1:0, transform:sec3.inView?'translateX(0)':'translateX(-36px)', transition:'opacity .8s ease, transform .8s ease' }}>
+              {activeBanner.titulo}
+              {activeBanner.subtitulo && <><br /><span className="text-shimmer">{activeBanner.subtitulo}</span></>}
             </h2>
-            <p style={{ color:'rgba(232,229,226,.6)', lineHeight:'1.8', marginBottom:'40px', fontSize:'15px', maxWidth:'340px' }}>
-              Fragancias exclusivas de larga duración para él y para ella. Elegancia que se siente.
-            </p>
+            {activeBanner.descripcion && (
+              <p style={{ color:'rgba(232,229,226,.6)', lineHeight:'1.8', marginBottom:'40px', fontSize:'15px', maxWidth:'340px' }}>
+                {activeBanner.descripcion}
+              </p>
+            )}
             <div data-burst style={{ position:'relative', width:'fit-content' }}>
               <ParticlesBurst />
-              <Link href="/tienda?cat=perfumes" className="btn-liquid" style={{ padding:'16px 36px', borderRadius:'14px', fontSize:'14px', fontWeight:'900' }}
+              <Link href={activeBanner.linkUrl} className="btn-liquid" style={{ padding:'16px 36px', borderRadius:'14px', fontSize:'14px', fontWeight:'900' }}
                 onClick={fireBurst} onMouseDown={handleRipple}>
                 <span className="shine" />
-                Ver perfumes →
+                {activeBanner.linkTexto}
               </Link>
             </div>
           </div>
@@ -421,22 +429,23 @@ export default function HomePage() {
 
         {/* Derecha — imagen */}
         <div style={{ position:'relative', overflow:'hidden', minHeight:'400px' }}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="https://images.unsplash.com/photo-1547887538-047c9d44754b?w=800&q=85" alt="Perfumes"
-            style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', transition:'transform .9s ease' }} />
+          {activeBanner.imagen ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={activeBanner.imagen} alt={activeBanner.titulo}
+              style={{ width:'100%', height:'100%', objectFit:'cover', display:'block', transition:'transform .9s ease' }} />
+          ) : (
+            <div style={{ width:'100%', height:'100%', minHeight:'400px', background:'linear-gradient(135deg,#1a1208,#2d1e0e)' }} />
+          )}
           <div style={{ position:'absolute', inset:0, background:'linear-gradient(to right,rgba(33,31,30,.45) 0%,transparent 55%)' }} />
-          {/* Precio flotante */}
-          <div style={{
-            position:'absolute', bottom:'32px', left:'32px',
-            background:'rgba(33,31,30,.9)', backdropFilter:'blur(20px)',
-            border:'1px solid rgba(255,255,255,.12)', borderRadius:'16px', padding:'18px 28px',
-            boxShadow:'0 8px 32px rgba(0,0,0,.4)',
-          }}>
-            <p style={{ color:'rgba(232,229,226,.65)', fontSize:'10px', letterSpacing:'2px', margin:'0 0 4px', textTransform:'uppercase' }}>DESDE</p>
-            <p style={{ color:'#fff', fontSize:'32px', fontWeight:'900', margin:0, letterSpacing:'-1px' }}>$<span className="text-shimmer">28.00</span></p>
-          </div>
+          {activeBanner.precioDesde && (
+            <div style={{ position:'absolute', bottom:'32px', left:'32px', background:'rgba(33,31,30,.9)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,.12)', borderRadius:'16px', padding:'18px 28px', boxShadow:'0 8px 32px rgba(0,0,0,.4)' }}>
+              <p style={{ color:'rgba(232,229,226,.65)', fontSize:'10px', letterSpacing:'2px', margin:'0 0 4px', textTransform:'uppercase' }}>DESDE</p>
+              <p style={{ color:'#fff', fontSize:'32px', fontWeight:'900', margin:0, letterSpacing:'-1px' }}>$<span className="text-shimmer">{activeBanner.precioDesde.toFixed(2)}</span></p>
+            </div>
+          )}
         </div>
       </section>
+      )}
 
       {/* Wave divider oscuro→oscuro-stats */}
       <div style={{ background:'#211f1e', marginBottom:'-2px' }}>
