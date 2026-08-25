@@ -266,157 +266,121 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Wave divider oscuro→blanco */}
-      <div style={{ background:'#0d0c0b', marginBottom:'-2px' }}>
-        <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
-          <path d="M0,40 C360,80 1080,0 1440,40 L1440,60 L0,60 Z" fill="#ffffff"/>
-        </svg>
-      </div>
-
-      {/* ════════════════════════════════
-      {dbCategories !== null && dbCategories.length > 0 && (
-      <>
-      <section ref={sec1.ref} style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
-
-        {/* Aurora blobs en fondo claro */}
-        <div className="aurora-blob animate-aurora-1" style={{ width:'500px', height:'500px', top:'-150px', left:'-100px', background:'radial-gradient(circle,rgba(193,105,43,.18),rgba(232,140,74,.08))' }} />
-        <div className="aurora-blob animate-aurora-2" style={{ width:'400px', height:'400px', bottom:'-100px', right:'-80px', background:'radial-gradient(circle,rgba(232,140,74,.15),rgba(193,105,43,.05))' }} />
-        <div className="aurora-blob animate-aurora-3" style={{ width:'300px', height:'300px', top:'40%', left:'40%', background:'radial-gradient(circle,rgba(255,200,100,.12),transparent)' }} />
-
-        {/* Iconos flotantes */}
-        {FLOAT_ICONS.map((ic, i) => (
-          <span key={i} className="float-icon" style={{
-            top:`${10 + (i*12)%80}%`, left:`${5 + (i*15)%90}%`,
-            animationDuration:`${5 + i}s`, animationDelay:`${i*0.6}s`,
-            color:'#c1692b',
-          }}>{ic}</span>
-        ))}
-
-        <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
-          <div style={{
-            display:'flex', justifyContent:'space-between', alignItems:'flex-end',
-            marginBottom:'52px', flexWrap:'wrap', gap:'20px',
-            opacity:sec1.inView?1:0, transform:sec1.inView?'translateY(0)':'translateY(28px)',
-            transition:'opacity .7s ease, transform .7s ease',
-          }}>
-            <div>
-              <p className="section-label" style={{ marginBottom:'12px' }}>Categorías</p>
-              <h2 style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:'900', color:'#211f1e', letterSpacing:'-1.5px', lineHeight:'1.05' }}>
-                Encuentra tu<br />estilo perfecto
-              </h2>
-            </div>
-            <Link href="/tienda" style={{ color:'#c1692b', textDecoration:'none', fontWeight:'800', fontSize:'14px', display:'flex', alignItems:'center', gap:'6px', letterSpacing:'0.5px', padding:'12px 20px', borderRadius:'12px', border:'2px solid rgba(193,105,43,.25)', transition:'all .2s', background:'rgba(193,105,43,.04)' }}>
-              Ver todo el catálogo →
-            </Link>
-          </div>
-
-          {/* Grid categorías reales */}
-          <div style={{
-            display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr', gridTemplateRows:'300px 300px', gap:'16px',
-            opacity:sec1.inView?1:0, transform:sec1.inView?'translateY(0)':'translateY(36px)',
-            transition:'opacity .8s ease .15s, transform .8s ease .15s',
-          }} className="cats-grid">
-            {dbCategories.slice(0,5).map((cat, i) => (
-              <Link key={cat.id} href={`/tienda?cat=${cat.id}`}
-                style={{ textDecoration:'none', gridRow:i===0?'span 2':undefined }}
-                className="cat-item">
-                {cat.image
-                  ? <img src={cat.image} alt={cat.label} /> // eslint-disable-line @next/next/no-img-element
-                  : <div style={{ width:'100%', height:'100%', background:'linear-gradient(135deg,#1a1208,#2d1e0e)' }} />
-                }
-                <div className="cat-overlay" />
-                <div style={{ position:'absolute', top:0, right:0, width:'100px', height:'100px', background:'radial-gradient(circle at top right,rgba(232,140,74,.25),transparent 70%)', pointerEvents:'none', zIndex:2 }} />
-                <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'24px 22px', zIndex:3 }}>
-                  <p style={{ color:'rgba(255,255,255,.5)', fontSize:'10px', letterSpacing:'2.5px', textTransform:'uppercase', marginBottom:'4px' }}>Colección</p>
-                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                    <p style={{ color:'#fff', fontWeight:'900', fontSize:i===0?'30px':'20px', letterSpacing:'-0.5px', margin:0, textShadow:'0 2px 12px rgba(0,0,0,.5)' }}>{cat.label}</p>
-                    <span className="cat-arrow" style={{ color:'#e88c4a', fontSize:'24px', fontWeight:'900', textShadow:'0 0 12px rgba(232,140,74,.8)' }}>→</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
+      {/* Wave divider oscuro→blanco - solo si hay categorias o productos */}
+      {(dbCategories !== null && dbCategories.length > 0) && (
+        <div style={{ background:'#0d0c0b', marginBottom:'-2px' }}>
+          <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
+            <path d="M0,40 C360,80 1080,0 1440,40 L1440,60 L0,60 Z" fill="#ffffff"/>
+          </svg>
         </div>
-      </section>
-
-      {/* Wave divider blanco→crema */}
-      <div style={{ background:'#fff', marginBottom:'-2px' }}>
-        <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
-          <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
-        </svg>
-      </div>
-      </>{/* fin condicional categorias */}
       )}
 
-      {/* Seccion productos destacados - visible si carga o si hay productos */}
-      {(!featuredLoaded || featured.length > 0) && (
-      <>
-      <section ref={sec2.ref} style={{ padding:'100px 32px', background:'#f9f7f5', position:'relative', overflow:'hidden' }}>
-
-        {/* Solo burbujas en sección clara — sin rayos para ahorrar CPU */}
-        <BubblesCanvas count={10} dark={false} />
-
-        {/* Aurora blobs crema */}
-        <div className="aurora-blob animate-aurora-2" style={{ width:'600px', height:'400px', top:'-80px', right:'-120px', background:'radial-gradient(ellipse,rgba(193,105,43,.1),transparent 70%)' }} />
-        <div className="aurora-blob animate-aurora-1" style={{ width:'400px', height:'400px', bottom:'-80px', left:'-60px', background:'radial-gradient(circle,rgba(232,140,74,.08),transparent 70%)' }} />
-
-        <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
-          <div style={{
-            textAlign:'center', marginBottom:'60px',
-            opacity:sec2.inView?1:0, transform:sec2.inView?'translateY(0)':'translateY(28px)',
-            transition:'opacity .7s ease, transform .7s ease',
-          }}>
-            <p className="section-label" style={{ justifyContent:'center', marginBottom:'14px' }}>Selección premium</p>
-            <h2 style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:'900', color:'#211f1e', letterSpacing:'-1.5px', marginBottom:'16px' }}>
-              Los más <span className="text-shimmer">vendidos</span>
-            </h2>
-            <p style={{ color:'#7a7675', fontSize:'16px', maxWidth:'440px', margin:'0 auto', lineHeight:'1.7' }}>
-              Piezas elegidas por cientos de clientes satisfechos en todo Venezuela.
-            </p>
-          </div>
-
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))', gap:'24px' }}>
-            {!featuredLoaded
-              ? Array.from({length:4}).map((_,i) => (
-                  <div key={i} style={{ borderRadius:'14px', overflow:'hidden', background:'#fff', boxShadow:'0 2px 20px rgba(33,31,30,.07)' }}>
-                    <div className="skeleton" style={{ aspectRatio:'3/4', borderRadius:0 }} />
-                    <div style={{ padding:'16px' }}>
-                      <div className="skeleton" style={{ height:'12px', width:'40%', marginBottom:'8px' }} />
-                      <div className="skeleton" style={{ height:'16px', width:'80%', marginBottom:'12px' }} />
-                      <div className="skeleton" style={{ height:'22px', width:'35%' }} />
+      {/* CATEGORIAS - solo si hay categorias en la DB */}
+      {dbCategories !== null && dbCategories.length > 0 && (
+        <section ref={sec1.ref} style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
+          <div className="aurora-blob animate-aurora-1" style={{ width:'500px', height:'500px', top:'-150px', left:'-100px', background:'radial-gradient(circle,rgba(193,105,43,.18),rgba(232,140,74,.08))' }} />
+          <div className="aurora-blob animate-aurora-2" style={{ width:'400px', height:'400px', bottom:'-100px', right:'-80px', background:'radial-gradient(circle,rgba(232,140,74,.15),rgba(193,105,43,.05))' }} />
+          <div className="aurora-blob animate-aurora-3" style={{ width:'300px', height:'300px', top:'40%', left:'40%', background:'radial-gradient(circle,rgba(255,200,100,.12),transparent)' }} />
+          {FLOAT_ICONS.map((ic, i) => (
+            <span key={i} className="float-icon" style={{ top:`${10 + (i*12)%80}%`, left:`${5 + (i*15)%90}%`, animationDuration:`${5 + i}s`, animationDelay:`${i*0.6}s`, color:'#c1692b' }}>{ic}</span>
+          ))}
+          <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'52px', flexWrap:'wrap', gap:'20px', opacity:sec1.inView?1:0, transform:sec1.inView?'translateY(0)':'translateY(28px)', transition:'opacity .7s ease, transform .7s ease' }}>
+              <div>
+                <p className="section-label" style={{ marginBottom:'12px' }}>Categorías</p>
+                <h2 style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:'900', color:'#211f1e', letterSpacing:'-1.5px', lineHeight:'1.05' }}>
+                  Encuentra tu<br />estilo perfecto
+                </h2>
+              </div>
+              <Link href="/tienda" style={{ color:'#c1692b', textDecoration:'none', fontWeight:'800', fontSize:'14px', display:'flex', alignItems:'center', gap:'6px', letterSpacing:'0.5px', padding:'12px 20px', borderRadius:'12px', border:'2px solid rgba(193,105,43,.25)', transition:'all .2s', background:'rgba(193,105,43,.04)' }}>
+                Ver todo el catálogo →
+              </Link>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr', gridTemplateRows:'300px 300px', gap:'16px', opacity:sec1.inView?1:0, transform:sec1.inView?'translateY(0)':'translateY(36px)', transition:'opacity .8s ease .15s, transform .8s ease .15s' }} className="cats-grid">
+              {dbCategories.slice(0,5).map((cat, i) => (
+                <Link key={cat.id} href={`/tienda?cat=${cat.id}`} style={{ textDecoration:'none', gridRow:i===0?'span 2':undefined }} className="cat-item">
+                  {cat.image
+                    ? <img src={cat.image} alt={cat.label} /> // eslint-disable-line @next/next/no-img-element
+                    : <div style={{ width:'100%', height:'100%', background:'linear-gradient(135deg,#1a1208,#2d1e0e)' }} />
+                  }
+                  <div className="cat-overlay" />
+                  <div style={{ position:'absolute', top:0, right:0, width:'100px', height:'100px', background:'radial-gradient(circle at top right,rgba(232,140,74,.25),transparent 70%)', pointerEvents:'none', zIndex:2 }} />
+                  <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'24px 22px', zIndex:3 }}>
+                    <p style={{ color:'rgba(255,255,255,.5)', fontSize:'10px', letterSpacing:'2.5px', textTransform:'uppercase', marginBottom:'4px' }}>Colección</p>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                      <p style={{ color:'#fff', fontWeight:'900', fontSize:i===0?'30px':'20px', letterSpacing:'-0.5px', margin:0, textShadow:'0 2px 12px rgba(0,0,0,.5)' }}>{cat.label}</p>
+                      <span className="cat-arrow" style={{ color:'#e88c4a', fontSize:'24px', fontWeight:'900', textShadow:'0 0 12px rgba(232,140,74,.8)' }}>→</span>
                     </div>
                   </div>
-                ))
-              : featured.map((product, i) => (
-                    <div key={product.id} style={{
-                      opacity:sec2.inView?1:0,
-                      transform:sec2.inView?'translateY(0) scale(1)':'translateY(36px) scale(.96)',
-                      transition:`opacity .6s ease ${i*90}ms, transform .7s cubic-bezier(.34,1.2,.64,1) ${i*90}ms`,
-                  }}>
-                    <ProductCard product={product} />
-                  </div>
-                ))
-            }
+                </Link>
+              ))}
+            </div>
           </div>
+        </section>
+      )}
 
-          <div style={{ textAlign:'center', marginTop:'56px' }} data-burst>
-            <ParticlesBurst />
-            <Link href="/tienda" className="btn-liquid" style={{ padding:'17px 56px', borderRadius:'14px', fontSize:'15px', fontWeight:'900' }}
-              onClick={fireBurst} onMouseDown={handleRipple}>
-              <span className="shine" />
-              Ver toda la tienda ✦
-            </Link>
-          </div>
+      {/* Wave divider blanco→crema - solo si hay categorias */}
+      {dbCategories !== null && dbCategories.length > 0 && (
+        <div style={{ background:'#fff', marginBottom:'-2px' }}>
+          <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
+            <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
+          </svg>
         </div>
-      </section>
+      )}
 
-      {/* Wave divider crema→oscuro */}
-      <div style={{ background:'#f9f7f5', marginBottom:'-2px' }}>
-        <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
-          <path d="M0,0 C360,60 1080,0 1440,50 L1440,60 L0,60 Z" fill="#211f1e"/>
-        </svg>
-      </div>
-      </>{/* fin condicional productos destacados */}
+      {/* PRODUCTOS DESTACADOS - visible si carga o si hay productos */}
+      {(!featuredLoaded || featured.length > 0) && (
+        <section ref={sec2.ref} style={{ padding:'100px 32px', background:'#f9f7f5', position:'relative', overflow:'hidden' }}>
+          <BubblesCanvas count={10} dark={false} />
+          <div className="aurora-blob animate-aurora-2" style={{ width:'600px', height:'400px', top:'-80px', right:'-120px', background:'radial-gradient(ellipse,rgba(193,105,43,.1),transparent 70%)' }} />
+          <div className="aurora-blob animate-aurora-1" style={{ width:'400px', height:'400px', bottom:'-80px', left:'-60px', background:'radial-gradient(circle,rgba(232,140,74,.08),transparent 70%)' }} />
+          <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
+            <div style={{ textAlign:'center', marginBottom:'60px', opacity:sec2.inView?1:0, transform:sec2.inView?'translateY(0)':'translateY(28px)', transition:'opacity .7s ease, transform .7s ease' }}>
+              <p className="section-label" style={{ justifyContent:'center', marginBottom:'14px' }}>Selección premium</p>
+              <h2 style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:'900', color:'#211f1e', letterSpacing:'-1.5px', marginBottom:'16px' }}>
+                Los más <span className="text-shimmer">vendidos</span>
+              </h2>
+              <p style={{ color:'#7a7675', fontSize:'16px', maxWidth:'440px', margin:'0 auto', lineHeight:'1.7' }}>
+                Piezas elegidas por cientos de clientes satisfechos en todo Venezuela.
+              </p>
+            </div>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))', gap:'24px' }}>
+              {!featuredLoaded
+                ? Array.from({length:4}).map((_,i) => (
+                    <div key={i} style={{ borderRadius:'14px', overflow:'hidden', background:'#fff', boxShadow:'0 2px 20px rgba(33,31,30,.07)' }}>
+                      <div className="skeleton" style={{ aspectRatio:'3/4', borderRadius:0 }} />
+                      <div style={{ padding:'16px' }}>
+                        <div className="skeleton" style={{ height:'12px', width:'40%', marginBottom:'8px' }} />
+                        <div className="skeleton" style={{ height:'16px', width:'80%', marginBottom:'12px' }} />
+                        <div className="skeleton" style={{ height:'22px', width:'35%' }} />
+                      </div>
+                    </div>
+                  ))
+                : featured.map((product, i) => (
+                    <div key={product.id} style={{ opacity:sec2.inView?1:0, transform:sec2.inView?'translateY(0) scale(1)':'translateY(36px) scale(.96)', transition:`opacity .6s ease ${i*90}ms, transform .7s cubic-bezier(.34,1.2,.64,1) ${i*90}ms` }}>
+                      <ProductCard product={product} />
+                    </div>
+                  ))
+              }
+            </div>
+            <div style={{ textAlign:'center', marginTop:'56px' }} data-burst>
+              <ParticlesBurst />
+              <Link href="/tienda" className="btn-liquid" style={{ padding:'17px 56px', borderRadius:'14px', fontSize:'15px', fontWeight:'900' }} onClick={fireBurst} onMouseDown={handleRipple}>
+                <span className="shine" />
+                Ver toda la tienda ✦
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Wave divider crema→oscuro - solo si hay productos */}
+      {(!featuredLoaded || featured.length > 0) && (
+        <div style={{ background:'#f9f7f5', marginBottom:'-2px' }}>
+          <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
+            <path d="M0,0 C360,60 1080,0 1440,50 L1440,60 L0,60 Z" fill="#211f1e"/>
+          </svg>
+        </div>
       )}
 
       {/* ════════════════════════════════
