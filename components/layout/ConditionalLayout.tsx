@@ -12,7 +12,7 @@ import { useCartStore } from '@/store/cart'
 // Rutas donde el carrito debe cerrarse automáticamente si está abierto
 const CLOSE_CART_ON = ['/checkout', '/confirmacion', '/admin']
 
-export function ConditionalLayout({ children }: { children: React.ReactNode }) {
+export function ConditionalLayout({ children, navbar }: { children: React.ReactNode; navbar?: React.ReactNode }) {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith('/admin')
   const closeCart = useCartStore(s => s.closeCart)
@@ -29,7 +29,7 @@ export function ConditionalLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <Navbar />
+      {navbar ?? <Navbar />}
       <main className="flex-1">
         <PageTransition>
           {children}

@@ -8,11 +8,12 @@ import { SearchDropdown } from '@/components/ui/SearchDropdown'
 const FALLBACK_LINKS: { href: string; label: string }[] = []
 // Sin fallback — si no hay categorías en la DB, el menú queda vacío
 
-export function Navbar() {
+export function Navbar({ initialLinks }: { initialLinks?: { href: string; label: string }[] }) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
-  const [navLinks, setNavLinks] = useState(FALLBACK_LINKS)
+  // Iniciar con los links pre-cargados desde el servidor — sin delay
+  const [navLinks, setNavLinks] = useState(initialLinks ?? FALLBACK_LINKS)
   const { openCart, count } = useCartStore()
   const cartCount = count()
 
