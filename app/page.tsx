@@ -273,11 +273,9 @@ export default function HomePage() {
       </div>
 
       {/* ════════════════════════════════
-          CATEGORÍAS — solo si hay categorías en la DB
-      ════════════════════════════════ */}
+      {/* Seccion categorias - solo visible si hay categorias en la DB */}
       {dbCategories !== null && dbCategories.length > 0 && (
       <>
-      ════════════════════════════════ */}
       <section ref={sec1.ref} style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
 
         {/* Aurora blobs en fondo claro */}
