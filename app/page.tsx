@@ -348,6 +348,7 @@ export default function HomePage() {
 
       {/* Seccion productos destacados - visible si carga o si hay productos */}
       {(!featuredLoaded || featured.length > 0) && (
+      <>
       <section ref={sec2.ref} style={{ padding:'100px 32px', background:'#f9f7f5', position:'relative', overflow:'hidden' }}>
 
         {/* Solo burbujas en sección clara — sin rayos para ahorrar CPU */}
@@ -413,7 +414,8 @@ export default function HomePage() {
           <path d="M0,0 C360,60 1080,0 1440,50 L1440,60 L0,60 Z" fill="#211f1e"/>
         </svg>
       </div>
-      )} {/* fin condicional productos destacados */}
+      </> /* fin condicional productos destacados */
+      )}
 
       {/* ════════════════════════════════
           BANNER PERFUMES — sección OSCURA
