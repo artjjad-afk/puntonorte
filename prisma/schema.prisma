@@ -38,6 +38,7 @@ model Category {
   imageData   String?  @db.LongText
   active      Boolean  @default(true)
   showInNav   Boolean  @default(true)
+  showInHome  Boolean  @default(false)
   order       Int      @default(0)
   createdAt   DateTime @default(now())
 

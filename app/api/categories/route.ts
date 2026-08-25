@@ -11,10 +11,15 @@ function isAdmin(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url)
-    const showAll = searchParams.get('all') === 'true'
+    const showAll  = searchParams.get('all')    === 'true'
+    const homeOnly = searchParams.get('home')   === 'true'
 
     const cats = await prisma.category.findMany({
-      where: showAll ? undefined : { active: true },
+      where: showAll
+        ? undefined
+        : homeOnly
+          ? { active: true, showInHome: true }
+          : { active: true },
       orderBy: { order: 'asc' },
     })
 

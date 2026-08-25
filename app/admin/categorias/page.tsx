@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'motion/react'
 interface Category {
   id: number; name: string; slug: string
   image: string | null; active: boolean
-  showInNav: boolean; order: number
+  showInNav: boolean; showInHome: boolean; order: number
 }
 
 function slugify(str: string) {
@@ -127,6 +127,14 @@ export default function AdminCategorias() {
   const handleToggleNav = async (cat: Category) => {
     try {
       const res = await fetch(`/api/categories/${cat.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ showInNav: !cat.showInNav }) })
+      if (!res.ok) throw new Error()
+      fetchCats()
+    } catch { alert('No se pudo actualizar.') }
+  }
+
+  const handleToggleHome = async (cat: Category) => {
+    try {
+      const res = await fetch(`/api/categories/${cat.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ showInHome: !cat.showInHome }) })
       if (!res.ok) throw new Error()
       fetchCats()
     } catch { alert('No se pudo actualizar.') }
@@ -470,6 +478,14 @@ export default function AdminCategorias() {
 
                       {/* Acciones */}
                       <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                        {/* Toggle inicio */}
+                        <button
+                          onClick={() => handleToggleHome(cat)}
+                          title={cat.showInHome ? 'Quitar del inicio' : 'Mostrar en inicio'}
+                          style={{ height: 32, padding: '0 10px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 5, background: cat.showInHome ? 'rgba(139,92,246,0.15)' : 'rgba(148,163,184,0.08)', border: `1px solid ${cat.showInHome ? 'rgba(139,92,246,0.3)' : 'rgba(148,163,184,0.15)'}`, color: cat.showInHome ? '#a78bfa' : 'rgba(148,163,184,0.5)', cursor: 'pointer', fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}
+                        >
+                          {cat.showInHome ? '🏠 INICIO' : '⌂ INICIO'}
+                        </button>
                         {/* Toggle acceso rápido en navbar */}
                         <button
                           onClick={() => handleToggleNav(cat)}

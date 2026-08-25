@@ -30,6 +30,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         }),
         ...(body.active !== undefined && { active: body.active }),
         ...(body.showInNav !== undefined && { showInNav: body.showInNav }),
+        ...(body.showInHome !== undefined && { showInHome: body.showInHome }),
       },
     })
     return NextResponse.json(cat)

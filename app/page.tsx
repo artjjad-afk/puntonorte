@@ -82,6 +82,9 @@ export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([])
   const [featuredLoaded, setFeaturedLoaded] = useState(false)
   const [dbCategories, setDbCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
+  const [homeCategories, setHomeCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
+  const carouselRef = useRef<HTMLDivElement>(null)
+  const [carouselIdx, setCarouselIdx] = useState(0)
   const [activeBanner, setActiveBanner] = useState<{
     etiqueta: string | null; titulo: string; subtitulo: string | null
     descripcion: string | null; linkUrl: string; linkTexto: string
@@ -102,7 +105,7 @@ export default function HomePage() {
       .then(data => setActiveBanner(data ?? null))
       .catch(() => setActiveBanner(null))
 
-    // Cargar categorías reales desde la DB
+    // Cargar categorías reales desde la DB (para la sección hero/grid)
     fetch('/api/categories')
       .then(r => r.json())
       .then(data => {
@@ -111,7 +114,6 @@ export default function HomePage() {
             id:    c.slug,
             slug:  c.slug,
             label: c.name,
-            // Si la imagen es base64 la descartamos para el hero — usar placeholder
             image: c.image && !c.image.startsWith('data:') ? c.image : '',
           })))
         } else {
@@ -119,6 +121,23 @@ export default function HomePage() {
         }
       })
       .catch(() => setDbCategories([]))
+
+    // Cargar categorías destacadas para el carrusel del inicio
+    fetch('/api/categories?home=true')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setHomeCategories(data.map((c: { slug: string; name: string; image?: string }) => ({
+            id:    c.slug,
+            slug:  c.slug,
+            label: c.name,
+            image: c.image && !c.image.startsWith('data:') ? c.image : '',
+          })))
+        } else {
+          setHomeCategories([])
+        }
+      })
+      .catch(() => setHomeCategories([]))
   }, [])
 
   useEffect(() => {
@@ -130,6 +149,7 @@ export default function HomePage() {
   const sec1 = useInView(); const sec2 = useInView()
   const sec3 = useInView(); const sec4 = useInView()
   const sec5 = useInView(); const sec6 = useInView()
+  const secHome = useInView()
 
   const handleRipple = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const btn = e.currentTarget
@@ -178,6 +198,23 @@ export default function HomePage() {
 
         /* ── Testimonial mouse spotlight ── */
         .testimonial-wow:hover::after{opacity:1;}
+
+        /* ── Home categories carousel ── */
+        @keyframes carousel-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
+        @keyframes glow-pulse{0%,100%{box-shadow:0 0 20px rgba(193,105,43,.3),0 8px 40px rgba(0,0,0,.3);}50%{box-shadow:0 0 40px rgba(193,105,43,.6),0 8px 60px rgba(0,0,0,.4);}}
+        @keyframes card-shine{0%{left:-120%;}100%{left:120%;}}
+        .hcat-card{position:relative;overflow:hidden;border-radius:24px;cursor:pointer;flex:0 0 auto;transition:transform .4s cubic-bezier(.34,1.3,.64,1),box-shadow .4s ease;}
+        .hcat-card:hover{transform:scale(1.04) translateY(-6px);}
+        .hcat-card:hover .hcat-img{transform:scale(1.1);}
+        .hcat-card::before{content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:skewX(-20deg);pointer-events:none;z-index:4;transition:none;}
+        .hcat-card:hover::before{animation:card-shine .7s ease forwards;}
+        .hcat-img{width:100%;height:100%;object-fit:cover;transition:transform .6s cubic-bezier(.25,.46,.45,.94);}
+        .hcat-active{animation:glow-pulse 2s ease-in-out infinite;}
+        .carousel-track{display:flex;gap:20px;transition:transform .6s cubic-bezier(.25,.46,.45,.94);}
+        @media(max-width:768px){
+          .hcat-card{width:200px!important;height:260px!important;}
+          .carousel-btn{width:40px!important;height:40px!important;}
+        }
       `}</style>
 
       {/* ════════════════════════════════
@@ -286,7 +323,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* CATEGORIAS - solo si hay categorias en la DB */}
+      {/* CATEGORÍAS GRID - solo si hay categorias en la DB */}
       {dbCategories !== null && dbCategories.length > 0 && (
         <section ref={sec1.ref} style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
           <div className="aurora-blob animate-aurora-1" style={{ width:'500px', height:'500px', top:'-150px', left:'-100px', background:'radial-gradient(circle,rgba(193,105,43,.18),rgba(232,140,74,.08))' }} />
@@ -337,6 +374,176 @@ export default function HomePage() {
             <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
           </svg>
         </div>
+      )}
+
+      {/* ════════════════════════════════
+          CARRUSEL CATEGORÍAS DESTACADAS
+      ════════════════════════════════ */}
+      {homeCategories !== null && homeCategories.length > 0 && (
+        <>
+          {/* Wave oscuro→blanco para el carrusel */}
+          <div style={{ background:'#0d0c0b', marginBottom:'-2px' }}>
+            <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
+              <path d="M0,40 C360,80 1080,0 1440,40 L1440,60 L0,60 Z" fill="#ffffff"/>
+            </svg>
+          </div>
+
+          <section ref={secHome.ref} style={{ padding:'80px 0 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
+            {/* Blobs decorativos */}
+            <div className="aurora-blob animate-aurora-1" style={{ width:'600px', height:'400px', top:'-80px', left:'-100px', background:'radial-gradient(ellipse,rgba(193,105,43,.12),transparent 70%)', pointerEvents:'none' }} />
+            <div className="aurora-blob animate-aurora-3" style={{ width:'500px', height:'500px', bottom:'-120px', right:'-80px', background:'radial-gradient(circle,rgba(232,140,74,.1),transparent 70%)', pointerEvents:'none' }} />
+            {FLOAT_ICONS.slice(0,4).map((ic, i) => (
+              <span key={i} className="float-icon" style={{ top:`${15 + (i*22)%70}%`, left:`${3 + (i*23)%94}%`, animationDuration:`${6 + i}s`, animationDelay:`${i*0.8}s`, color:'#c1692b', opacity:0.4 }}>{ic}</span>
+            ))}
+
+            {/* Header */}
+            <div style={{ maxWidth:'1320px', margin:'0 auto', padding:'0 32px', position:'relative', zIndex:2 }}>
+              <div style={{
+                display:'flex', justifyContent:'space-between', alignItems:'flex-end',
+                marginBottom:'48px', flexWrap:'wrap', gap:'20px',
+                opacity: secHome.inView ? 1 : 0,
+                transform: secHome.inView ? 'translateY(0)' : 'translateY(28px)',
+                transition: 'opacity .7s ease, transform .7s ease',
+              }}>
+                <div>
+                  <p className="section-label" style={{ marginBottom:'12px' }}>Destacadas</p>
+                  <h2 style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:'900', color:'#211f1e', letterSpacing:'-1.5px', lineHeight:'1.05', margin:0 }}>
+                    Explora por<br /><span className="text-shimmer">categoría</span>
+                  </h2>
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
+                  {/* Botones navegación */}
+                  <button className="carousel-btn" aria-label="Anterior"
+                    onClick={() => setCarouselIdx(i => Math.max(0, i - 1))}
+                    style={{ width:48, height:48, borderRadius:'50%', border:'2px solid rgba(193,105,43,.3)', background: carouselIdx === 0 ? 'rgba(193,105,43,.06)' : 'rgba(193,105,43,.12)', cursor: carouselIdx === 0 ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', color: carouselIdx === 0 ? 'rgba(193,105,43,.3)' : '#c1692b', transition:'all .2s', outline:'none' }}>
+                    ←
+                  </button>
+                  <button className="carousel-btn" aria-label="Siguiente"
+                    onClick={() => setCarouselIdx(i => Math.min(homeCategories.length - 1, i + 1))}
+                    style={{ width:48, height:48, borderRadius:'50%', border:'2px solid rgba(193,105,43,.3)', background: carouselIdx >= homeCategories.length - 1 ? 'rgba(193,105,43,.06)' : 'rgba(193,105,43,.12)', cursor: carouselIdx >= homeCategories.length - 1 ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', color: carouselIdx >= homeCategories.length - 1 ? 'rgba(193,105,43,.3)' : '#c1692b', transition:'all .2s', outline:'none' }}>
+                    →
+                  </button>
+                  <Link href="/tienda" style={{ color:'#c1692b', textDecoration:'none', fontWeight:'800', fontSize:'14px', padding:'12px 20px', borderRadius:'12px', border:'2px solid rgba(193,105,43,.25)', background:'rgba(193,105,43,.04)', letterSpacing:'0.5px' }}>
+                    Ver todo →
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Track del carrusel — overflow visible con padding lateral */}
+            <div style={{ overflow:'hidden', position:'relative', zIndex:2 }}>
+              <div
+                ref={carouselRef}
+                className="carousel-track"
+                style={{
+                  paddingLeft: 'max(32px, calc((100vw - 1320px) / 2 + 32px))',
+                  paddingRight: '32px',
+                  transform: `translateX(calc(-${carouselIdx} * (260px + 20px)))`,
+                }}
+              >
+                {homeCategories.map((cat, i) => {
+                  const isActive = i === carouselIdx
+                  // Paleta de acentos rotativos para las cards sin imagen
+                  const gradients = [
+                    'linear-gradient(135deg,#1a0f06,#3d1f0a)',
+                    'linear-gradient(135deg,#0d0d1a,#1a1035)',
+                    'linear-gradient(135deg,#061a0f,#0a3020)',
+                    'linear-gradient(135deg,#1a0612,#35062a)',
+                    'linear-gradient(135deg,#0d1a06,#1e3510)',
+                  ]
+                  return (
+                    <Link
+                      key={cat.id}
+                      href={`/tienda?cat=${cat.id}`}
+                      className={`hcat-card ${isActive ? 'hcat-active' : ''}`}
+                      style={{
+                        width: isActive ? '300px' : '240px',
+                        height: isActive ? '380px' : '320px',
+                        textDecoration: 'none',
+                        boxShadow: isActive
+                          ? '0 0 32px rgba(193,105,43,.45), 0 16px 48px rgba(0,0,0,.35)'
+                          : '0 8px 32px rgba(0,0,0,.2)',
+                        opacity: secHome.inView ? 1 : 0,
+                        transform: secHome.inView
+                          ? `translateY(0) scale(${isActive ? 1 : 0.97})`
+                          : 'translateY(40px) scale(.94)',
+                        transition: `opacity .6s ease ${i * 80}ms, transform .7s cubic-bezier(.34,1.2,.64,1) ${i * 80}ms, width .5s cubic-bezier(.34,1.2,.64,1), height .5s cubic-bezier(.34,1.2,.64,1), box-shadow .4s ease`,
+                      }}
+                    >
+                      {/* Imagen o gradiente */}
+                      {cat.image
+                        ? <img src={cat.image} alt={cat.label} className="hcat-img" /> // eslint-disable-line @next/next/no-img-element
+                        : <div style={{ width:'100%', height:'100%', background: gradients[i % gradients.length] }} />
+                      }
+
+                      {/* Overlay gradiente */}
+                      <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top, rgba(13,11,9,.95) 0%, rgba(13,11,9,.3) 50%, transparent 100%)', zIndex:1 }} />
+
+                      {/* Brillo superior */}
+                      {isActive && (
+                        <div style={{ position:'absolute', top:0, left:0, right:0, height:'2px', background:'linear-gradient(90deg,transparent,rgba(232,140,74,.8),transparent)', zIndex:3 }} />
+                      )}
+
+                      {/* Número ordinal decorativo */}
+                      <div style={{ position:'absolute', top:16, right:16, zIndex:3, width:32, height:32, borderRadius:'50%', background:'rgba(13,11,9,.6)', backdropFilter:'blur(8px)', border:'1px solid rgba(232,140,74,.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                        <span style={{ color:'rgba(232,140,74,.8)', fontSize:'11px', fontWeight:'900', fontFamily:'var(--font-mono)' }}>0{i+1}</span>
+                      </div>
+
+                      {/* Badge activo */}
+                      {isActive && (
+                        <div style={{ position:'absolute', top:16, left:16, zIndex:3, padding:'4px 10px', borderRadius:'100px', background:'rgba(193,105,43,.9)', backdropFilter:'blur(8px)' }}>
+                          <span style={{ color:'#fff', fontSize:'9px', fontWeight:'900', letterSpacing:'1.5px', fontFamily:'var(--font-mono)' }}>DESTACADA</span>
+                        </div>
+                      )}
+
+                      {/* Contenido inferior */}
+                      <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:isActive?'28px 24px':'20px 18px', zIndex:2, transition:'padding .5s ease' }}>
+                        <p style={{ color:'rgba(232,140,74,.6)', fontSize:'9px', letterSpacing:'2px', textTransform:'uppercase', margin:'0 0 6px', fontFamily:'var(--font-mono)' }}>
+                          Colección
+                        </p>
+                        <p style={{ color:'#fff', fontWeight:'900', fontSize: isActive ? '26px' : '18px', letterSpacing:'-0.5px', margin:'0 0 10px', textShadow:'0 2px 12px rgba(0,0,0,.6)', lineHeight:1.1, transition:'font-size .5s ease' }}>
+                          {cat.label}
+                        </p>
+                        <div style={{ display:'flex', alignItems:'center', gap:8, opacity: isActive ? 1 : 0, transform: isActive ? 'translateY(0)' : 'translateY(8px)', transition:'all .4s ease' }}>
+                          <span style={{ color:'#e88c4a', fontSize:'12px', fontWeight:'800', letterSpacing:'0.5px' }}>Ver colección</span>
+                          <span style={{ color:'#e88c4a', fontSize:'16px', fontWeight:'900' }}>→</span>
+                        </div>
+                      </div>
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+
+            {/* Dots indicadores */}
+            <div style={{ display:'flex', justifyContent:'center', gap:'8px', marginTop:'36px', position:'relative', zIndex:2 }}>
+              {homeCategories.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCarouselIdx(i)}
+                  aria-label={`Ir a categoría ${i + 1}`}
+                  style={{
+                    width: i === carouselIdx ? '28px' : '8px',
+                    height: '8px',
+                    borderRadius: '100px',
+                    border: 'none',
+                    background: i === carouselIdx ? '#c1692b' : 'rgba(193,105,43,.25)',
+                    cursor: 'pointer',
+                    padding: 0,
+                    transition: 'all .4s cubic-bezier(.34,1.3,.64,1)',
+                  }}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* Wave blanco→crema */}
+          <div style={{ background:'#fff', marginBottom:'-2px' }}>
+            <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
+              <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
+            </svg>
+          </div>
+        </>
       )}
 
       {/* PRODUCTOS DESTACADOS - visible si carga o si hay productos */}
