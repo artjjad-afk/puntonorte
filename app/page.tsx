@@ -80,6 +80,7 @@ function AnimatedNumber({ target, suffix, inView }: { target: number; suffix: st
 
 export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([])
+  const [dbCategories, setDbCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
   const [scrollY, setScrollY] = useState(0)
 
   useEffect(() => {
@@ -87,6 +88,23 @@ export default function HomePage() {
       .then(r => r.json())
       .then(d => setFeatured(Array.isArray(d) ? d.slice(0, 8) : []))
       .catch(() => setFeatured([]))
+
+    // Cargar categorías reales desde la DB
+    fetch('/api/categories')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDbCategories(data.map((c: { slug: string; name: string; image?: string }) => ({
+            id:    c.slug,
+            slug:  c.slug,
+            label: c.name,
+            image: c.image || '',
+          })))
+        } else {
+          setDbCategories([]) // sin categorías — mostrar mensaje
+        }
+      })
+      .catch(() => setDbCategories([]))
   }, [])
 
   useEffect(() => {
@@ -289,30 +307,59 @@ export default function HomePage() {
             </Link>
           </div>
 
-          <div style={{
-            display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr', gridTemplateRows:'300px 300px', gap:'16px',
-            opacity:sec1.inView?1:0, transform:sec1.inView?'translateY(0)':'translateY(36px)',
-            transition:'opacity .8s ease .15s, transform .8s ease .15s',
-          }} className="cats-grid">
-            {categories.slice(0,5).map((cat, i) => (
-              <Link key={cat.id} href={`/tienda?cat=${cat.id}`}
-                style={{ textDecoration:'none', gridRow:i===0?'span 2':undefined }}
-                className="cat-item">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={cat.image} alt={cat.label} />
-                <div className="cat-overlay" />
-                {/* Brillo en esquina */}
-                <div style={{ position:'absolute', top:0, right:0, width:'100px', height:'100px', background:'radial-gradient(circle at top right,rgba(232,140,74,.25),transparent 70%)', pointerEvents:'none', zIndex:2 }} />
-                <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'24px 22px', zIndex:3 }}>
-                  <p style={{ color:'rgba(255,255,255,.5)', fontSize:'10px', letterSpacing:'2.5px', textTransform:'uppercase', marginBottom:'4px' }}>Colección</p>
-                  <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                    <p style={{ color:'#fff', fontWeight:'900', fontSize:i===0?'30px':'20px', letterSpacing:'-0.5px', margin:0, textShadow:'0 2px 12px rgba(0,0,0,.5)' }}>{cat.label}</p>
-                    <span className="cat-arrow" style={{ color:'#e88c4a', fontSize:'24px', fontWeight:'900', textShadow:'0 0 12px rgba(232,140,74,.8)' }}>→</span>
-                  </div>
-                </div>
+          {/* Grid o mensaje vacío */}
+          {dbCategories !== null && dbCategories.length === 0 ? (
+            /* Sin categorías — mensaje orientativo */
+            <div style={{
+              display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+              minHeight:'300px', gap:'20px', textAlign:'center',
+              background:'rgba(193,105,43,0.04)', border:'2px dashed rgba(193,105,43,0.2)',
+              borderRadius:'20px', padding:'48px 32px',
+              opacity:sec1.inView?1:0,
+              transition:'opacity .7s ease .2s',
+            }}>
+              <span style={{ fontSize:'48px' }}>🏷️</span>
+              <div>
+                <p style={{ fontSize:'20px', fontWeight:'800', color:'#211f1e', margin:'0 0 10px', letterSpacing:'-0.5px' }}>
+                  Aún no hay categorías configuradas
+                </p>
+                <p style={{ fontSize:'15px', color:'#7a7675', margin:'0 0 6px', lineHeight:'1.7', maxWidth:'440px' }}>
+                  Las categorías y sus colecciones se administran desde el panel de administración.
+                </p>
+                <p style={{ fontSize:'13px', color:'rgba(193,105,43,0.8)', fontWeight:'600', margin:0 }}>
+                  Admin → Categorías → Agregar categoría
+                </p>
+              </div>
+              <Link href="/tienda"
+                style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'13px 28px', borderRadius:'12px', background:'#c1692b', color:'#fff', textDecoration:'none', fontWeight:'700', fontSize:'14px', marginTop:'8px' }}>
+                Ver toda la tienda →
               </Link>
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div style={{
+              display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr', gridTemplateRows:'300px 300px', gap:'16px',
+              opacity:sec1.inView?1:0, transform:sec1.inView?'translateY(0)':'translateY(36px)',
+              transition:'opacity .8s ease .15s, transform .8s ease .15s',
+            }} className="cats-grid">
+              {(dbCategories ?? categories).slice(0,5).map((cat, i) => (
+                <Link key={cat.id} href={`/tienda?cat=${cat.id}`}
+                  style={{ textDecoration:'none', gridRow:i===0?'span 2':undefined }}
+                  className="cat-item">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={cat.image} alt={cat.label} />
+                  <div className="cat-overlay" />
+                  <div style={{ position:'absolute', top:0, right:0, width:'100px', height:'100px', background:'radial-gradient(circle at top right,rgba(232,140,74,.25),transparent 70%)', pointerEvents:'none', zIndex:2 }} />
+                  <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'24px 22px', zIndex:3 }}>
+                    <p style={{ color:'rgba(255,255,255,.5)', fontSize:'10px', letterSpacing:'2.5px', textTransform:'uppercase', marginBottom:'4px' }}>Colección</p>
+                    <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+                      <p style={{ color:'#fff', fontWeight:'900', fontSize:i===0?'30px':'20px', letterSpacing:'-0.5px', margin:0, textShadow:'0 2px 12px rgba(0,0,0,.5)' }}>{cat.label}</p>
+                      <span className="cat-arrow" style={{ color:'#e88c4a', fontSize:'24px', fontWeight:'900', textShadow:'0 0 12px rgba(232,140,74,.8)' }}>→</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
