@@ -100,10 +100,11 @@ export default function HomePage() {
             id:    c.slug,
             slug:  c.slug,
             label: c.name,
-            image: c.image || '',
+            // Si la imagen es base64 la descartamos para el hero — usar placeholder
+            image: c.image && !c.image.startsWith('data:') ? c.image : '',
           })))
         } else {
-          setDbCategories([]) // sin categorías — mostrar mensaje
+          setDbCategories([])
         }
       })
       .catch(() => setDbCategories([]))
@@ -273,7 +274,6 @@ export default function HomePage() {
       </div>
 
       {/* ════════════════════════════════
-      {/* Seccion categorias - solo visible si hay categorias en la DB */}
       {dbCategories !== null && dbCategories.length > 0 && (
       <>
       <section ref={sec1.ref} style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
@@ -320,8 +320,10 @@ export default function HomePage() {
               <Link key={cat.id} href={`/tienda?cat=${cat.id}`}
                 style={{ textDecoration:'none', gridRow:i===0?'span 2':undefined }}
                 className="cat-item">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={cat.image} alt={cat.label} />
+                {cat.image
+                  ? <img src={cat.image} alt={cat.label} /> // eslint-disable-line @next/next/no-img-element
+                  : <div style={{ width:'100%', height:'100%', background:'linear-gradient(135deg,#1a1208,#2d1e0e)' }} />
+                }
                 <div className="cat-overlay" />
                 <div style={{ position:'absolute', top:0, right:0, width:'100px', height:'100px', background:'radial-gradient(circle at top right,rgba(232,140,74,.25),transparent 70%)', pointerEvents:'none', zIndex:2 }} />
                 <div style={{ position:'absolute', bottom:0, left:0, right:0, padding:'24px 22px', zIndex:3 }}>
