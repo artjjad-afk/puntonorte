@@ -80,6 +80,7 @@ function AnimatedNumber({ target, suffix, inView }: { target: number; suffix: st
 
 export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([])
+  const [featuredLoaded, setFeaturedLoaded] = useState(false)
   const [dbCategories, setDbCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
   const [scrollY, setScrollY] = useState(0)
 
@@ -88,6 +89,7 @@ export default function HomePage() {
       .then(r => r.json())
       .then(d => setFeatured(Array.isArray(d) ? d.slice(0, 8) : []))
       .catch(() => setFeatured([]))
+      .finally(() => setFeaturedLoaded(true))
 
     // Cargar categorías reales desde la DB
     fetch('/api/categories')
@@ -398,8 +400,9 @@ export default function HomePage() {
           </div>
 
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))', gap:'24px' }}>
-            {featured.length === 0
-              ? Array.from({length:4}).map((_,i) => (
+            {!featuredLoaded
+              ? /* Cargando — skeletons */
+                Array.from({length:4}).map((_,i) => (
                   <div key={i} style={{ borderRadius:'14px', overflow:'hidden', background:'#fff', boxShadow:'0 2px 20px rgba(33,31,30,.07)' }}>
                     <div className="skeleton" style={{ aspectRatio:'3/4', borderRadius:0 }} />
                     <div style={{ padding:'16px' }}>
@@ -409,11 +412,38 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))
-              : featured.map((product, i) => (
-                  <div key={product.id} style={{
-                    opacity:sec2.inView?1:0,
-                    transform:sec2.inView?'translateY(0) scale(1)':'translateY(36px) scale(.96)',
-                    transition:`opacity .6s ease ${i*90}ms, transform .7s cubic-bezier(.34,1.2,.64,1) ${i*90}ms`,
+              : featured.length === 0
+                ? /* Sin productos destacados — mensaje orientativo */
+                  <div style={{
+                    gridColumn:'1 / -1',
+                    display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
+                    minHeight:'260px', gap:'16px', textAlign:'center',
+                    background:'rgba(193,105,43,0.04)', border:'2px dashed rgba(193,105,43,0.2)',
+                    borderRadius:'20px', padding:'48px 32px',
+                  }}>
+                    <span style={{ fontSize:'40px' }}>✨</span>
+                    <div>
+                      <p style={{ fontSize:'18px', fontWeight:'800', color:'#211f1e', margin:'0 0 8px', letterSpacing:'-0.5px' }}>
+                        Aún no hay productos destacados
+                      </p>
+                      <p style={{ fontSize:'14px', color:'#7a7675', margin:'0 0 6px', lineHeight:'1.7', maxWidth:'400px' }}>
+                        Los productos que marques como <strong>"Destacado"</strong> aparecerán aquí automáticamente.
+                      </p>
+                      <p style={{ fontSize:'12px', color:'rgba(193,105,43,0.8)', fontWeight:'600', margin:0 }}>
+                        Admin → Productos → Nuevo producto → activar "Destacado en inicio"
+                      </p>
+                    </div>
+                    <Link href="/tienda"
+                      style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'12px 24px', borderRadius:'12px', background:'#c1692b', color:'#fff', textDecoration:'none', fontWeight:'700', fontSize:'13px', marginTop:'8px' }}>
+                      Ver toda la tienda →
+                    </Link>
+                  </div>
+                : /* Productos cargados */
+                  featured.map((product, i) => (
+                    <div key={product.id} style={{
+                      opacity:sec2.inView?1:0,
+                      transform:sec2.inView?'translateY(0) scale(1)':'translateY(36px) scale(.96)',
+                      transition:`opacity .6s ease ${i*90}ms, transform .7s cubic-bezier(.34,1.2,.64,1) ${i*90}ms`,
                   }}>
                     <ProductCard product={product} />
                   </div>
