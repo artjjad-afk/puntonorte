@@ -346,9 +346,8 @@ export default function HomePage() {
       </> /* fin condicional categorías */
       )}
 
-      {/* ════════════════════════════════
-          PRODUCTOS DESTACADOS — sección CREMA
-      ════════════════════════════════ */}
+      {/* Seccion productos destacados - visible si carga o si hay productos */}
+      {(!featuredLoaded || featured.length > 0) && (
       <section ref={sec2.ref} style={{ padding:'100px 32px', background:'#f9f7f5', position:'relative', overflow:'hidden' }}>
 
         {/* Solo burbujas en sección clara — sin rayos para ahorrar CPU */}
@@ -375,8 +374,7 @@ export default function HomePage() {
 
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))', gap:'24px' }}>
             {!featuredLoaded
-              ? /* Cargando — skeletons */
-                Array.from({length:4}).map((_,i) => (
+              ? Array.from({length:4}).map((_,i) => (
                   <div key={i} style={{ borderRadius:'14px', overflow:'hidden', background:'#fff', boxShadow:'0 2px 20px rgba(33,31,30,.07)' }}>
                     <div className="skeleton" style={{ aspectRatio:'3/4', borderRadius:0 }} />
                     <div style={{ padding:'16px' }}>
@@ -386,34 +384,7 @@ export default function HomePage() {
                     </div>
                   </div>
                 ))
-              : featured.length === 0
-                ? /* Sin productos destacados — mensaje orientativo */
-                  <div style={{
-                    gridColumn:'1 / -1',
-                    display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center',
-                    minHeight:'260px', gap:'16px', textAlign:'center',
-                    background:'rgba(193,105,43,0.04)', border:'2px dashed rgba(193,105,43,0.2)',
-                    borderRadius:'20px', padding:'48px 32px',
-                  }}>
-                    <span style={{ fontSize:'40px' }}>✨</span>
-                    <div>
-                      <p style={{ fontSize:'18px', fontWeight:'800', color:'#211f1e', margin:'0 0 8px', letterSpacing:'-0.5px' }}>
-                        Aún no hay productos destacados
-                      </p>
-                      <p style={{ fontSize:'14px', color:'#7a7675', margin:'0 0 6px', lineHeight:'1.7', maxWidth:'400px' }}>
-                        Los productos que marques como <strong>"Destacado"</strong> aparecerán aquí automáticamente.
-                      </p>
-                      <p style={{ fontSize:'12px', color:'rgba(193,105,43,0.8)', fontWeight:'600', margin:0 }}>
-                        Admin → Productos → Nuevo producto → activar "Destacado en inicio"
-                      </p>
-                    </div>
-                    <Link href="/tienda"
-                      style={{ display:'inline-flex', alignItems:'center', gap:'8px', padding:'12px 24px', borderRadius:'12px', background:'#c1692b', color:'#fff', textDecoration:'none', fontWeight:'700', fontSize:'13px', marginTop:'8px' }}>
-                      Ver toda la tienda →
-                    </Link>
-                  </div>
-                : /* Productos cargados */
-                  featured.map((product, i) => (
+              : featured.map((product, i) => (
                     <div key={product.id} style={{
                       opacity:sec2.inView?1:0,
                       transform:sec2.inView?'translateY(0) scale(1)':'translateY(36px) scale(.96)',
@@ -442,6 +413,7 @@ export default function HomePage() {
           <path d="M0,0 C360,60 1080,0 1440,50 L1440,60 L0,60 Z" fill="#211f1e"/>
         </svg>
       </div>
+      )} {/* fin condicional productos destacados */}
 
       {/* ════════════════════════════════
           BANNER PERFUMES — sección OSCURA
