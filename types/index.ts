@@ -1,16 +1,17 @@
 ﻿export interface Product {
-  id: number                // número — igual que en la DB (era string, causaba bugs en el carrito)
+  id: number
   name: string
   slug: string
   price: number
   originalPrice?: number | null
-  category: string          // string abierto — las categorías son dinámicas desde la DB
+  category: string
   subcategory?: string | null
   images: string[]
   description: string
   sizes?: string[]
   colors?: string[]
   inStock: boolean
+  stock: number
   featured: boolean
   active?: boolean
   badge?: string | null
