@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { Plus, Trash2, Eye, EyeOff, Pencil, X, Check, Upload, Link as LinkIcon, Zap } from 'lucide-react'
+import { Plus, Trash2, Eye, EyeOff, Pencil, X, Check, Upload, Link as LinkIcon, Zap, ChevronDown } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 
 interface Banner {
@@ -16,6 +16,11 @@ interface Banner {
   active: boolean
   orden: number
 }
+
+interface Category { slug: string; name: string }
+interface Product  { slug: string; name: string }
+
+type DestType = 'tienda' | 'categoria' | 'producto' | 'custom'
 
 const empty = {
   etiqueta: '', titulo: '', subtitulo: '', descripcion: '',
@@ -53,6 +58,21 @@ export default function AdminBanners() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [form, setForm]         = useState(empty)
 
+  // Selector de destino
+  const [destType, setDestType]   = useState<DestType>('tienda')
+  const [destCat, setDestCat]     = useState('')
+  const [destProd, setDestProd]   = useState('')
+  const [categories, setCategories] = useState<Category[]>([])
+  const [products, setProducts]   = useState<Product[]>([])
+
+  // Calcula la URL según la selección
+  const computedUrl = (): string => {
+    if (destType === 'tienda')    return '/tienda'
+    if (destType === 'categoria') return destCat ? `/tienda?cat=${destCat}` : ''
+    if (destType === 'producto')  return destProd ? `/tienda/${destProd}` : ''
+    return form.linkUrl // custom
+  }
+
   const fetchBanners = async () => {
     setLoading(true)
     try {
@@ -67,7 +87,18 @@ export default function AdminBanners() {
     } finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchBanners() }, [])
+  useEffect(() => {
+    fetchBanners()
+    // Cargar categorías y productos para el selector
+    fetch('/api/categories')
+      .then(r => r.json())
+      .then(d => setCategories(Array.isArray(d) ? d : []))
+      .catch(() => {})
+    fetch('/api/products')
+      .then(r => r.json())
+      .then(d => setProducts(Array.isArray(d) ? d.map((p: { slug: string; name: string }) => ({ slug: p.slug, name: p.name })) : []))
+      .catch(() => {})
+  }, [])
 
   const fileToBase64 = useCallback((file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -91,7 +122,8 @@ export default function AdminBanners() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.titulo.trim()) { setError('El título es requerido'); return }
-    if (!form.linkUrl.trim()) { setError('La URL del botón es requerida'); return }
+    const finalUrl = computedUrl()
+    if (!finalUrl) { setError('Selecciona el destino del botón'); return }
     if (!form.linkTexto.trim()) { setError('El texto del botón es requerido'); return }
 
     setSaving(true); setError('')
@@ -100,10 +132,11 @@ export default function AdminBanners() {
       const method = editingId ? 'PUT' : 'POST'
       const res = await fetch(url, {
         method, headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, precioDesde: form.precioDesde || null }),
+        body: JSON.stringify({ ...form, linkUrl: finalUrl, precioDesde: form.precioDesde || null }),
       })
       if (res.ok) {
         setForm(empty); setEditingId(null); setImgMode('url')
+        setDestType('tienda'); setDestCat(''); setDestProd('')
         fetchBanners()
       } else {
         const d = await res.json(); setError(d.error || 'Error al guardar')
@@ -121,6 +154,18 @@ export default function AdminBanners() {
       orden: String(b.orden), imagen: b.imagen || '', imageData: null,
     })
     setImgMode('url')
+    // Detectar tipo de URL para mostrar el selector correcto
+    if (b.linkUrl === '/tienda') {
+      setDestType('tienda')
+    } else if (b.linkUrl.startsWith('/tienda?cat=')) {
+      setDestType('categoria')
+      setDestCat(b.linkUrl.replace('/tienda?cat=', ''))
+    } else if (b.linkUrl.startsWith('/tienda/')) {
+      setDestType('producto')
+      setDestProd(b.linkUrl.replace('/tienda/', ''))
+    } else {
+      setDestType('custom')
+    }
   }
 
   const handleToggle = async (b: Banner) => {
@@ -199,8 +244,56 @@ export default function AdminBanners() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
-                <label style={lbl}>URL del botón *</label>
-                <input className="bn-inp" value={form.linkUrl} onChange={e => set('linkUrl', e.target.value)} placeholder="/tienda?cat=perfumes" style={inp} />
+                <label style={lbl}>¿A dónde lleva el botón? *</label>
+                {/* Selector visual de destino */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8 }}>
+                  {([
+                    ['tienda',    '🛍️ Toda la tienda'],
+                    ['categoria', '🏷️ Una categoría'],
+                    ['producto',  '📦 Un producto'],
+                    ['custom',    '🔗 URL personalizada'],
+                  ] as [DestType, string][]).map(([val, label]) => (
+                    <button key={val} type="button" onClick={() => setDestType(val)}
+                      style={{ padding: '8px 10px', borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'inherit', textAlign: 'left', background: destType === val ? 'rgba(249,115,22,0.2)' : 'rgba(255,255,255,0.05)', color: destType === val ? '#f97316' : 'rgba(148,163,184,0.7)', outline: destType === val ? '1px solid rgba(249,115,22,0.4)' : '1px solid rgba(255,255,255,0.08)', transition: 'all .15s' }}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Sub-selector según tipo */}
+                {destType === 'categoria' && (
+                  <div style={{ position: 'relative' }}>
+                    <select className="bn-inp" value={destCat} onChange={e => setDestCat(e.target.value)}
+                      style={{ ...inp, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
+                      <option value="">— Elige una categoría —</option>
+                      {categories.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
+                    </select>
+                    <ChevronDown size={14} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'rgba(148,163,184,0.5)' }} />
+                  </div>
+                )}
+
+                {destType === 'producto' && (
+                  <div style={{ position: 'relative' }}>
+                    <select className="bn-inp" value={destProd} onChange={e => setDestProd(e.target.value)}
+                      style={{ ...inp, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
+                      <option value="">— Elige un producto —</option>
+                      {products.map(p => <option key={p.slug} value={p.slug}>{p.name}</option>)}
+                    </select>
+                    <ChevronDown size={14} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'rgba(148,163,184,0.5)' }} />
+                  </div>
+                )}
+
+                {destType === 'custom' && (
+                  <input className="bn-inp" value={form.linkUrl} onChange={e => set('linkUrl', e.target.value)}
+                    placeholder="https://... o /ruta/interna" style={inp} />
+                )}
+
+                {/* Preview URL generada */}
+                {destType !== 'custom' && computedUrl() && (
+                  <p style={{ margin: '4px 0 0', fontSize: 10, color: 'rgba(148,163,184,0.4)', fontFamily: 'var(--font-mono)' }}>
+                    URL: {computedUrl()}
+                  </p>
+                )}
               </div>
               <div>
                 <label style={lbl}>Texto del botón *</label>
