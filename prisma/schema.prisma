@@ -24,6 +24,7 @@ model Product {
   inStock       Boolean  @default(true) // calculado: stock > 0 (se actualiza automáticamente)
   featured      Boolean  @default(false)
   active        Boolean  @default(true)
+  showInOffers  Boolean  @default(false)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -39,7 +40,6 @@ model Category {
   active      Boolean  @default(true)
   showInNav   Boolean  @default(true)
   showInHome  Boolean  @default(false)
-  showInOffers Boolean @default(false)
   order       Int      @default(0)
   createdAt   DateTime @default(now())
 
