@@ -85,14 +85,13 @@ export default function HomePage() {
   const [featuredLoaded, setFeaturedLoaded] = useState(false)
   const [dbCategories, setDbCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
   const [homeCategories, setHomeCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
-  const [carouselOffset, setCarouselOffset] = useState(0)      // índice del primer elemento visible en el array rotado
-  const [carouselAnim, setCarouselAnim]     = useState(false)  // true = animando salida
-  const [carouselDir, setCarouselDir]       = useState(1)      // 1 = →, -1 = ←
+  const [carouselOffset, setCarouselOffset] = useState(0)
+  const [carouselDir, setCarouselDir]       = useState<1 | -1>(1)
+  const [carouselEntering, setCarouselEntering] = useState(false) // true durante la animación de entrada
   const [carouselClickAnim, setCarouselClickAnim] = useState(false)
   const autoplayRef   = useRef<ReturnType<typeof setInterval> | null>(null)
   const animatingRef  = useRef(false)
 
-  // Rota el array para que index `offset` sea el primero
   const rotated = useCallback((arr: typeof homeCategories, offset: number) => {
     if (!arr || arr.length === 0) return []
     const n = arr.length
@@ -103,16 +102,11 @@ export default function HomePage() {
     if (animatingRef.current) return
     animatingRef.current = true
     setCarouselDir(dir)
-    setCarouselAnim(true)               // dispara animación de salida (~350ms)
-    if (dir === 1) {
-      setCarouselClickAnim(true)
-      setTimeout(() => setCarouselClickAnim(false), 350)
-    }
-    setTimeout(() => {
-      setCarouselOffset(o => (o + dir + cats.length) % cats.length)
-      setCarouselAnim(false)            // quita clase de animación → entrada limpia
-      animatingRef.current = false
-    }, 360)
+    setCarouselEntering(true)
+    if (dir === 1) { setCarouselClickAnim(true); setTimeout(() => setCarouselClickAnim(false), 350) }
+    setCarouselOffset(o => (o + dir + cats.length) % cats.length)
+    // Quitar estado "entering" después de que la animación termina
+    setTimeout(() => { setCarouselEntering(false); animatingRef.current = false }, 600)
   }, [])
 
   const resetAutoplay = useCallback(() => {
@@ -248,6 +242,25 @@ export default function HomePage() {
         @keyframes text-pan{0%{background-position:0% center;}100%{background-position:200% center;}}
         @keyframes bounceX{0%,100%{transform:translateX(0);}50%{transform:translateX(5px);}}
         @keyframes progress-fill{from{width:0%;}to{width:100%;}}
+        @keyframes card-enter-right{
+          0%  { transform:scale(0.7) translateX(120px) translateY(0px) rotate(6deg); opacity:0; filter:brightness(0.3); }
+          60% { transform:scale(1.15) translateX(-8px) translateY(-18px) rotate(-1deg); opacity:1; filter:brightness(1.1); }
+          100%{ transform:scale(1.1) translateX(0) translateY(-14px) rotate(0deg); opacity:1; filter:brightness(1); }
+        }
+        @keyframes card-enter-left{
+          0%  { transform:scale(0.7) translateX(-120px) translateY(0px) rotate(-6deg); opacity:0; filter:brightness(0.3); }
+          60% { transform:scale(1.15) translateX(8px) translateY(-18px) rotate(1deg); opacity:1; filter:brightness(1.1); }
+          100%{ transform:scale(1.1) translateX(0) translateY(-14px) rotate(0deg); opacity:1; filter:brightness(1); }
+        }
+        @keyframes card-slide-over{
+          0%  { transform:scale(0.95) translateX(-30px); opacity:0.5; }
+          100%{ transform:scale(var(--sc,0.88)) translateX(0); opacity:1; }
+        }
+        @keyframes card-flash{
+          0%  { opacity:1; }
+          40% { opacity:0.8; }
+          100%{ opacity:0; }
+        }
         .hcat-card{position:relative;overflow:hidden;border-radius:20px;cursor:pointer;flex:0 0 auto;animation:hcat-in .55s cubic-bezier(.34,1.2,.64,1) both;}
         .hcat-card:hover{transform:translateY(-8px) scale(1.02);}
         .hcat-card:hover .hcat-img{transform:scale(1.08);}
@@ -497,12 +510,18 @@ export default function HomePage() {
                   {rotated(homeCategories, carouselOffset).map((cat, i) => {
                     const isActive = i === 0
                     const gradients = ['linear-gradient(145deg,#2d1a06,#4a2e10)','linear-gradient(145deg,#0d1528,#1a2540)','linear-gradient(145deg,#0a2010,#143520)','linear-gradient(145deg,#200815,#3a1228)']
-                    const sc    = isActive ? 1.1  : Math.max(0.78, 1 - i * 0.055)
-                    const br    = isActive ? 1    : Math.max(0.4,  1 - i * 0.14)
-                    const tyUp  = isActive ? -14  : 0
+                    const sc   = isActive ? 1.1  : Math.max(0.78, 1 - i * 0.055)
+                    const br   = isActive ? 1    : Math.max(0.4,  1 - i * 0.14)
+                    const tyUp = isActive ? -14  : 0
+                    // Animación de entrada: la activa entra desde la dirección del avance
+                    const enterAnim = carouselEntering && isActive
+                      ? (carouselDir === 1 ? 'card-enter-right' : 'card-enter-left')
+                      : carouselEntering && i > 0
+                        ? 'card-slide-over'
+                        : 'none'
                     return (
                       <Link
-                        key={`${cat.id}-${i}`}
+                        key={`${cat.id}-${carouselOffset}-${i}`}
                         href={`/tienda?cat=${cat.id}`}
                         style={{
                           width: '300px', height: '390px', flexShrink: 0,
@@ -514,7 +533,8 @@ export default function HomePage() {
                             ? '0 0 0 2px rgba(232,140,74,.5),0 24px 60px rgba(0,0,0,.7),0 0 50px rgba(193,105,43,.25)'
                             : '0 8px 32px rgba(0,0,0,.5)',
                           zIndex: isActive ? 3 : Math.max(1, 6 - i),
-                          transition: `transform .55s cubic-bezier(.34,1.2,.64,1) ${i*35}ms, filter .5s ease ${i*25}ms, box-shadow .4s ease`,
+                          transition: `transform .6s cubic-bezier(.34,1.2,.64,1) ${i*45}ms, filter .55s ease ${i*30}ms, box-shadow .4s ease`,
+                          animation: enterAnim !== 'none' ? `${enterAnim} .6s cubic-bezier(.34,1.2,.64,1) ${i*45}ms both` : undefined,
                         }}
                       >
                         {cat.image
@@ -525,6 +545,12 @@ export default function HomePage() {
                         <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.6) 40%,rgba(5,4,3,.05) 70%,transparent 100%)',zIndex:1}} />
                         {isActive && <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 0%,rgba(232,140,74,.1),transparent 60%)',zIndex:2}} />}
                         {isActive && <div style={{position:'absolute',top:0,left:0,right:0,height:'2px',background:'linear-gradient(90deg,transparent,rgba(232,140,74,.9) 50%,transparent)',zIndex:5,boxShadow:'0 0 14px rgba(232,140,74,.7)'}} />}
+                        {/* Flash de entrada */}
+                        {isActive && carouselEntering && (
+                          <div style={{position:'absolute',inset:0,zIndex:8,pointerEvents:'none',
+                            animation:'card-flash .5s ease forwards',
+                            background:'radial-gradient(ellipse at 50% 40%,rgba(232,140,74,.25),transparent 70%)'}} />
+                        )}
                         <div style={{position:'absolute',top:16,right:16,zIndex:6,width:30,height:30,borderRadius:'50%',background:'rgba(5,4,3,.75)',backdropFilter:'blur(10px)',border:`1px solid ${isActive?'rgba(232,140,74,.4)':'rgba(232,140,74,.15)'}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
                           <span style={{color:isActive?'#e88c4a':'rgba(232,140,74,.3)',fontSize:'10px',fontWeight:'900',fontFamily:'var(--font-mono)'}}>0{((carouselOffset + i) % homeCategories.length) + 1}</span>
                         </div>
