@@ -371,6 +371,38 @@ body {
   }
 }
 
+/* ══════════════════════════════════════════════
+   ICONOS DE TIENDA FLOTANDO (decorativo, colorido)
+   ══════════════════════════════════════════════ */
+.pn-floaticon {
+  will-change: transform;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  filter: drop-shadow(0 6px 14px rgba(0,0,0,.10));
+}
+.pn-fl-a { animation-name: pn-fl-a; }
+.pn-fl-b { animation-name: pn-fl-b; }
+.pn-fl-c { animation-name: pn-fl-c; }
+@keyframes pn-fl-a {
+  0%,100% { transform: translateY(0)     rotate(var(--r,0deg)); }
+  50%     { transform: translateY(-26px) rotate(calc(var(--r,0deg) + 10deg)); }
+}
+@keyframes pn-fl-b {
+  0%,100% { transform: translateY(0)    rotate(var(--r,0deg)); }
+  50%     { transform: translateY(22px) rotate(calc(var(--r,0deg) - 12deg)); }
+}
+@keyframes pn-fl-c {
+  0%,100% { transform: translate(0,0)         rotate(var(--r,0deg)); }
+  50%     { transform: translate(16px,-18px)  rotate(calc(var(--r,0deg) + 14deg)); }
+}
+/* En móvil dejamos menos iconos para no recargar la vista ni el rendimiento */
+@media (max-width: 768px) {
+  .pn-floaticon:nth-child(n+8) { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pn-floaticon { animation: none !important; }
+}
+
 /* ── Skeleton loader ── */
 .skeleton {
   background: linear-gradient(90deg, #f0eeec 25%, #e8e5e2 50%, #f0eeec 75%);

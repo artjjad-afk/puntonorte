@@ -5,6 +5,7 @@ import { ProductCard } from '@/components/ui/ProductCard'
 import { BubblesCanvas } from '@/components/ui/BubblesCanvas'
 import { LightRays } from '@/components/ui/LightRays'
 import { ParticlesBurst, fireBurst } from '@/components/ui/ParticlesBurst'
+import { FloatingShopIcons } from '@/components/ui/FloatingShopIcons'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Product } from '@/types'
 
@@ -702,6 +703,8 @@ export default function HomePage() {
       ════════════════════════════════ */}
       {offerProducts && offerProducts.length > 0 && (
         <section style={{ padding:'90px 32px 100px', background:'#f9f7f5', position:'relative', overflow:'hidden' }}>
+          {/* Iconos de tienda flotando */}
+          <FloatingShopIcons />
           {/* Blobs */}
           <div className="aurora-blob animate-aurora-1" style={{ width:'600px', height:'500px', top:'-120px', right:'-100px', background:'radial-gradient(ellipse,rgba(249,115,22,.1),transparent 70%)', pointerEvents:'none' }} />
           <div className="aurora-blob animate-aurora-2" style={{ width:'400px', height:'400px', bottom:'-80px', left:'-60px', background:'radial-gradient(circle,rgba(193,105,43,.08),transparent 70%)', pointerEvents:'none' }} />
@@ -820,6 +823,8 @@ export default function HomePage() {
       {/* PRODUCTOS DESTACADOS - solo cuando ya cargó y tiene productos */}
       {featuredLoaded && featured.length > 0 && (
         <section style={{ padding:'100px 32px', background:'#f9f7f5', position:'relative', overflow:'hidden' }}>
+          {/* Iconos de tienda flotando (arreglo desplazado para variar) */}
+          <FloatingShopIcons offset={6} />
           <BubblesCanvas count={10} dark={false} />
           <div className="aurora-blob animate-aurora-2" style={{ width:'600px', height:'400px', top:'-80px', right:'-120px', background:'radial-gradient(ellipse,rgba(193,105,43,.1),transparent 70%)' }} />
           <div className="aurora-blob animate-aurora-1" style={{ width:'400px', height:'400px', bottom:'-80px', left:'-60px', background:'radial-gradient(circle,rgba(232,140,74,.08),transparent 70%)' }} />
