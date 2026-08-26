@@ -41,11 +41,11 @@ export function ProductCard({ product }: { product: Product }) {
     : null
 
   return (
-    <Link href={`/tienda/${product.slug}`} style={{ textDecoration:'none', color:'inherit', display:'block', height:'100%' }}>
+    <Link href={`/tienda/${product.slug}`} style={{ textDecoration:'none', color:'inherit', display:'flex', flexDirection:'column' }}>
       <article
         ref={cardRef}
         className="product-card"
-        style={{ height:'100%', display:'flex', flexDirection:'column' }}
+        style={{ flex:1, display:'flex', flexDirection:'column' }}
         onMouseMove={handleMouseMove}
         onMouseEnter={() => product.images.length > 1 && setImgIdx(1)}
         onMouseLeave={() => setImgIdx(0)}
