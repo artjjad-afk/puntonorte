@@ -893,7 +893,7 @@ export default function HomePage() {
 
       {/* BANNER PROMOCIONAL — solo si hay un banner activo en la DB */}
       {activeBanner && (
-      <section className="promo-strip" style={{ position:'relative' }}>
+      <section className="promo-strip" style={{ position:'relative', overflow:'hidden' }}>
         <div style={{ background:'#211f1e', padding:'80px 60px', display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', overflow:'hidden' }}>
           <LightRays dark rayCount={5} />
           <BubblesCanvas count={8} dark />
