@@ -148,7 +148,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
     const tokenParam  = searchParams.get('token')
     const adminAccess = isAdmin(req)
 
-    if (!adminAccess && tokenParam !== order.accessToken) {
+    // Si el pedido no tiene accessToken (legacy), solo el admin puede verlo.
+    // Sin este guard, tokenParam=null === accessToken=null daría acceso a cualquiera.
+    if (!adminAccess && (!order.accessToken || tokenParam !== order.accessToken)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
