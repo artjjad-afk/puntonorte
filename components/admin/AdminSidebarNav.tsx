@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import {
   LayoutDashboard, Package, ShoppingBag, Tag,
-  ExternalLink, LogOut, Store, Moon, Sun,
+  ExternalLink, LogOut, Store,
   ChevronLeft, ChevronRight, Zap,
 } from 'lucide-react'
 
@@ -180,7 +180,6 @@ export function AdminSidebarNav() {
   const pathname  = usePathname()
   const router    = useRouter()
   const [collapsed, setCollapsed] = useState(false)
-  const [dark, setDark] = useState(true)
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname === href || pathname.startsWith(href + '/')
 
@@ -455,40 +454,6 @@ export function AdminSidebarNav() {
 
       {/* ── Footer — acciones ── */}
       <div style={{ padding: '8px 0 12px', flexShrink: 0, position: 'relative', zIndex: 1 }}>
-
-        {/* Modo oscuro toggle */}
-        <button
-          onClick={() => setDark(d => !d)}
-          className="sb-item"
-          style={{ padding: collapsed ? '12px 0' : '12px 20px', justifyContent: collapsed ? 'center' : 'flex-start' }}
-        >
-          <span style={{ display: 'grid', placeItems: 'center', width: 22, height: 22, flexShrink: 0 }}>
-            {dark ? <Moon size={18} strokeWidth={1.75} /> : <Sun size={18} strokeWidth={1.75} />}
-          </span>
-          <AnimatePresence>
-            {!collapsed && (
-              <motion.div
-                initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -6 }} transition={{ duration: 0.16 }}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1 }}
-              >
-                <span>Modo oscuro</span>
-                {/* Toggle pill */}
-                <motion.div
-                  animate={{ background: dark ? '#f97316' : '#334155' }}
-                  style={{ width: 36, height: 20, borderRadius: 10, position: 'relative', flexShrink: 0 }}
-                >
-                  <motion.div
-                    animate={{ x: dark ? 18 : 2 }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                    style={{ position: 'absolute', top: 2, width: 16, height: 16, borderRadius: '50%', background: '#fff' }}
-                  />
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          {collapsed && <span className="sb-tip">Modo oscuro</span>}
-        </button>
 
         {/* Ver tienda */}
         <a href="/" target="_blank" rel="noopener noreferrer"
