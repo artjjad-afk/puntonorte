@@ -217,7 +217,8 @@ export default function CheckoutPage() {
         .checkout-layout { display:grid; grid-template-columns:1fr 400px; gap:32px; align-items:start; }
         @media(max-width:900px){
           .checkout-layout { grid-template-columns:1fr !important; }
-          .checkout-layout > div:last-child { position:static !important; }
+          .checkout-layout > div:first-child { order:1 !important; }              /* formulario arriba */
+          .checkout-layout > div:last-child  { order:2 !important; position:static !important; } /* resumen debajo */
           .checkout-summary { border-radius:16px !important; }
         }
         .pay-option { padding:18px 20px; border-radius:14px; border:1.5px solid #e8e5e2; cursor:pointer; transition:all .2s; background:#fff; text-align:left; width:100%; }
