@@ -28,7 +28,11 @@ interface Stats {
   pendingOrders: number
   totalRevenue: number
   recentOrders: Order[]
+  statusCounts: Record<string, number>
 }
+
+// Estados que cuentan como ingreso real (venta concretada)
+const PAID_STATUSES = ['confirmed', 'shipped', 'delivered']
 
 /* ── Status config ── */
 const STATUS: Record<string, { label: string; color: string; bg: string; icon: React.ReactNode }> = {
@@ -92,8 +96,11 @@ export default function AdminDashboard() {
         activeProducts: products.filter((p: { active: boolean }) => p.active).length,
         totalOrders:    orders.length,
         pendingOrders:  orders.filter((o: Order) => o.status === 'pending').length,
-        totalRevenue:   orders.reduce((a: number, o: Order) => a + o.total, 0),
+        // Ingresos = solo pedidos pagados (confirmado / enviado / entregado)
+        totalRevenue:   orders.filter((o: Order) => PAID_STATUSES.includes(o.status)).reduce((a: number, o: Order) => a + o.total, 0),
         recentOrders:   orders.slice(0, 6),
+        // Conteo por estado sobre TODOS los pedidos (para la dona y la distribución)
+        statusCounts:   orders.reduce((acc: Record<string, number>, o: Order) => { acc[o.status] = (acc[o.status] || 0) + 1; return acc }, {}),
       })
       /* Gráfica últimos 7 días */
       const days = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb']
@@ -101,6 +108,7 @@ export default function AdminDashboard() {
       setChartData(Array.from({ length: 7 }, (_, i) => {
         const dayIdx = (today - 6 + i + 7) % 7
         const day_orders = orders.filter((o: Order) => {
+          if (!PAID_STATUSES.includes(o.status)) return false
           const diff = Math.floor((Date.now() - new Date(o.createdAt).getTime()) / 86400000)
           return diff === 6 - i
         })
@@ -114,11 +122,11 @@ export default function AdminDashboard() {
 
   /* Datos para el pie de estados */
   const pieData = stats ? [
-    { name: 'Pendiente',  value: stats.recentOrders.filter(o => o.status === 'pending').length,   color: '#fbbf24' },
-    { name: 'Confirmado', value: stats.recentOrders.filter(o => o.status === 'confirmed').length, color: '#4ade80' },
-    { name: 'Enviado',    value: stats.recentOrders.filter(o => o.status === 'shipped').length,   color: '#60a5fa' },
-    { name: 'Entregado',  value: stats.recentOrders.filter(o => o.status === 'delivered').length, color: '#a78bfa' },
-    { name: 'Cancelado',  value: stats.recentOrders.filter(o => o.status === 'cancelled').length, color: '#f87171' },
+    { name: 'Pendiente',  value: stats.statusCounts['pending']   ?? 0, color: '#fbbf24' },
+    { name: 'Confirmado', value: stats.statusCounts['confirmed'] ?? 0, color: '#4ade80' },
+    { name: 'Enviado',    value: stats.statusCounts['shipped']   ?? 0, color: '#60a5fa' },
+    { name: 'Entregado',  value: stats.statusCounts['delivered'] ?? 0, color: '#a78bfa' },
+    { name: 'Cancelado',  value: stats.statusCounts['cancelled'] ?? 0, color: '#f87171' },
   ].filter(d => d.value > 0) : []
 
   const totalPie = pieData.reduce((a, d) => a + d.value, 0)
@@ -405,8 +413,8 @@ export default function AdminDashboard() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             {Object.entries(STATUS).map(([key, st]) => {
-              const count  = stats?.recentOrders.filter(o => o.status === key).length ?? 0
-              const total  = stats?.recentOrders.length ?? 1
+              const count  = stats?.statusCounts[key] ?? 0
+              const total  = stats?.totalOrders ?? 0
               const pct    = total > 0 ? Math.round((count / total) * 100) : 0
               return (
                 <div key={key}>
