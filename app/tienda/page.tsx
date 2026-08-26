@@ -109,7 +109,7 @@ function TiendaContent() {
         </div>
 
         {loading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '24px' }}>
+          <div className="tienda-grid">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} style={{ borderRadius: '14px', overflow: 'hidden', background: '#fff' }}>
                 <div className="skeleton" style={{ aspectRatio: '3/4', borderRadius: 0 }} />
@@ -130,7 +130,7 @@ function TiendaContent() {
             </button>
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '24px' }}>
+          <div className="tienda-grid">
             {filtered.map(product => <ProductCard key={product.id} product={product} />)}
           </div>
         )}

@@ -395,13 +395,23 @@ body {
   0%,100% { transform: translate(0,0)         rotate(var(--r,0deg)); }
   50%     { transform: translate(16px,-18px)  rotate(calc(var(--r,0deg) + 14deg)); }
 }
-/* En móvil dejamos menos iconos para no recargar la vista ni el rendimiento */
+/* En móvil ocultamos los iconos flotantes: el contenido ocupa casi todo
+   el ancho y se montarían sobre los títulos. Son un adorno de escritorio. */
 @media (max-width: 768px) {
-  .pn-floaticon:nth-child(n+8) { display: none; }
+  .pn-floaticon { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .pn-floaticon { animation: none !important; }
 }
+
+/* ── Grilla de productos en /tienda (responsive por columnas) ── */
+.tienda-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+@media (min-width: 640px)  { .tienda-grid { grid-template-columns: repeat(3, 1fr); gap: 22px; } }
+@media (min-width: 1024px) { .tienda-grid { grid-template-columns: repeat(4, 1fr); gap: 24px; } }
 
 /* ── Botón "Descargar catálogo" (hero) ── */
 .btn-download {
