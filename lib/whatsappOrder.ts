@@ -22,58 +22,44 @@ export type WAOrderData = {
   orderId?: number | null
 }
 
-// Emojis por código (a prueba de encoding)
-const E = {
-  bag:     '\u{1F6CD}\u{FE0F}', // 🛍️
-  receipt: '\u{1F9FE}',         // 🧾
-  money:   '\u{1F4B0}',         // 💰
-  box:     '\u{1F4E6}',         // 📦
-  person:  '\u{1F464}',         // 👤
-  phone:   '\u{1F4F1}',         // 📱
-  pin:     '\u{1F4CD}',         // 📍
-  city:    '\u{1F3D9}\u{FE0F}', // 🏙️
-  memo:    '\u{1F4DD}',         // 📝
-  card:    '\u{1F4B3}',         // 💳
-  tag:     '\u{1F516}',         // 🔖
-  hands:   '\u{1F64C}',         // 🙌
-  spark:   '\u{2728}',          // ✨
-}
-
-const LINE = '━'.repeat(18) // ━━━…
+// Sin emojis a propósito: la app de WhatsApp que usa la tienda los muestra
+// como "�" cuando llegan por enlace wa.me. Usamos negritas, divisores y
+// caracteres seguros (─ · •) que sí se renderizan bien.
+const LINE = '─'.repeat(24) // ────…
 
 export function buildOrderWAMessage(d: WAOrderData): string {
   const productos = d.items.map(i => {
     const variante = [
       i.size ? `Talla ${i.size}` : null,
       i.color ? `Color ${i.color}` : null,
-    ].filter(Boolean).join(' · ') // ·
+    ].filter(Boolean).join(' · ')
     const totalLinea = (i.price * i.quantity).toFixed(2)
     return `• *${i.name}*\n   ${i.quantity} × $${i.price.toFixed(2)} = $${totalLinea}` +
       (variante ? `\n   _${variante}_` : '')
   }).join('\n\n')
 
   const partes: string[] = [
-    `${E.bag} *NUEVO PEDIDO*  ·  Punto Norte`,
+    '*NUEVO PEDIDO*  ·  Punto Norte',
     LINE,
-    `${E.receipt} *Productos*`,
+    '*PRODUCTOS*',
     productos,
     '',
-    `${E.money} *Total:*  $${d.total.toFixed(2)}`,
+    `*TOTAL:*  $${d.total.toFixed(2)}`,
     LINE,
-    `${E.box} *Datos de envío*`,
-    `${E.person} ${d.name}`,
-    `${E.phone} ${d.phone}`,
-    `${E.pin} ${d.address}`,
-    `${E.city} ${d.city}`,
+    '*DATOS DE ENVÍO*',
+    `*Nombre:*  ${d.name}`,
+    `*Teléfono:*  ${d.phone}`,
+    `*Dirección:*  ${d.address}`,
+    `*Ciudad:*  ${d.city}`,
   ]
 
-  if (d.notes) partes.push(`${E.memo} ${d.notes}`)
+  if (d.notes) partes.push(`*Notas:*  ${d.notes}`)
 
   partes.push('')
-  partes.push(`${E.card} *Pago:*  ${d.paymentLabel}`)
-  if (d.orderId != null) partes.push(`${E.tag} *Pedido #${d.orderId}*`)
+  partes.push(`*Pago:*  ${d.paymentLabel}`)
+  if (d.orderId != null) partes.push(`*Pedido #${d.orderId}*`)
   partes.push(LINE)
-  partes.push(`${E.hands} ¡Gracias por tu compra! ${E.spark}`)
+  partes.push('_¡Gracias por tu compra!_')
 
   return encodeURIComponent(partes.join('\n'))
 }
