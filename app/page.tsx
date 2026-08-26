@@ -47,45 +47,35 @@ const HERO_PARTICLES = [
 /* Iconos flotantes para secciones claras */
 const FLOAT_ICONS = ['✦','◆','✧','◇','⬦','✦','◈','✧']
 
-function useInView() {
-  const ref = useRef<HTMLDivElement>(null)
-  const [inView, setInView] = useState(false)
+function AnimatedNumber({ target, suffix }: { target: number; suffix: string }) {
+  const [current, setCurrent] = useState(0)
+  const ref = useRef<HTMLSpanElement>(null)
   useEffect(() => {
     const el = ref.current; if (!el) return
-    // Fallback: si en 1.5s no disparó el observer, forzar visible
-    const fallback = setTimeout(() => setInView(true), 1500)
-    const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); clearTimeout(fallback) } },
-      { threshold: 0, rootMargin: '0px 0px 0px 0px' }
-    )
+    const obs = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return
+      obs.disconnect()
+      const start = Date.now()
+      const duration = 1600
+      const tick = () => {
+        const p = Math.min((Date.now() - start) / duration, 1)
+        const ease = p === 1 ? 1 : 1 - Math.pow(2, -10 * p)
+        setCurrent(Math.floor(ease * target))
+        if (p < 1) requestAnimationFrame(tick)
+      }
+      requestAnimationFrame(tick)
+    }, { threshold: 0.1 })
     obs.observe(el)
-    return () => { obs.disconnect(); clearTimeout(fallback) }
-  }, [])
-  return { ref, inView }
-}
-
-function AnimatedNumber({ target, suffix, inView }: { target: number; suffix: string; inView: boolean }) {
-  const [current, setCurrent] = useState(0)
-  useEffect(() => {
-    if (!inView) return
-    const start = Date.now()
-    const duration = 1600
-    const tick = () => {
-      const p = Math.min((Date.now() - start) / duration, 1)
-      const ease = p === 1 ? 1 : 1 - Math.pow(2, -10 * p)
-      setCurrent(Math.floor(ease * target))
-      if (p < 1) requestAnimationFrame(tick)
-    }
-    requestAnimationFrame(tick)
-  }, [inView, target])
-  return <>{current}{suffix}</>
+    return () => obs.disconnect()
+  }, [target])
+  return <span ref={ref}>{current}{suffix}</span>
 }
 
 export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([])
   const [featuredLoaded, setFeaturedLoaded] = useState(false)
-  const [dbCategories, setDbCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
-  const [homeCategories, setHomeCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
+  const [dbCategories, setDbCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null | undefined>(undefined)
+  const [homeCategories, setHomeCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null | undefined>(undefined)
   const [carouselOffset, setCarouselOffset] = useState(0)
   const [carouselDir, setCarouselDir]       = useState<1 | -1>(1)
   const [carouselClickAnim, setCarouselClickAnim] = useState(false)
@@ -178,11 +168,6 @@ export default function HomePage() {
     window.addEventListener('scroll', fn, { passive: true })
     return () => window.removeEventListener('scroll', fn)
   }, [])
-
-  const sec1 = useInView(); const sec2 = useInView()
-  const sec3 = useInView(); const sec4 = useInView()
-  const sec5 = useInView(); const sec6 = useInView()
-  const secHome = useInView()
 
   const handleRipple = useCallback((e: React.MouseEvent<HTMLElement>) => {
     const btn = e.currentTarget
@@ -347,9 +332,30 @@ export default function HomePage() {
 
       {/* Sin wave separador — la sección del carrusel es oscura como el hero, fluye directo */}
 
+      {/* SKELETON carrusel mientras carga */}
+      {homeCategories === undefined && (
+        <section style={{ padding:'80px 0 90px', background:'#111009', position:'relative', minHeight:'600px', overflow:'hidden' }}>
+          <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,#0d0b08,#1a1208,#0f0d0a)' }} />
+          <div style={{ position:'relative', zIndex:2, maxWidth:'1320px', margin:'0 auto', padding:'0 32px' }}>
+            <div style={{ marginBottom:'60px' }}>
+              <div className="skeleton" style={{ width:'180px', height:'14px', marginBottom:'18px', borderRadius:8, background:'rgba(193,105,43,.1)' }} />
+              <div className="skeleton" style={{ width:'320px', height:'52px', marginBottom:'12px', borderRadius:8, background:'rgba(193,105,43,.08)' }} />
+              <div className="skeleton" style={{ width:'240px', height:'52px', borderRadius:8, background:'rgba(193,105,43,.08)' }} />
+            </div>
+            <div style={{ display:'flex', gap:'24px', paddingBottom:'20px' }}>
+              {[1,2,3,4].map(i => (
+                <div key={i} style={{ width:'300px', height:'390px', flexShrink:0, borderRadius:20, background:'rgba(193,105,43,.06)', border:'1px solid rgba(193,105,43,.08)', transform:`scale(${i===1?1:.88})` }}>
+                  <div style={{ width:'100%', height:'100%', background:'linear-gradient(135deg,rgba(193,105,43,.04),transparent)', borderRadius:20 }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* CATEGORÍAS GRID - solo si NO hay homeCategories pero sí hay dbCategories */}
-      {(homeCategories === null || homeCategories.length === 0) && dbCategories !== null && dbCategories.length > 0 && (
-        <section ref={sec1.ref} style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
+      {(homeCategories === null || homeCategories.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
+        <section style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
           <div className="aurora-blob animate-aurora-1" style={{ width:'500px', height:'500px', top:'-150px', left:'-100px', background:'radial-gradient(circle,rgba(193,105,43,.18),rgba(232,140,74,.08))' }} />
           <div className="aurora-blob animate-aurora-2" style={{ width:'400px', height:'400px', bottom:'-100px', right:'-80px', background:'radial-gradient(circle,rgba(232,140,74,.15),rgba(193,105,43,.05))' }} />
           <div className="aurora-blob animate-aurora-3" style={{ width:'300px', height:'300px', top:'40%', left:'40%', background:'radial-gradient(circle,rgba(255,200,100,.12),transparent)' }} />
@@ -357,7 +363,12 @@ export default function HomePage() {
             <span key={i} className="float-icon" style={{ top:`${10 + (i*12)%80}%`, left:`${5 + (i*15)%90}%`, animationDuration:`${5 + i}s`, animationDelay:`${i*0.6}s`, color:'#c1692b' }}>{ic}</span>
           ))}
           <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'52px', flexWrap:'wrap', gap:'20px', opacity:sec1.inView?1:0, transform:sec1.inView?'translateY(0)':'translateY(28px)', transition:'opacity .7s ease, transform .7s ease' }}>
+            <motion.div
+              initial={{ opacity:0, y:28 }} whileInView={{ opacity:1, y:0 }}
+              viewport={{ once:true, margin:'-60px' }}
+              transition={{ duration:.7, ease:[.25,.46,.45,.94] }}
+              style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'52px', flexWrap:'wrap', gap:'20px' }}
+            >
               <div>
                 <p className="section-label" style={{ marginBottom:'12px' }}>Categorías</p>
                 <h2 style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:'900', color:'#211f1e', letterSpacing:'-1.5px', lineHeight:'1.05' }}>
@@ -367,8 +378,14 @@ export default function HomePage() {
               <Link href="/tienda" style={{ color:'#c1692b', textDecoration:'none', fontWeight:'800', fontSize:'14px', display:'flex', alignItems:'center', gap:'6px', letterSpacing:'0.5px', padding:'12px 20px', borderRadius:'12px', border:'2px solid rgba(193,105,43,.25)', transition:'all .2s', background:'rgba(193,105,43,.04)' }}>
                 Ver todo el catálogo →
               </Link>
-            </div>
-            <div style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr', gridTemplateRows:'300px 300px', gap:'16px', opacity:sec1.inView?1:0, transform:sec1.inView?'translateY(0)':'translateY(36px)', transition:'opacity .8s ease .15s, transform .8s ease .15s' }} className="cats-grid">
+            </motion.div>
+            <motion.div
+              initial={{ opacity:0, y:36 }} whileInView={{ opacity:1, y:0 }}
+              viewport={{ once:true, margin:'-60px' }}
+              transition={{ duration:.8, delay:.12, ease:[.25,.46,.45,.94] }}
+              style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr', gridTemplateRows:'300px 300px', gap:'16px' }}
+              className="cats-grid"
+            >
               {dbCategories.slice(0,5).map((cat, i) => (
                 <Link key={cat.id} href={`/tienda?cat=${cat.id}`} style={{ textDecoration:'none', gridRow:i===0?'span 2':undefined }} className="cat-item">
                   {cat.image
@@ -386,13 +403,13 @@ export default function HomePage() {
                   </div>
                 </Link>
               ))}
-            </div>
+            </motion.div>
           </div>
         </section>
       )}
 
       {/* Wave divider blanco→crema - solo si se muestra el grid (sin homeCategories) */}
-      {(homeCategories === null || homeCategories.length === 0) && dbCategories !== null && dbCategories.length > 0 && (
+      {(homeCategories === null || homeCategories?.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
         <div style={{ background:'#fff', marginBottom:'-2px' }}>
           <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
             <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
@@ -401,11 +418,9 @@ export default function HomePage() {
       )}
 
       {/* CARRUSEL CATEGORÍAS DESTACADAS */}
-      {homeCategories !== null && homeCategories.length > 0 && (
+      {homeCategories !== undefined && homeCategories !== null && homeCategories.length > 0 && (
         <>
           <section style={{ padding:'0', background:'#111009', position:'relative', overflow:'hidden', minHeight:'600px' }}>
-            {/* div sentinela para IntersectionObserver */}
-            <div ref={secHome.ref} style={{ position:'absolute', top:0, left:0, width:'1px', height:'1px' }} />
 
             {/* ── Fondo atmosférico oscuro ── */}
             <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,#0d0b08 0%,#1a1208 40%,#0f0d0a 100%)', zIndex:0 }} />
@@ -426,10 +441,16 @@ export default function HomePage() {
 
               {/* ── Header ── */}
               <div style={{ maxWidth:'1320px', margin:'0 auto', padding:'0 32px' }}>
-                <div style={{
-                  display:'flex', justifyContent:'space-between', alignItems:'flex-end',
-                  marginBottom:'60px', flexWrap:'wrap', gap:'24px',
-                }}>
+                <motion.div
+                  initial={{ opacity:0, y:40 }}
+                  whileInView={{ opacity:1, y:0 }}
+                  viewport={{ once:true, margin:'-80px' }}
+                  transition={{ duration:.8, ease:[.25,.46,.45,.94] }}
+                  style={{
+                    display:'flex', justifyContent:'space-between', alignItems:'flex-end',
+                    marginBottom:'60px', flexWrap:'wrap', gap:'24px',
+                  }}
+                >
                   {/* Título izquierda */}
                   <div>
                     {/* Etiqueta pill */}
@@ -464,7 +485,7 @@ export default function HomePage() {
                       Ver todo el catálogo →
                     </Link>
                   </div>
-                </div>
+                </motion.div>
               </div>
 
               {/* ── Track del carrusel — Framer Motion ── */}
@@ -659,12 +680,17 @@ export default function HomePage() {
 
       {/* PRODUCTOS DESTACADOS - visible si carga o si hay productos */}
       {(!featuredLoaded || featured.length > 0) && (
-        <section ref={sec2.ref} style={{ padding:'100px 32px', background:'#f9f7f5', position:'relative', overflow:'hidden' }}>
+        <section style={{ padding:'100px 32px', background:'#f9f7f5', position:'relative', overflow:'hidden' }}>
           <BubblesCanvas count={10} dark={false} />
           <div className="aurora-blob animate-aurora-2" style={{ width:'600px', height:'400px', top:'-80px', right:'-120px', background:'radial-gradient(ellipse,rgba(193,105,43,.1),transparent 70%)' }} />
           <div className="aurora-blob animate-aurora-1" style={{ width:'400px', height:'400px', bottom:'-80px', left:'-60px', background:'radial-gradient(circle,rgba(232,140,74,.08),transparent 70%)' }} />
           <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
-            <div style={{ textAlign:'center', marginBottom:'60px', opacity:sec2.inView?1:0, transform:sec2.inView?'translateY(0)':'translateY(28px)', transition:'opacity .7s ease, transform .7s ease' }}>
+            <motion.div
+              initial={{ opacity:0, y:28 }} whileInView={{ opacity:1, y:0 }}
+              viewport={{ once:true, margin:'-60px' }}
+              transition={{ duration:.7, ease:[.25,.46,.45,.94] }}
+              style={{ textAlign:'center', marginBottom:'60px' }}
+            >
               <p className="section-label" style={{ justifyContent:'center', marginBottom:'14px' }}>Selección premium</p>
               <h2 style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:'900', color:'#211f1e', letterSpacing:'-1.5px', marginBottom:'16px' }}>
                 Los más <span className="text-shimmer">vendidos</span>
@@ -672,7 +698,7 @@ export default function HomePage() {
               <p style={{ color:'#7a7675', fontSize:'16px', maxWidth:'440px', margin:'0 auto', lineHeight:'1.7' }}>
                 Piezas elegidas por cientos de clientes satisfechos en todo Venezuela.
               </p>
-            </div>
+            </motion.div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))', gap:'24px' }}>
               {!featuredLoaded
                 ? Array.from({length:4}).map((_,i) => (
@@ -686,9 +712,15 @@ export default function HomePage() {
                     </div>
                   ))
                 : featured.map((product, i) => (
-                    <div key={product.id} style={{ opacity:sec2.inView?1:0, transform:sec2.inView?'translateY(0) scale(1)':'translateY(36px) scale(.96)', transition:`opacity .6s ease ${i*90}ms, transform .7s cubic-bezier(.34,1.2,.64,1) ${i*90}ms` }}>
+                    <motion.div
+                      key={product.id}
+                      initial={{ opacity:0, y:36, scale:.96 }}
+                      whileInView={{ opacity:1, y:0, scale:1 }}
+                      viewport={{ once:true, margin:'-40px' }}
+                      transition={{ duration:.6, delay:i*0.08, ease:[.34,1.2,.64,1] }}
+                    >
                       <ProductCard product={product} />
-                    </div>
+                    </motion.div>
                   ))
               }
             </div>
@@ -714,8 +746,7 @@ export default function HomePage() {
 
       {/* BANNER PROMOCIONAL — solo si hay un banner activo en la DB */}
       {activeBanner && (
-      <section ref={sec3.ref} className="promo-strip" style={{ position:'relative' }}>
-        {/* Izquierda */}
+      <section className="promo-strip" style={{ position:'relative' }}>
         <div style={{ background:'#211f1e', padding:'80px 60px', display:'flex', flexDirection:'column', justifyContent:'center', position:'relative', overflow:'hidden' }}>
           <LightRays dark rayCount={5} />
           <BubblesCanvas count={8} dark />
@@ -725,10 +756,15 @@ export default function HomePage() {
             {activeBanner.etiqueta && (
               <p className="section-label" style={{ marginBottom:'18px' }}>{activeBanner.etiqueta}</p>
             )}
-            <h2 style={{ color:'#fff', fontSize:'clamp(28px,3.5vw,50px)', fontWeight:'900', letterSpacing:'-1.5px', lineHeight:'1.05', marginBottom:'18px', opacity:sec3.inView?1:0, transform:sec3.inView?'translateX(0)':'translateX(-36px)', transition:'opacity .8s ease, transform .8s ease' }}>
+            <motion.h2
+              initial={{ opacity:0, x:-36 }} whileInView={{ opacity:1, x:0 }}
+              viewport={{ once:true, margin:'-60px' }}
+              transition={{ duration:.8, ease:[.25,.46,.45,.94] }}
+              style={{ color:'#fff', fontSize:'clamp(28px,3.5vw,50px)', fontWeight:'900', letterSpacing:'-1.5px', lineHeight:'1.05', marginBottom:'18px' }}
+            >
               {activeBanner.titulo}
               {activeBanner.subtitulo && <><br /><span className="text-shimmer">{activeBanner.subtitulo}</span></>}
-            </h2>
+            </motion.h2>
             {activeBanner.descripcion && (
               <p style={{ color:'rgba(232,229,226,.6)', lineHeight:'1.8', marginBottom:'40px', fontSize:'15px', maxWidth:'340px' }}>
                 {activeBanner.descripcion}
@@ -775,7 +811,7 @@ export default function HomePage() {
       {/* ════════════════════════════════
           STATS — sección MUY OSCURA
       ════════════════════════════════ */}
-      <section ref={sec4.ref} style={{ background:'#1a1817', padding:'80px 32px 100px', position:'relative', overflow:'hidden' }}>
+      <section style={{ background:'#1a1817', padding:'80px 32px 100px', position:'relative', overflow:'hidden' }}>
 
         <LightRays dark rayCount={8} />
         <BubblesCanvas count={12} dark />
@@ -786,22 +822,26 @@ export default function HomePage() {
         <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
           <div style={{ textAlign:'center', marginBottom:'52px' }}>
             <p className="section-label" style={{ justifyContent:'center', marginBottom:'14px' }}>Números reales</p>
-            <h2 style={{
-              color:'#fff', fontSize:'clamp(24px,3.5vw,42px)', fontWeight:'900', letterSpacing:'-1px',
-              opacity:sec4.inView?1:0, transform:sec4.inView?'translateY(0)':'translateY(20px)',
-              transition:'opacity .7s ease, transform .7s ease',
-            }}>
+            <motion.h2
+              initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }}
+              viewport={{ once:true, margin:'-60px' }}
+              transition={{ duration:.7, ease:[.25,.46,.45,.94] }}
+              style={{ color:'#fff', fontSize:'clamp(24px,3.5vw,42px)', fontWeight:'900', letterSpacing:'-1px' }}
+            >
               La confianza de nuestros <span className="neon-copper">clientes</span>
-            </h2>
+            </motion.h2>
           </div>
 
           <div className="stats-grid" style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:'20px' }}>
             {stats.map((s, i) => (
-              <div key={i} className="stat-card" style={{
-                opacity:sec4.inView?1:0,
-                transform:sec4.inView?'translateY(0) scale(1)':'translateY(32px) scale(.93)',
-                transition:`opacity .5s ease ${i*130}ms, transform .7s cubic-bezier(.34,1.3,.64,1) ${i*130}ms`,
-              }}>
+              <motion.div
+                key={i}
+                initial={{ opacity:0, y:32, scale:.93 }}
+                whileInView={{ opacity:1, y:0, scale:1 }}
+                viewport={{ once:true, margin:'-40px' }}
+                transition={{ duration:.7, delay:i*0.13, ease:[.34,1.3,.64,1] }}
+                className="stat-card"
+              >
                 <div style={{ fontSize:'32px', marginBottom:'12px', filter:'drop-shadow(0 0 8px rgba(193,105,43,.5))' }}>{s.icon}</div>
                 <p style={{
                   fontSize:'clamp(34px,4.5vw,52px)', fontWeight:'900', letterSpacing:'-2px',
@@ -809,10 +849,10 @@ export default function HomePage() {
                   WebkitBackgroundClip:'text', backgroundClip:'text', color:'transparent',
                   filter:'drop-shadow(0 0 10px rgba(193,105,43,.5))',
                 }}>
-                  <AnimatedNumber target={s.value} suffix={s.suffix} inView={sec4.inView} />
+                  <AnimatedNumber target={s.value} suffix={s.suffix} />
                 </p>
                 <p style={{ color:'rgba(232,229,226,.45)', fontSize:'13px', letterSpacing:'0.5px', margin:0 }}>{s.label}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -828,7 +868,7 @@ export default function HomePage() {
       {/* ════════════════════════════════
           TESTIMONIOS — sección BLANCA con aurora
       ════════════════════════════════ */}
-      <section ref={sec5.ref} style={{ padding:'100px 32px', background:'#fff', position:'relative', overflow:'hidden' }}>
+      <section style={{ padding:'100px 32px', background:'#fff', position:'relative', overflow:'hidden' }}>
 
         {/* Solo burbujas en testimonios */}
         <BubblesCanvas count={10} dark={false} />
@@ -847,24 +887,28 @@ export default function HomePage() {
         ))}
 
         <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
-          <div style={{
-            textAlign:'center', marginBottom:'60px',
-            opacity:sec5.inView?1:0, transform:sec5.inView?'translateY(0)':'translateY(24px)',
-            transition:'opacity .7s ease, transform .7s ease',
-          }}>
+          <motion.div
+            initial={{ opacity:0, y:24 }} whileInView={{ opacity:1, y:0 }}
+            viewport={{ once:true, margin:'-60px' }}
+            transition={{ duration:.7, ease:[.25,.46,.45,.94] }}
+            style={{ textAlign:'center', marginBottom:'60px' }}
+          >
             <p className="section-label" style={{ justifyContent:'center', marginBottom:'14px' }}>Testimonios reales</p>
             <h2 style={{ fontSize:'clamp(28px,4vw,48px)', fontWeight:'900', color:'#211f1e', letterSpacing:'-1.5px' }}>
               Lo dicen nuestros <span className="text-shimmer">clientes</span>
             </h2>
-          </div>
+          </motion.div>
 
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(300px,1fr))', gap:'28px' }}>
             {testimonials.map((t, i) => (
-              <div key={i} className="testimonial-wow glow-card" style={{
-                opacity:sec5.inView?1:0,
-                transition:`opacity .6s ease ${i*150}ms, transform .7s cubic-bezier(.34,1.2,.64,1) ${i*150}ms`,
-                transform:sec5.inView?'translateY(0) rotate(0deg)':`translateY(36px) rotate(${i%2===0?-1:1}deg)`,
-              }}>
+              <motion.div
+                key={i}
+                initial={{ opacity:0, y:36, rotate: i%2===0 ? -1 : 1 }}
+                whileInView={{ opacity:1, y:0, rotate:0 }}
+                viewport={{ once:true, margin:'-40px' }}
+                transition={{ duration:.7, delay:i*0.15, ease:[.34,1.2,.64,1] }}
+                className="testimonial-wow glow-card"
+              >
                 <div style={{ display:'flex', gap:'2px', marginBottom:'16px' }}>
                   {Array.from({length:t.stars}).map((_,s) => (
                     <span key={s} style={{ color:'#c1692b', fontSize:'18px', filter:'drop-shadow(0 0 6px rgba(193,105,43,.7))' }}>★</span>
@@ -886,13 +930,11 @@ export default function HomePage() {
                     <p style={{ margin:0, fontSize:'12px', color:'#7a7675' }}>{t.city}, Venezuela ✓</p>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
-
-      {/* Wave divider blanco→negro */}
       <div style={{ background:'#fff', marginBottom:'-2px' }}>
         <svg viewBox="0 0 1440 70" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
           <path d="M0,35 C360,70 1080,0 1440,35 L1440,70 L0,70 Z" fill="#0d0c0b"/>
@@ -902,7 +944,7 @@ export default function HomePage() {
       {/* ════════════════════════════════
           CTA FINAL — sección NEGRA
       ════════════════════════════════ */}
-      <section ref={sec6.ref} style={{ position:'relative', padding:'120px 32px', background:'#0d0c0b', overflow:'hidden', textAlign:'center' }}>
+      <section style={{ position:'relative', padding:'120px 32px', background:'#0d0c0b', overflow:'hidden', textAlign:'center' }}>
 
         <LightRays dark rayCount={9} />
         <BubblesCanvas count={14} dark />
@@ -935,9 +977,13 @@ export default function HomePage() {
 
         <div style={{
           position:'relative', zIndex:3, maxWidth:'660px', margin:'0 auto',
-          opacity:sec6.inView?1:0, transform:sec6.inView?'translateY(0)':'translateY(36px)',
-          transition:'opacity .9s ease, transform .9s cubic-bezier(.22,1,.36,1)',
         }}>
+          <motion.div
+            initial={{ opacity:0, y:36 }}
+            whileInView={{ opacity:1, y:0 }}
+            viewport={{ once:true, margin:'-60px' }}
+            transition={{ duration:.9, ease:[.22,1,.36,1] }}
+          >
           <p className="section-label" style={{ justifyContent:'center', marginBottom:'22px' }}>✦ Comunidad Punto Norte ✦</p>
           <h2 style={{ color:'#fff', fontSize:'clamp(32px,5.5vw,60px)', fontWeight:'900', letterSpacing:'-2px', lineHeight:'1.05', marginBottom:'22px' }}>
             Únete y recibe<br /><span className="text-shimmer">descuentos exclusivos</span>
@@ -970,6 +1016,7 @@ export default function HomePage() {
               Ver catálogo ✦
             </Link>
           </div>
+          </motion.div>
         </div>
       </section>
     </>
