@@ -224,9 +224,12 @@ export default function CheckoutPage() {
         .pay-option { padding:18px 20px; border-radius:14px; border:1.5px solid #e8e5e2; cursor:pointer; transition:all .2s; background:#fff; text-align:left; width:100%; }
         .pay-option:hover { border-color:#c1692b; background:#fff7f3; }
         .pay-option.selected { border-color:#c1692b; background:#fff7f3; box-shadow:0 0 0 3px rgba(193,105,43,0.12); }
+        /* En movil/tablet ocultamos los textos de los pasos: quedan solo los
+           circulos conectados. El titulo del formulario ya indica el paso. */
+        @media(max-width:768px){
+          .checkout-step-label { display:none !important; }
+        }
         @media(max-width:480px){
-          /* En movil solo mostramos la etiqueta del paso activo (los demas quedan como circulos) */
-          .checkout-step-label:not(.is-active) { display:none; }
           .checkout-confirm-grid { grid-template-columns:1fr !important; }
         }
       `}</style>
