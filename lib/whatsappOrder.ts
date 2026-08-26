@@ -1,6 +1,11 @@
 // Generador del mensaje de pedido por WhatsApp — fuente única de verdad
-// para checkout y confirmación. Usa escapes Unicode en los emojis para que
-// nunca se corrompan por la codificación del archivo.
+// para checkout y confirmación.
+//
+// Los emojis se ven perfectos cuando el mensaje se compone desde el celular,
+// pero WhatsApp Web/Escritorio los corrompe (aparecen como "�") por el salto
+// navegador→app. Por eso detectamos el dispositivo: en móvil enviamos la
+// versión con emojis; en PC, una versión limpia (negritas + divisores) que
+// se ve bien en todas partes.
 
 export type WAOrderItem = {
   name: string
@@ -41,8 +46,19 @@ const E = {
 
 const LINE = '─'.repeat(20) // ────…
 
-export function buildOrderWAMessage(d: WAOrderData): string {
-  const productos = d.items.map(i => {
+// ¿El mensaje se está componiendo desde un teléfono?
+function isMobileDevice(): boolean {
+  if (typeof navigator === 'undefined') return false
+  const nav = navigator as Navigator & { userAgentData?: { mobile?: boolean } }
+  if (nav.userAgentData && typeof nav.userAgentData.mobile === 'boolean') {
+    return nav.userAgentData.mobile
+  }
+  return /Android|iPhone|iPad|iPod|Mobile|Windows Phone|IEMobile|Opera Mini/i.test(navigator.userAgent)
+}
+
+// Lista de productos (igual en ambas versiones)
+function listaProductos(d: WAOrderData): string {
+  return d.items.map(i => {
     const variante = [
       i.size ? `Talla ${i.size}` : null,
       i.color ? `Color ${i.color}` : null,
@@ -51,12 +67,15 @@ export function buildOrderWAMessage(d: WAOrderData): string {
     return `• *${i.name}*\n   ${i.quantity} × $${i.price.toFixed(2)} = $${totalLinea}` +
       (variante ? `\n   _${variante}_` : '')
   }).join('\n\n')
+}
 
+// Versión con emojis (móvil)
+function conEmojis(d: WAOrderData): string {
   const partes: string[] = [
     `${E.bag} *NUEVO PEDIDO*  ·  Punto Norte`,
     LINE,
     `${E.receipt} *Productos*`,
-    productos,
+    listaProductos(d),
     '',
     `${E.money} *Total:*  $${d.total.toFixed(2)}`,
     LINE,
@@ -66,14 +85,41 @@ export function buildOrderWAMessage(d: WAOrderData): string {
     `${E.pin} ${d.address}`,
     `${E.city} ${d.city}`,
   ]
-
   if (d.notes) partes.push(`${E.memo} ${d.notes}`)
-
   partes.push('')
   partes.push(`${E.card} *Pago:*  ${d.paymentLabel}`)
   if (d.orderId != null) partes.push(`${E.tag} *Pedido #${d.orderId}*`)
   partes.push(LINE)
   partes.push(`${E.hands} ¡Gracias por tu compra! ${E.spark}`)
+  return partes.join('\n')
+}
 
-  return encodeURIComponent(partes.join('\n'))
+// Versión limpia sin emojis (PC / WhatsApp Web)
+function sinEmojis(d: WAOrderData): string {
+  const partes: string[] = [
+    '*NUEVO PEDIDO*  ·  Punto Norte',
+    LINE,
+    '*PRODUCTOS*',
+    listaProductos(d),
+    '',
+    `*TOTAL:*  $${d.total.toFixed(2)}`,
+    LINE,
+    '*DATOS DE ENVÍO*',
+    `*Nombre:*  ${d.name}`,
+    `*Teléfono:*  ${d.phone}`,
+    `*Dirección:*  ${d.address}`,
+    `*Ciudad:*  ${d.city}`,
+  ]
+  if (d.notes) partes.push(`*Notas:*  ${d.notes}`)
+  partes.push('')
+  partes.push(`*Pago:*  ${d.paymentLabel}`)
+  if (d.orderId != null) partes.push(`*Pedido #${d.orderId}*`)
+  partes.push(LINE)
+  partes.push('_¡Gracias por tu compra!_')
+  return partes.join('\n')
+}
+
+export function buildOrderWAMessage(d: WAOrderData): string {
+  const msg = isMobileDevice() ? conEmojis(d) : sinEmojis(d)
+  return encodeURIComponent(msg)
 }
