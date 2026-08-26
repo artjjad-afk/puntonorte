@@ -82,13 +82,13 @@ export default function HomePage() {
   const autoplayRef   = useRef<ReturnType<typeof setInterval> | null>(null)
   const animatingRef  = useRef(false)
 
-  const rotated = useCallback((arr: typeof homeCategories, offset: number) => {
+  const rotated = useCallback((arr: { id: string; slug: string; label: string; image: string }[] | null | undefined, offset: number) => {
     if (!arr || arr.length === 0) return []
     const n = arr.length
     return Array.from({ length: n }, (_, i) => arr[(offset + i) % n])
   }, [])
 
-  const advance = useCallback((dir: 1 | -1, cats: NonNullable<typeof homeCategories>) => {
+  const advance = useCallback((dir: 1 | -1, cats: { id: string; slug: string; label: string; image: string }[]) => {
     if (animatingRef.current) return
     animatingRef.current = true
     setCarouselDir(dir)
@@ -330,7 +330,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Sin wave separador — la sección del carrusel es oscura como el hero, fluye directo */}
+            {/* Sin wave separador — la sección del carrusel es oscura como el hero, fluye directo */}
 
       {/* SKELETON carrusel mientras carga */}
       {homeCategories === undefined && (
@@ -354,7 +354,7 @@ export default function HomePage() {
       )}
 
       {/* CATEGORÍAS GRID - solo si NO hay homeCategories pero sí hay dbCategories */}
-      {(homeCategories === null || homeCategories.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
+      {(!homeCategories || homeCategories.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
         <section style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
           <div className="aurora-blob animate-aurora-1" style={{ width:'500px', height:'500px', top:'-150px', left:'-100px', background:'radial-gradient(circle,rgba(193,105,43,.18),rgba(232,140,74,.08))' }} />
           <div className="aurora-blob animate-aurora-2" style={{ width:'400px', height:'400px', bottom:'-100px', right:'-80px', background:'radial-gradient(circle,rgba(232,140,74,.15),rgba(193,105,43,.05))' }} />
@@ -409,7 +409,7 @@ export default function HomePage() {
       )}
 
       {/* Wave divider blanco→crema - solo si se muestra el grid (sin homeCategories) */}
-      {(homeCategories === null || homeCategories?.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
+      {(!homeCategories || homeCategories?.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
         <div style={{ background:'#fff', marginBottom:'-2px' }}>
           <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
             <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
@@ -634,7 +634,7 @@ export default function HomePage() {
               <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'16px', marginTop:'40px', padding:'0 32px' }}>
                 <span style={{ color:'rgba(232,140,74,.4)', fontSize:'11px', fontFamily:'var(--font-mono)', fontWeight:'700' }}>0{carouselOffset + 1}</span>
                 <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
-                  {homeCategories.map((_, i) => (
+                  {(homeCategories ?? []).map((_, i) => (
                     <motion.button
                       key={i}
                       onClick={() => { setCarouselOffset(i); resetAutoplay() }}
@@ -645,7 +645,7 @@ export default function HomePage() {
                     />
                   ))}
                 </div>
-                <span style={{ color:'rgba(232,140,74,.4)', fontSize:'11px', fontFamily:'var(--font-mono)', fontWeight:'700' }}>0{homeCategories.length}</span>
+                <span style={{ color:'rgba(232,140,74,.4)', fontSize:'11px', fontFamily:'var(--font-mono)', fontWeight:'700' }}>0{homeCategories?.length ?? 0}</span>
               </div>
 
               {/* Barra de progreso autoplay */}
