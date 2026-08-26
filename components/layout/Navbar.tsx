@@ -154,13 +154,13 @@ export function Navbar({ initialLinks }: { initialLinks?: { href: string; label:
 
       {/* Mobile menu overlay */}
       {menuOpen && (
-        <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 48, backdropFilter: 'blur(2px)' }} />
+        <div onClick={() => setMenuOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 98, backdropFilter: 'blur(2px)' }} />
       )}
 
       {/* Mobile menu drawer */}
       <div style={{
         position: 'fixed', top: 0, left: 0, bottom: 0, width: '85%', maxWidth: '320px',
-        background: '#1a1817', zIndex: 49, display: 'flex', flexDirection: 'column',
+        background: '#1a1817', zIndex: 99, display: 'flex', flexDirection: 'column',
         transform: menuOpen ? 'translateX(0)' : 'translateX(-100%)',
         transition: 'transform 0.3s cubic-bezier(0.4,0,0.2,1)',
         boxShadow: '4px 0 40px rgba(0,0,0,0.4)',
