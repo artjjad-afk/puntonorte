@@ -5,6 +5,7 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { StoreJsonLd } from '@/components/ui/JsonLd'
 import { NavbarServer } from '@/components/layout/NavbarServer'
 import { InitialLoader } from '@/components/ui/InitialLoader'
+import { RouteTransition } from '@/components/ui/RouteTransition'
 
 const BASE = 'https://puntonorteshop.com'
 
@@ -80,6 +81,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es" className="h-full">
       <body className="min-h-full flex flex-col" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
         <InitialLoader />
+        <RouteTransition />
         <StoreJsonLd />
         <ToastProvider>
           <ConditionalLayout navbar={<NavbarServer />}>
