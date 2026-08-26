@@ -279,6 +279,35 @@ body {
   transform: translateY(0);
 }
 
+/* ── Loader de carga inicial (marca Punto Norte) ── */
+.pn-loader {
+  position: fixed; inset: 0; z-index: 99999;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 20px;
+  background: var(--pn-off);
+  transition: opacity .5s ease, visibility .5s ease;
+}
+.pn-loader--out { opacity: 0; visibility: hidden; pointer-events: none; }
+.pn-loader__logo {
+  height: 56px; width: auto; object-fit: contain;
+  animation: pn-loader-pulse 1.6s ease-in-out infinite;
+}
+.pn-loader__ring {
+  width: 46px; height: 46px; border-radius: 50%;
+  border: 3px solid rgba(193, 105, 43, .18);
+  border-top-color: #c1692b;
+  animation: pn-loader-spin .8s linear infinite;
+}
+.pn-loader__text {
+  font-size: 11px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; color: var(--pn-muted);
+}
+@keyframes pn-loader-spin { to { transform: rotate(360deg); } }
+@keyframes pn-loader-pulse {
+  0%, 100% { opacity: .6;  transform: scale(1); }
+  50%      { opacity: 1;   transform: scale(1.06); }
+}
+
 /* ── Skeleton loader ── */
 .skeleton {
   background: linear-gradient(90deg, #f0eeec 25%, #e8e5e2 50%, #f0eeec 75%);

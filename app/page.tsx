@@ -47,6 +47,17 @@ const HERO_PARTICLES = [
 /* Iconos flotantes para secciones claras */
 const FLOAT_ICONS = ['✦','◆','✧','◇','⬦','✦','◈','✧']
 
+/* fetch con timeout — si la red se cuelga (típico en móvil), aborta a los `ms`
+   y la promesa rechaza, de modo que el estado se resuelve (vacío) en vez de
+   quedarse colgado para siempre y dejar la sección invisible. */
+function fetchJSON(url: string, ms = 6000): Promise<unknown> {
+  const ctrl = new AbortController()
+  const to = setTimeout(() => ctrl.abort(), ms)
+  return fetch(url, { signal: ctrl.signal })
+    .then(r => r.json())
+    .finally(() => clearTimeout(to))
+}
+
 function AnimatedNumber({ target, suffix }: { target: number; suffix: string }) {
   const [current, setCurrent] = useState(0)
   const ref = useRef<HTMLSpanElement>(null)
@@ -120,22 +131,19 @@ export default function HomePage() {
   const [scrollY, setScrollY] = useState(0)
 
   useEffect(() => {
-    fetch('/api/products?featured=true')
-      .then(r => r.json())
+    fetchJSON('/api/products?featured=true')
       .then(d => setFeatured(Array.isArray(d) ? d.slice(0, 8) : []))
       .catch(() => setFeatured([]))
       .finally(() => setFeaturedLoaded(true))
 
     // Cargar banner activo
-    fetch('/api/banners')
-      .then(r => r.json())
-      .then(data => setActiveBanner(data ?? null))
+    fetchJSON('/api/banners')
+      .then(data => setActiveBanner((data as typeof activeBanner) ?? null))
       .catch(() => setActiveBanner(null))
 
     // Cargar categorías reales desde la DB (para la sección hero/grid)
-    fetch('/api/categories')
-      .then(r => r.json())
-      .then(data => {
+    fetchJSON('/api/categories')
+      .then((data: unknown) => {
         if (Array.isArray(data) && data.length > 0) {
           setDbCategories(data.map((c: { slug: string; name: string; image?: string }) => ({
             id:    c.slug,
@@ -150,9 +158,8 @@ export default function HomePage() {
       .catch(() => setDbCategories([]))
 
     // Cargar categorías destacadas para el carrusel del inicio
-    fetch('/api/categories?home=true')
-      .then(r => r.json())
-      .then(data => {
+    fetchJSON('/api/categories?home=true')
+      .then((data: unknown) => {
         if (Array.isArray(data) && data.length > 0) {
           setHomeCategories(data.map((c: { slug: string; name: string; image?: string }) => ({
             id:    c.slug,
@@ -167,10 +174,36 @@ export default function HomePage() {
       .catch(() => setHomeCategories([]))
 
     // Cargar productos en oferta
-    fetch('/api/products?offers=true')
-      .then(r => r.json())
-      .then(data => setOfferProducts(Array.isArray(data) ? data : []))
+    fetchJSON('/api/products?offers=true')
+      .then((data: unknown) => setOfferProducts(Array.isArray(data) ? data : []))
       .catch(() => setOfferProducts([]))
+  }, [])
+
+  /* ── Loader de carga inicial ──
+     `dataReady` es true cuando los 5 estados dejaron de ser `undefined`
+     (cada fetch siempre resuelve algo gracias a los .catch + timeout). */
+  const dataReady =
+    featuredLoaded &&
+    activeBanner  !== undefined &&
+    dbCategories  !== undefined &&
+    homeCategories !== undefined &&
+    offerProducts !== undefined
+
+  // El loader arranca visible (va en el HTML del servidor → aparece al instante).
+  const [loaderHidden, setLoaderHidden] = useState(false)
+
+  // Cuando todo cargó, esperamos a que termine el fade y lo desmontamos.
+  useEffect(() => {
+    if (!dataReady) return
+    const t = setTimeout(() => setLoaderHidden(true), 550)
+    return () => clearTimeout(t)
+  }, [dataReady])
+
+  // Red de seguridad: pase lo que pase, nunca dejar el loader más de 7s
+  // (si un fetch quedó colgado en móvil, revelamos igual lo que sí cargó).
+  useEffect(() => {
+    const t = setTimeout(() => setLoaderHidden(true), 7000)
+    return () => clearTimeout(t)
   }, [])
 
   useEffect(() => {
@@ -188,6 +221,16 @@ export default function HomePage() {
 
   return (
     <>
+      {/* ── Loader de carga inicial (marca Punto Norte) ── */}
+      {!loaderHidden && (
+        <div className={`pn-loader${dataReady ? ' pn-loader--out' : ''}`} aria-hidden={dataReady} role="status">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Punto Norte" className="pn-loader__logo" width={64} height={64} />
+          <div className="pn-loader__ring" />
+          <div className="pn-loader__text">Cargando</div>
+        </div>
+      )}
+
       <style>{`
         /* ── Cat items ── */
         .cat-item{position:relative;overflow:hidden;border-radius:20px;cursor:pointer;display:block;}
