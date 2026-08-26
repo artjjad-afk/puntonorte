@@ -48,27 +48,24 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const product = await prisma.product.update({
       where: { id: parseInt(id) },
       data: {
-        ...(name        && { name: name.trim() }),
-        ...(price       && { price: parseFloat(price) }),
-        originalPrice: originalPrice ? parseFloat(originalPrice) : null,
-        ...(category    && { category }),
-        subcategory: subcategory || null,
-        ...(description && { description: description.trim() }),
-        ...(images      && { images: JSON.stringify(Array.isArray(images) ? images : [images]) }),
-        sizes:  sizes?.length  ? JSON.stringify(sizes)  : null,
-        colors: colors?.length ? JSON.stringify(colors) : null,
-        badge: badge || null,
-        // Stock — si se envía, actualizar y recalcular inStock
+        ...(name        !== undefined && name        && { name: name.trim() }),
+        ...(price       !== undefined && price       && { price: parseFloat(price) }),
+        ...(originalPrice !== undefined && { originalPrice: originalPrice ? parseFloat(originalPrice) : null }),
+        ...(category    !== undefined && category    && { category }),
+        ...(subcategory !== undefined && { subcategory: subcategory || null }),
+        ...(description !== undefined && description && { description: description.trim() }),
+        ...(images      !== undefined && images      && { images: JSON.stringify(Array.isArray(images) ? images : [images]) }),
+        ...(sizes       !== undefined && { sizes:  sizes?.length  ? JSON.stringify(sizes)  : null }),
+        ...(colors      !== undefined && { colors: colors?.length ? JSON.stringify(colors) : null }),
+        ...(badge       !== undefined && { badge: badge || null }),
         ...(stockNum !== undefined && !isNaN(stockNum) && stockNum >= 0 && {
           stock:   stockNum,
           inStock: inStockCalc,
         }),
-        // inStock manual solo si no se envió stock
         ...(body.inStock !== undefined && stockNum === undefined && { inStock: body.inStock }),
-        ...(featured !== undefined && { featured }),
-        ...(active   !== undefined && { active }),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...(body.showInOffers !== undefined && { showInOffers: body.showInOffers } as any),
+        ...(featured    !== undefined && { featured }),
+        ...(active      !== undefined && { active }),
+        ...(body.showInOffers !== undefined && { showInOffers: Boolean(body.showInOffers) }),
       },
     })
 
