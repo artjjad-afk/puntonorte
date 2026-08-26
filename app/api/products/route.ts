@@ -23,20 +23,22 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url)
     const category = searchParams.get('category')
     const featured = searchParams.get('featured')
-    const showAll = searchParams.get('all') === 'true'
+    const showAll  = searchParams.get('all')    === 'true'
+    const offersOnly = searchParams.get('offers') === 'true'
     const activeParam = searchParams.get('active')
     const q = searchParams.get('q')?.trim()
 
-    // showAll solo permitido para admins autenticados
     if (showAll && !isAdmin(req)) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
 
     const active = showAll ? undefined : activeParam !== 'false'
-    const where: Record<string, unknown> = {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where: Record<string, any> = {}
     if (active !== undefined) where.active = active
     if (category && category !== 'all') where.category = category
     if (featured === 'true') where.featured = true
+    if (offersOnly) where.showInOffers = true
 
     // Búsqueda por texto — busca en nombre, descripción y categoría
     if (q) {

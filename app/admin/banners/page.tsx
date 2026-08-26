@@ -1,445 +1,292 @@
 'use client'
-import { useEffect, useState, useRef, useCallback } from 'react'
-import { Plus, Trash2, Eye, EyeOff, Pencil, X, Check, Upload, Link as LinkIcon, Zap, ChevronDown } from 'lucide-react'
+import { useEffect, useState, useCallback } from 'react'
+import { Tag, Eye, EyeOff, Search, Percent, Star, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 
-interface Banner {
+interface Product {
   id: number
-  etiqueta: string | null
-  titulo: string
-  subtitulo: string | null
-  descripcion: string | null
-  linkUrl: string
-  linkTexto: string
-  imagen: string | null
-  precioDesde: number | null
+  name: string
+  slug: string
+  price: number
+  originalPrice: number | null
+  category: string
+  images: string[]
+  badge: string | null
+  featured: boolean
   active: boolean
-  orden: number
+  inStock: boolean
+  showInOffers: boolean
 }
 
-interface Category { slug: string; name: string }
-interface Product  { slug: string; name: string }
-
-type DestType = 'tienda' | 'categoria' | 'producto' | 'custom'
-
-const empty = {
-  etiqueta: '', titulo: '', subtitulo: '', descripcion: '',
-  linkUrl: '', linkTexto: '', precioDesde: '', orden: '0',
-  imagen: '', imageData: null as string | null,
-}
+interface Toast { id: number; type: 'success' | 'error'; message: string }
 
 const inp: React.CSSProperties = {
   width: '100%', padding: '10px 14px', borderRadius: 10,
   border: '1px solid rgba(255,255,255,0.1)', fontSize: 13,
   outline: 'none', fontFamily: 'inherit',
   background: 'rgba(255,255,255,0.06)', color: '#e2e8f0',
-  transition: 'border-color .2s', boxSizing: 'border-box' as const,
-}
-const lbl: React.CSSProperties = {
-  display: 'block', fontSize: 10, fontWeight: 700,
-  color: 'rgba(148,163,184,0.6)', letterSpacing: '0.1em',
-  textTransform: 'uppercase', marginBottom: 6,
-  fontFamily: 'var(--font-mono)',
-}
-const card: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 16, padding: 24, position: 'relative',
+  transition: 'border-color .2s', boxSizing: 'border-box',
 }
 
-export default function AdminBanners() {
-  const [banners, setBanners]   = useState<Banner[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [saving, setSaving]     = useState(false)
-  const [error, setError]       = useState('')
-  const [editingId, setEditingId] = useState<number | null>(null)
-  const [imgMode, setImgMode]   = useState<'upload' | 'url'>('url')
-  const [dragging, setDragging] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
-  const [form, setForm]         = useState(empty)
+function discount(price: number, original: number | null) {
+  if (!original || original <= price) return null
+  return Math.round(((original - price) / original) * 100)
+}
 
-  // Selector de destino
-  const [destType, setDestType]   = useState<DestType>('tienda')
-  const [destCat, setDestCat]     = useState('')
-  const [destProd, setDestProd]   = useState('')
-  const [categories, setCategories] = useState<Category[]>([])
+export default function AdminOfertas() {
   const [products, setProducts]   = useState<Product[]>([])
+  const [loading, setLoading]     = useState(true)
+  const [search, setSearch]       = useState('')
+  const [filter, setFilter]       = useState<'all' | 'offers'>('all')
+  const [toasts, setToasts]       = useState<Toast[]>([])
+  const toastId                   = useState(0)
 
-  // Calcula la URL según la selección
-  const computedUrl = (): string => {
-    if (destType === 'tienda')    return '/tienda'
-    if (destType === 'categoria') return destCat ? `/tienda?cat=${destCat}` : ''
-    if (destType === 'producto')  return destProd ? `/tienda/${destProd}` : ''
-    return form.linkUrl // custom
-  }
+  const showToast = useCallback((type: Toast['type'], message: string) => {
+    const id = ++toastId[0]
+    setToasts(t => [...t, { id, type, message }])
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3200)
+  }, [toastId])
 
-  const fetchBanners = async () => {
+  const fetchProducts = async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/banners?all=true')
+      const res = await fetch('/api/products?all=true')
       if (res.ok) {
         const data = await res.json()
-        setBanners(Array.isArray(data) ? data : [])
+        setProducts(Array.isArray(data) ? data : [])
       }
     } finally { setLoading(false) }
   }
 
-  useEffect(() => {
-    fetchBanners()
-    // Cargar categorías y productos para el selector
-    fetch('/api/categories')
-      .then(r => r.json())
-      .then(d => setCategories(Array.isArray(d) ? d : []))
-      .catch(() => {})
-    fetch('/api/products')
-      .then(r => r.json())
-      .then(d => setProducts(Array.isArray(d) ? d.map((p: { slug: string; name: string }) => ({ slug: p.slug, name: p.name })) : []))
-      .catch(() => {})
-  }, [])
+  useEffect(() => { fetchProducts() }, [])
 
-  const fileToBase64 = useCallback((file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      if (file.size > 2_097_152) { reject(new Error('Imagen mayor a 2MB')); return }
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
-  }, [])
-
-  const handleFile = useCallback(async (file: File) => {
-    if (!file.type.startsWith('image/')) { setError('Solo imágenes'); return }
+  const toggleOffer = async (product: Product) => {
     try {
-      const b64 = await fileToBase64(file)
-      setForm(f => ({ ...f, imageData: b64, imagen: '' }))
-      setError('')
-    } catch (e: unknown) { setError(e instanceof Error ? e.message : 'Error') }
-  }, [fileToBase64])
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.titulo.trim()) { setError('El título es requerido'); return }
-    const finalUrl = computedUrl()
-    if (!finalUrl) { setError('Selecciona el destino del botón'); return }
-    if (!form.linkTexto.trim()) { setError('El texto del botón es requerido'); return }
-
-    setSaving(true); setError('')
-    try {
-      const url    = editingId ? `/api/banners/${editingId}` : '/api/banners'
-      const method = editingId ? 'PUT' : 'POST'
-      const res = await fetch(url, {
-        method, headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...form, linkUrl: finalUrl, precioDesde: form.precioDesde || null }),
+      const res = await fetch(`/api/products/${product.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ showInOffers: !product.showInOffers }),
       })
-      if (res.ok) {
-        setForm(empty); setEditingId(null); setImgMode('url')
-        setDestType('tienda'); setDestCat(''); setDestProd('')
-        fetchBanners()
-      } else {
-        const d = await res.json(); setError(d.error || 'Error al guardar')
-      }
-    } catch { setError('Error de conexión') }
-    finally { setSaving(false) }
+      if (!res.ok) throw new Error()
+      showToast('success', product.showInOffers
+        ? `"${product.name}" quitado de ofertas`
+        : `"${product.name}" destacado en ofertas ✦`)
+      fetchProducts()
+    } catch { showToast('error', 'No se pudo actualizar el producto') }
   }
 
-  const startEdit = (b: Banner) => {
-    setEditingId(b.id)
-    setForm({
-      etiqueta: b.etiqueta || '', titulo: b.titulo, subtitulo: b.subtitulo || '',
-      descripcion: b.descripcion || '', linkUrl: b.linkUrl, linkTexto: b.linkTexto,
-      precioDesde: b.precioDesde ? String(b.precioDesde) : '',
-      orden: String(b.orden), imagen: b.imagen || '', imageData: null,
-    })
-    setImgMode('url')
-    // Detectar tipo de URL para mostrar el selector correcto
-    if (b.linkUrl === '/tienda') {
-      setDestType('tienda')
-    } else if (b.linkUrl.startsWith('/tienda?cat=')) {
-      setDestType('categoria')
-      setDestCat(b.linkUrl.replace('/tienda?cat=', ''))
-    } else if (b.linkUrl.startsWith('/tienda/')) {
-      setDestType('producto')
-      setDestProd(b.linkUrl.replace('/tienda/', ''))
-    } else {
-      setDestType('custom')
-    }
-  }
+  const filtered = products.filter(p => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+                        p.category.toLowerCase().includes(search.toLowerCase())
+    const matchFilter = filter === 'all' || p.showInOffers
+    return matchSearch && matchFilter
+  })
 
-  const handleToggle = async (b: Banner) => {
-    try {
-      await fetch(`/api/banners/${b.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !b.active }) })
-      fetchBanners()
-    } catch { alert('No se pudo actualizar') }
-  }
-
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Eliminar este banner?')) return
-    try {
-      await fetch(`/api/banners/${id}`, { method: 'DELETE' })
-      fetchBanners()
-    } catch { alert('No se pudo eliminar') }
-  }
-
-  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
+  const offersCount = products.filter(p => p.showInOffers).length
 
   return (
     <div style={{ padding: '24px 28px 80px', minHeight: '100vh', background: 'var(--bg-console, #0f1421)', fontFamily: 'var(--font-display, sans-serif)', color: '#e2e8f0' }}>
       <style>{`
-        .bn-inp:focus { border-color: rgba(249,115,22,0.5) !important; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+        .offer-row { transition: background .18s; border-radius: 12px; }
+        .offer-row:hover { background: rgba(255,255,255,0.03); }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes toast-in { from { opacity:0; transform:translateX(40px) scale(.95); } to { opacity:1; transform:translateX(0) scale(1); } }
       `}</style>
 
+      {/* Toasts */}
+      <div style={{ position:'fixed', bottom:28, right:28, zIndex:9999, display:'flex', flexDirection:'column', gap:10, pointerEvents:'none' }}>
+        <AnimatePresence>
+          {toasts.map(t => (
+            <motion.div key={t.id}
+              initial={{ opacity:0, x:40, scale:.95 }}
+              animate={{ opacity:1, x:0, scale:1 }}
+              exit={{ opacity:0, x:40, scale:.95 }}
+              transition={{ type:'spring', stiffness:400, damping:30 }}
+              style={{ display:'flex', alignItems:'center', gap:10, padding:'12px 18px', borderRadius:14, pointerEvents:'auto', backdropFilter:'blur(20px)',
+                background: t.type === 'success' ? 'rgba(34,197,94,.15)' : 'rgba(248,113,113,.15)',
+                border: `1px solid ${t.type === 'success' ? 'rgba(34,197,94,.3)' : 'rgba(248,113,113,.3)'}`,
+                boxShadow:'0 8px 32px rgba(0,0,0,.4)', maxWidth:320, fontSize:13, fontWeight:600,
+                color: t.type === 'success' ? '#86efac' : '#fca5a5' }}>
+              {t.type === 'success' ? '✦' : '!'} {t.message}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
+
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
-        <div style={{ width: 38, height: 38, borderRadius: 11, background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <Zap size={19} color="#f97316" strokeWidth={1.75} />
-        </div>
-        <div>
-          <h1 style={{ fontSize: 'clamp(20px,3vw,26px)', fontWeight: 800, color: '#f1f5f9', margin: 0, letterSpacing: '-0.5px' }}>Banners promocionales</h1>
-          <p style={{ color: 'rgba(148,163,184,0.5)', fontSize: 12, margin: 0, fontFamily: 'var(--font-mono)' }}>
-            Gestiona el banner de la página principal
-          </p>
+      <div style={{ marginBottom:28 }}>
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
+          <div style={{ width:36, height:36, borderRadius:10, background:'rgba(249,115,22,.15)', border:'1px solid rgba(249,115,22,.25)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+            <Percent size={18} color="#f97316" strokeWidth={1.75} />
+          </div>
+          <div>
+            <h1 style={{ fontSize:'clamp(20px,3vw,28px)', fontWeight:800, color:'#f1f5f9', margin:0, letterSpacing:'-0.5px' }}>Ofertas</h1>
+            <p style={{ color:'rgba(148,163,184,.5)', fontSize:12, margin:0, fontFamily:'var(--font-mono)' }}>
+              {offersCount} producto{offersCount !== 1 ? 's' : ''} en oferta · Gestiona qué se destaca en el inicio
+            </p>
+          </div>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, alignItems: 'start' }}>
-
-        {/* Formulario */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} style={card}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(249,115,22,0.3),transparent)', borderRadius: '16px 16px 0 0' }} />
-
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9', margin: '0 0 20px', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Plus size={15} color="#f97316" /> {editingId ? 'Editando banner' : 'Nuevo banner'}
-          </h2>
-
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div>
-                <label style={lbl}>Etiqueta pequeña</label>
-                <input className="bn-inp" value={form.etiqueta} onChange={e => set('etiqueta', e.target.value)} placeholder="Ej: Fragrancias" style={inp} />
-              </div>
-              <div>
-                <label style={lbl}>Precio desde (opcional)</label>
-                <input className="bn-inp" type="number" step="0.01" min="0" value={form.precioDesde} onChange={e => set('precioDesde', e.target.value)} placeholder="28.00" style={inp} />
-              </div>
-            </div>
-
+      {/* Stats rápidas */}
+      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:24 }}>
+        {[
+          { label:'En oferta', value: offersCount, icon:'🔥', color:'rgba(249,115,22,.15)', border:'rgba(249,115,22,.25)' },
+          { label:'Con descuento', value: products.filter(p => discount(p.price, p.originalPrice) !== null).length, icon:'🏷️', color:'rgba(96,165,250,.12)', border:'rgba(96,165,250,.25)' },
+          { label:'Total productos', value: products.length, icon:'📦', color:'rgba(148,163,184,.08)', border:'rgba(148,163,184,.15)' },
+        ].map(s => (
+          <div key={s.label} style={{ background:s.color, border:`1px solid ${s.border}`, borderRadius:14, padding:'16px 20px', display:'flex', alignItems:'center', gap:12 }}>
+            <span style={{ fontSize:24 }}>{s.icon}</span>
             <div>
-              <label style={lbl}>Título principal *</label>
-              <input className="bn-inp" value={form.titulo} onChange={e => set('titulo', e.target.value)} placeholder="Ej: Perfumes" style={inp} />
+              <p style={{ margin:0, fontSize:24, fontWeight:900, color:'#f1f5f9', letterSpacing:'-1px' }}>{s.value}</p>
+              <p style={{ margin:0, fontSize:11, color:'rgba(148,163,184,.6)', fontFamily:'var(--font-mono)', textTransform:'uppercase', letterSpacing:'.08em' }}>{s.label}</p>
             </div>
+          </div>
+        ))}
+      </div>
 
-            <div>
-              <label style={lbl}>Subtítulo</label>
-              <input className="bn-inp" value={form.subtitulo} onChange={e => set('subtitulo', e.target.value)} placeholder="Ej: Premium hasta 20% OFF" style={inp} />
-            </div>
+      {/* Filtros y búsqueda */}
+      <div style={{ display:'flex', gap:12, marginBottom:20, flexWrap:'wrap', alignItems:'center' }}>
+        <div style={{ position:'relative', flex:1, minWidth:200 }}>
+          <Search size={14} style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', color:'rgba(148,163,184,.4)', pointerEvents:'none' }} />
+          <input value={search} onChange={e => setSearch(e.target.value)}
+            placeholder="Buscar producto o categoría..."
+            style={{ ...inp, paddingLeft:36 }} />
+        </div>
+        <div style={{ display:'flex', gap:6 }}>
+          {(['all','offers'] as const).map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              style={{ padding:'9px 16px', borderRadius:10, fontSize:12, fontWeight:700, cursor:'pointer', border:'none', fontFamily:'inherit',
+                background: filter === f ? 'rgba(249,115,22,.2)' : 'rgba(255,255,255,.05)',
+                color: filter === f ? '#f97316' : 'rgba(148,163,184,.6)',
+                outline: filter === f ? '1px solid rgba(249,115,22,.4)' : '1px solid rgba(255,255,255,.08)' }}>
+              {f === 'all' ? 'Todos' : '🔥 En oferta'}
+            </button>
+          ))}
+        </div>
+      </div>
 
-            <div>
-              <label style={lbl}>Descripción</label>
-              <textarea className="bn-inp" value={form.descripcion} onChange={e => set('descripcion', e.target.value)} rows={3} placeholder="Texto descriptivo..." style={{ ...inp, resize: 'vertical' }} />
-            </div>
+      {/* Lista */}
+      <motion.div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:18, overflow:'hidden' }}>
+        {/* Header tabla */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 120px 120px 100px 120px', gap:16, padding:'12px 20px', borderBottom:'1px solid rgba(255,255,255,.06)', fontSize:10, fontWeight:700, color:'rgba(148,163,184,.4)', letterSpacing:'.1em', textTransform:'uppercase', fontFamily:'var(--font-mono)' }}>
+          <span>Producto</span>
+          <span>Precio</span>
+          <span>Descuento</span>
+          <span>Estado</span>
+          <span style={{ textAlign:'right' }}>En oferta</span>
+        </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div>
-                <label style={lbl}>¿A dónde lleva el botón? *</label>
-                {/* Selector visual de destino */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 8 }}>
-                  {([
-                    ['tienda',    '🛍️ Toda la tienda'],
-                    ['categoria', '🏷️ Una categoría'],
-                    ['producto',  '📦 Un producto'],
-                    ['custom',    '🔗 URL personalizada'],
-                  ] as [DestType, string][]).map(([val, label]) => (
-                    <button key={val} type="button" onClick={() => setDestType(val)}
-                      style={{ padding: '8px 10px', borderRadius: 8, fontSize: 11, fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'inherit', textAlign: 'left', background: destType === val ? 'rgba(249,115,22,0.2)' : 'rgba(255,255,255,0.05)', color: destType === val ? '#f97316' : 'rgba(148,163,184,0.7)', outline: destType === val ? '1px solid rgba(249,115,22,0.4)' : '1px solid rgba(255,255,255,0.08)', transition: 'all .15s' }}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Sub-selector según tipo */}
-                {destType === 'categoria' && (
-                  <div style={{ position: 'relative' }}>
-                    <select className="bn-inp" value={destCat} onChange={e => setDestCat(e.target.value)}
-                      style={{ ...inp, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
-                      <option value="">— Elige una categoría —</option>
-                      {categories.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
-                    </select>
-                    <ChevronDown size={14} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'rgba(148,163,184,0.5)' }} />
-                  </div>
-                )}
-
-                {destType === 'producto' && (
-                  <div style={{ position: 'relative' }}>
-                    <select className="bn-inp" value={destProd} onChange={e => setDestProd(e.target.value)}
-                      style={{ ...inp, appearance: 'none', paddingRight: 32, cursor: 'pointer' }}>
-                      <option value="">— Elige un producto —</option>
-                      {products.map(p => <option key={p.slug} value={p.slug}>{p.name}</option>)}
-                    </select>
-                    <ChevronDown size={14} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: 'rgba(148,163,184,0.5)' }} />
-                  </div>
-                )}
-
-                {destType === 'custom' && (
-                  <input className="bn-inp" value={form.linkUrl} onChange={e => set('linkUrl', e.target.value)}
-                    placeholder="https://... o /ruta/interna" style={inp} />
-                )}
-
-                {/* Preview URL generada */}
-                {destType !== 'custom' && computedUrl() && (
-                  <p style={{ margin: '4px 0 0', fontSize: 10, color: 'rgba(148,163,184,0.4)', fontFamily: 'var(--font-mono)' }}>
-                    URL: {computedUrl()}
-                  </p>
-                )}
-              </div>
-              <div>
-                <label style={lbl}>Texto del botón *</label>
-                <input className="bn-inp" value={form.linkTexto} onChange={e => set('linkTexto', e.target.value)} placeholder="Ver perfumes →" style={inp} />
-              </div>
-            </div>
-
-            {/* Imagen */}
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-                <label style={{ ...lbl, marginBottom: 0 }}>Imagen lateral</label>
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {(['url', 'upload'] as const).map(mode => (
-                    <button key={mode} type="button" onClick={() => setImgMode(mode)}
-                      style={{ padding: '3px 10px', borderRadius: 6, fontSize: 10, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-mono)', background: imgMode === mode ? 'rgba(249,115,22,0.2)' : 'rgba(255,255,255,0.06)', color: imgMode === mode ? '#f97316' : 'rgba(148,163,184,0.5)' }}>
-                      {mode === 'url' ? <><LinkIcon size={9} style={{ display: 'inline', marginRight: 3 }} />URL</> : <><Upload size={9} style={{ display: 'inline', marginRight: 3 }} />SUBIR</>}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {imgMode === 'url' ? (
-                <>
-                  <input className="bn-inp" value={form.imagen} onChange={e => set('imagen', e.target.value)} placeholder="https://..." style={inp} />
-                  {form.imagen && !form.imagen.startsWith('data:') && (
-                    <div style={{ marginTop: 8, height: 80, borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={form.imagen} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => (e.currentTarget.style.display = 'none')} />
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div
-                  onDragOver={e => { e.preventDefault(); setDragging(true) }}
-                  onDragLeave={() => setDragging(false)}
-                  onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f) }}
-                  onClick={() => fileRef.current?.click()}
-                  style={{ border: `2px dashed ${dragging ? 'rgba(249,115,22,0.7)' : form.imageData ? 'rgba(34,197,94,0.4)' : 'rgba(255,255,255,0.12)'}`, borderRadius: 12, padding: form.imageData ? 0 : '16px', textAlign: 'center', cursor: 'pointer', background: dragging ? 'rgba(249,115,22,0.06)' : 'rgba(255,255,255,0.02)', transition: 'all .2s', overflow: 'hidden' }}
+        {loading ? (
+          <div style={{ padding:56, textAlign:'center', color:'rgba(148,163,184,.4)' }}>
+            <div style={{ width:32, height:32, border:'2px solid rgba(249,115,22,.3)', borderTopColor:'#f97316', borderRadius:'50%', margin:'0 auto 12px', animation:'spin .8s linear infinite' }} />
+            <p style={{ margin:0, fontSize:13, fontFamily:'var(--font-mono)' }}>Cargando productos...</p>
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding:56, textAlign:'center', color:'rgba(148,163,184,.3)' }}>
+            <Tag size={36} strokeWidth={1} style={{ margin:'0 auto 12px', display:'block', opacity:.4 }} />
+            <p style={{ margin:'0 0 4px', fontSize:15, fontWeight:600, color:'rgba(148,163,184,.4)' }}>
+              {search ? 'Sin resultados' : 'Sin productos'}
+            </p>
+            <p style={{ margin:0, fontSize:12, fontFamily:'var(--font-mono)' }}>
+              {search ? `No hay productos que coincidan con "${search}"` : 'Crea productos desde la sección Productos'}
+            </p>
+          </div>
+        ) : (
+          <div>
+            {filtered.map((product, idx) => {
+              const disc = discount(product.price, product.originalPrice)
+              const img  = product.images?.[0] ?? null
+              return (
+                <motion.div
+                  key={product.id}
+                  initial={{ opacity:0, x:-8 }}
+                  animate={{ opacity:1, x:0 }}
+                  transition={{ delay: idx * 0.03 }}
+                  className="offer-row"
+                  style={{ display:'grid', gridTemplateColumns:'1fr 120px 120px 100px 120px', gap:16, padding:'14px 20px', borderBottom: idx < filtered.length - 1 ? '1px solid rgba(255,255,255,.05)' : 'none', alignItems:'center' }}
                 >
-                  {form.imageData ? (
-                    <div style={{ position: 'relative' }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={form.imageData} alt="" style={{ width: '100%', height: 80, objectFit: 'cover', display: 'block' }} />
-                      <button type="button" onClick={e => { e.stopPropagation(); setForm(f => ({ ...f, imageData: null })) }}
-                        style={{ position: 'absolute', top: 6, right: 6, width: 24, height: 24, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <X size={12} />
-                      </button>
+                  {/* Producto */}
+                  <div style={{ display:'flex', alignItems:'center', gap:12, minWidth:0 }}>
+                    <div style={{ width:44, height:44, borderRadius:10, overflow:'hidden', flexShrink:0, background:'rgba(255,255,255,.06)', border:'1px solid rgba(255,255,255,.08)' }}>
+                      {img
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={img} alt={product.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                        : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}><Tag size={16} color="rgba(148,163,184,.3)" /></div>
+                      }
                     </div>
-                  ) : (
-                    <>
-                      <Upload size={18} color={dragging ? '#f97316' : 'rgba(148,163,184,0.35)'} style={{ margin: '0 auto 6px', display: 'block' }} />
-                      <p style={{ margin: 0, fontSize: 12, color: 'rgba(148,163,184,0.5)' }}>{dragging ? 'Suelta aquí' : 'Arrastra o haz clic'}</p>
-                    </>
-                  )}
-                  <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f) }} />
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: 12 }}>
-              <div>
-                <label style={lbl}>Orden</label>
-                <input className="bn-inp" type="number" min="0" value={form.orden} onChange={e => set('orden', e.target.value)} style={inp} />
-              </div>
-            </div>
-
-            <AnimatePresence>
-              {error && (
-                <motion.p initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  style={{ color: '#f87171', fontSize: 12, margin: 0, padding: '8px 12px', background: 'rgba(248,113,113,0.1)', borderRadius: 8, border: '1px solid rgba(248,113,113,0.2)' }}>
-                  {error}
-                </motion.p>
-              )}
-            </AnimatePresence>
-
-            <div style={{ display: 'flex', gap: 8 }}>
-              <button type="submit" disabled={saving}
-                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px', borderRadius: 11, background: saving ? 'rgba(249,115,22,0.3)' : 'linear-gradient(135deg,#f97316,#c1692b)', color: '#fff', border: 'none', cursor: saving ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', boxShadow: saving ? 'none' : '0 4px 16px rgba(249,115,22,0.3)' }}>
-                {saving ? 'Guardando...' : (editingId ? <><Check size={14} /> Guardar cambios</> : <><Plus size={14} /> Crear banner</>)}
-              </button>
-              {editingId && (
-                <button type="button" onClick={() => { setEditingId(null); setForm(empty); setImgMode('url') }}
-                  style={{ padding: '11px 16px', borderRadius: 11, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(148,163,184,0.7)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 13 }}>
-                  Cancelar
-                </button>
-              )}
-            </div>
-          </form>
-        </motion.div>
-
-        {/* Lista de banners */}
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1 }} style={card}>
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 1, background: 'linear-gradient(90deg,transparent,rgba(249,115,22,0.2),transparent)', borderRadius: '16px 16px 0 0' }} />
-
-          <h2 style={{ fontSize: 14, fontWeight: 700, color: '#f1f5f9', margin: '0 0 16px' }}>
-            Banners activos
-            <span style={{ marginLeft: 8, fontSize: 11, padding: '2px 8px', borderRadius: 100, background: 'rgba(249,115,22,0.15)', color: '#f97316' }}>{banners.length}</span>
-          </h2>
-
-          {loading ? (
-            <div style={{ padding: 40, textAlign: 'center', color: 'rgba(148,163,184,0.4)' }}>
-              <div style={{ width: 28, height: 28, border: '2px solid rgba(249,115,22,0.3)', borderTopColor: '#f97316', borderRadius: '50%', margin: '0 auto 10px', animation: 'spin .8s linear infinite' }} />
-              <p style={{ margin: 0, fontSize: 12, fontFamily: 'var(--font-mono)' }}>Cargando...</p>
-            </div>
-          ) : banners.length === 0 ? (
-            <div style={{ padding: 40, textAlign: 'center', color: 'rgba(148,163,184,0.3)' }}>
-              <Zap size={32} strokeWidth={1} style={{ margin: '0 auto 10px', display: 'block' }} />
-              <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600, color: 'rgba(148,163,184,0.4)' }}>Sin banners</p>
-              <p style={{ margin: 0, fontSize: 11, fontFamily: 'var(--font-mono)' }}>Crea el primer banner con el formulario</p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {banners.map(b => (
-                <div key={b.id} style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, overflow: 'hidden' }}>
-                  {/* Preview imagen */}
-                  {b.imagen && (
-                    <div style={{ height: 80, overflow: 'hidden' }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={b.imagen} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    <div style={{ minWidth:0 }}>
+                      <p style={{ margin:0, fontWeight:700, color:'#f1f5f9', fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{product.name}</p>
+                      <p style={{ margin:0, fontSize:11, color:'rgba(148,163,184,.45)', fontFamily:'var(--font-mono)' }}>{product.category}</p>
                     </div>
-                  )}
-                  <div style={{ padding: '12px 14px' }}>
-                    {b.etiqueta && <p style={{ margin: '0 0 2px', fontSize: 10, color: '#f97316', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}>{b.etiqueta}</p>}
-                    <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 700, color: '#f1f5f9' }}>{b.titulo}</p>
-                    {b.subtitulo && <p style={{ margin: '0 0 6px', fontSize: 12, color: 'rgba(148,163,184,0.6)' }}>{b.subtitulo}</p>}
-                    <p style={{ margin: '0 0 10px', fontSize: 11, color: 'rgba(148,163,184,0.4)', fontFamily: 'var(--font-mono)' }}>{b.linkUrl}</p>
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 100, background: b.active ? 'rgba(34,197,94,0.12)' : 'rgba(148,163,184,0.08)', color: b.active ? '#22c55e' : 'rgba(148,163,184,0.5)', border: `1px solid ${b.active ? 'rgba(34,197,94,0.25)' : 'rgba(148,163,184,0.15)'}` }}>
-                        {b.active ? 'Activo' : 'Inactivo'}
-                      </span>
-                      <div style={{ marginLeft: 'auto', display: 'flex', gap: 5 }}>
-                        <button onClick={() => startEdit(b)} style={{ width: 28, height: 28, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', cursor: 'pointer' }}>
-                          <Pencil size={12} />
-                        </button>
-                        <button onClick={() => handleToggle(b)} style={{ width: 28, height: 28, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.15)', color: 'rgba(148,163,184,0.6)', cursor: 'pointer' }}>
-                          {b.active ? <EyeOff size={12} /> : <Eye size={12} />}
-                        </button>
-                        <button onClick={() => handleDelete(b.id)} style={{ width: 28, height: 28, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', cursor: 'pointer' }}>
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </div>
+                    {product.featured && (
+                      <span title="Destacado" style={{ flexShrink:0 }}><Star size={13} color="#f97316" fill="#f97316" /></span>
+                    )}
                   </div>
-                </div>
-              ))}
-            </div>
-          )}
+
+                  {/* Precio */}
+                  <div>
+                    <p style={{ margin:0, fontWeight:800, color:'#f1f5f9', fontSize:14 }}>${product.price.toFixed(2)}</p>
+                    {product.originalPrice && (
+                      <p style={{ margin:0, fontSize:11, color:'rgba(148,163,184,.4)', textDecoration:'line-through', fontFamily:'var(--font-mono)' }}>${product.originalPrice.toFixed(2)}</p>
+                    )}
+                  </div>
+
+                  {/* Descuento */}
+                  <div>
+                    {disc !== null ? (
+                      <span style={{ display:'inline-flex', alignItems:'center', gap:4, padding:'3px 10px', borderRadius:100, background:'rgba(34,197,94,.12)', border:'1px solid rgba(34,197,94,.25)', color:'#86efac', fontSize:12, fontWeight:800, fontFamily:'var(--font-mono)' }}>
+                        -{disc}%
+                      </span>
+                    ) : (
+                      <span style={{ color:'rgba(148,163,184,.3)', fontSize:12, fontFamily:'var(--font-mono)' }}>—</span>
+                    )}
+                  </div>
+
+                  {/* Estado */}
+                  <div>
+                    <span style={{ display:'inline-block', padding:'3px 10px', borderRadius:100, fontSize:11, fontWeight:700,
+                      background: product.active ? 'rgba(34,197,94,.1)' : 'rgba(148,163,184,.08)',
+                      color: product.active ? '#22c55e' : 'rgba(148,163,184,.5)',
+                      border: `1px solid ${product.active ? 'rgba(34,197,94,.25)' : 'rgba(148,163,184,.15)'}` }}>
+                      {product.active ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </div>
+
+                  {/* Toggle oferta */}
+                  <div style={{ display:'flex', justifyContent:'flex-end' }}>
+                    <button
+                      onClick={() => toggleOffer(product)}
+                      title={product.showInOffers ? 'Quitar de ofertas' : 'Destacar en ofertas'}
+                      style={{ height:34, padding:'0 14px', borderRadius:10, display:'flex', alignItems:'center', gap:6, cursor:'pointer', border:'none', fontFamily:'var(--font-mono)', fontSize:10, fontWeight:800, letterSpacing:'.06em', transition:'all .2s',
+                        background: product.showInOffers ? 'linear-gradient(135deg,rgba(249,115,22,.25),rgba(251,146,60,.2))' : 'rgba(148,163,184,.08)',
+                        color: product.showInOffers ? '#f97316' : 'rgba(148,163,184,.5)',
+                        outline: product.showInOffers ? '1px solid rgba(249,115,22,.4)' : '1px solid rgba(148,163,184,.15)',
+                        boxShadow: product.showInOffers ? '0 0 16px rgba(249,115,22,.2)' : 'none' }}>
+                      {product.showInOffers ? (
+                        <><Percent size={11} /> EN OFERTA</>
+                      ) : (
+                        <><X size={11} /> AGREGAR</>
+                      )}
+                    </button>
+                  </div>
+                </motion.div>
+              )
+            })}
+          </div>
+        )}
+      </motion.div>
+
+      {/* Tip */}
+      {offersCount > 0 && (
+        <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} transition={{ delay:.3 }}
+          style={{ marginTop:16, padding:'12px 16px', background:'rgba(249,115,22,.06)', border:'1px solid rgba(249,115,22,.14)', borderRadius:12, display:'flex', alignItems:'center', gap:10 }}>
+          <span style={{ fontSize:18 }}>💡</span>
+          <p style={{ margin:0, fontSize:12, color:'rgba(148,163,184,.6)', fontFamily:'var(--font-mono)', lineHeight:1.6 }}>
+            Tienes <strong style={{ color:'#f97316' }}>{offersCount} producto{offersCount !== 1 ? 's' : ''}</strong> en oferta. Aparecerán en la sección de ofertas de la página principal.
+          </p>
         </motion.div>
-      </div>
+      )}
     </div>
   )
 }

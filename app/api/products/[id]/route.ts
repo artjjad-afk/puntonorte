@@ -67,6 +67,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...(body.inStock !== undefined && stockNum === undefined && { inStock: body.inStock }),
         ...(featured !== undefined && { featured }),
         ...(active   !== undefined && { active }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...(body.showInOffers !== undefined && { showInOffers: body.showInOffers } as any),
       },
     })
 

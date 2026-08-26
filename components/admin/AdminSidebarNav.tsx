@@ -14,7 +14,7 @@ const NAV = [
   { href: '/admin',            label: 'Dashboard',  icon: LayoutDashboard, exact: true  },
   { href: '/admin/productos',  label: 'Productos',  icon: Package,         exact: false },
   { href: '/admin/categorias', label: 'Categorías', icon: Tag,             exact: false },
-  { href: '/admin/banners',    label: 'Banners',    icon: Zap,             exact: false },
+  { href: '/admin/banners',    label: 'Ofertas',    icon: Zap,             exact: false },
   { href: '/admin/pedidos',    label: 'Pedidos',    icon: ShoppingBag,     exact: false },
 ]
 
