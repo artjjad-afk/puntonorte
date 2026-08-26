@@ -77,7 +77,59 @@ export default function CatalogoPage() {
   const fecha = new Date().toLocaleDateString('es-VE', { day: '2-digit', month: 'long', year: 'numeric' })
 
   return (
-    <div className="catalogo-root" style={{ minHeight: '100vh', background: '#f4f2f0', color: '#211f1e' }}>
+    <div className="catalogo-root">
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600&display=swap');
+        .catalogo-root{
+          --serif:'Playfair Display', Georgia, 'Times New Roman', serif;
+          --sans:'Manrope', system-ui, -apple-system, Arial, sans-serif;
+          --ink:#211f1e; --muted:#8a8683; --line:#e8e5e2; --copper:#c1692b; --copper2:#e88c4a; --paper:#faf8f6;
+          font-family:var(--sans); color:var(--ink); background:var(--paper);
+        }
+        /* ── Portada ── */
+        .cov{position:relative;overflow:hidden;background:radial-gradient(circle at 50% 30%, #322d2a 0%, #1c1a18 55%, #141210 100%);color:#f6f1ea;text-align:center;padding:90px 28px 84px;}
+        .cov__glow{position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,rgba(232,140,74,.22),transparent 62%);pointer-events:none;}
+        .cov__kicker{position:relative;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--copper2);font-weight:700;margin:0 0 22px;}
+        .cov__logo{position:relative;height:86px;width:auto;object-fit:contain;margin:0 auto 22px;display:block;filter:drop-shadow(0 6px 22px rgba(232,140,74,.35));}
+        .cov__title{position:relative;font-family:var(--serif);font-weight:800;font-size:clamp(52px,9vw,88px);line-height:.95;letter-spacing:-1px;margin:0;}
+        .cov__title em{font-style:italic;color:var(--copper2);}
+        .cov__sub{position:relative;font-size:12px;letter-spacing:5px;text-transform:uppercase;color:rgba(246,241,234,.65);margin:20px 0 0;font-weight:600;}
+        .cov__tag{position:relative;max-width:520px;margin:22px auto 0;font-size:15px;line-height:1.6;color:rgba(246,241,234,.78);}
+        .cov__rule{position:relative;width:64px;height:2px;margin:30px auto 0;background:linear-gradient(90deg,transparent,var(--copper2),transparent);}
+        .cov__chips{position:relative;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:30px auto 0;}
+        .cov__chip{font-size:12px;font-weight:600;color:rgba(246,241,234,.9);border:1px solid rgba(232,140,74,.35);border-radius:40px;padding:8px 16px;background:rgba(255,255,255,.04);}
+        /* ── Contenido ── */
+        .cat-wrap{max-width:1060px;margin:0 auto;padding:64px 28px 80px;}
+        .cat-state{text-align:center;color:var(--muted);padding:80px 0;font-size:15px;}
+        .cat-sec{margin-top:56px;}
+        .cat-sec:first-of-type{margin-top:0;}
+        .cat-head{display:flex;align-items:flex-end;gap:16px;margin:0 0 26px;}
+        .cat-idx{font-family:var(--serif);font-weight:800;font-size:44px;line-height:.8;color:transparent;-webkit-text-stroke:1.4px rgba(193,105,43,.5);letter-spacing:-1px;}
+        .cat-name{font-family:var(--serif);font-weight:700;font-size:30px;line-height:1;letter-spacing:-.5px;margin:0;}
+        .cat-count{font-size:12px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;}
+        .cat-hr{flex:1;height:1px;background:var(--line);margin-bottom:6px;}
+        .cat-grid{display:flex;flex-wrap:wrap;gap:22px;}
+        .cat-card{flex:1 1 230px;max-width:270px;min-width:0;background:#fff;border-radius:16px;overflow:hidden;border:1px solid var(--line);box-shadow:0 10px 30px rgba(33,31,30,.06);display:flex;flex-direction:column;}
+        .cat-imgbox{position:relative;aspect-ratio:4/5;background:#f1eeeb;}
+        .cat-imgbox img{width:100%;height:100%;object-fit:cover;display:block;}
+        .cat-noimg{display:flex;align-items:center;justify-content:center;height:100%;color:#c9c5c2;font-size:12px;letter-spacing:1px;}
+        .cat-disc{position:absolute;top:12px;left:12px;background:linear-gradient(135deg,var(--copper),var(--copper2));color:#fff;font-size:11px;font-weight:800;letter-spacing:.5px;padding:5px 11px;border-radius:40px;box-shadow:0 4px 12px rgba(193,105,43,.35);}
+        .cat-out{position:absolute;top:12px;right:12px;background:rgba(33,31,30,.9);color:#fff;font-size:10px;font-weight:700;letter-spacing:.5px;padding:5px 10px;border-radius:40px;}
+        .cat-body{padding:16px 16px 18px;display:flex;flex-direction:column;gap:8px;flex:1;}
+        .cat-kick{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--copper);}
+        .cat-pname{font-family:var(--serif);font-weight:600;font-size:18px;line-height:1.25;margin:0;flex:1;}
+        .cat-price{display:flex;align-items:baseline;gap:9px;}
+        .cat-now{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.5px;}
+        .cat-old{font-size:14px;color:var(--muted);text-decoration:line-through;}
+        /* ── Pie ── */
+        .cat-foot{margin-top:70px;text-align:center;padding:44px 28px;background:radial-gradient(circle at 50% 0%, #322d2a, #1c1a18);color:#f6f1ea;border-radius:22px;}
+        .cat-foot h3{font-family:var(--serif);font-size:28px;font-weight:700;margin:0 0 8px;}
+        .cat-foot p{margin:4px 0;font-size:14px;color:rgba(246,241,234,.8);}
+        .cat-foot .cat-foot__cta{display:inline-block;margin-top:16px;background:linear-gradient(135deg,var(--copper),var(--copper2));color:#fff;font-weight:800;font-size:14px;padding:13px 28px;border-radius:12px;text-decoration:none;}
+        @media(max-width:520px){ .cat-card{flex:1 1 150px;} .cat-name{font-size:24px;} .cat-idx{font-size:34px;} }
+        @media print{ .cov{break-after:page;} .cat-card{flex:0 0 30%;} }
+      `}</style>
+
       {/* Aviso mientras se prepara la descarga automática (no se imprime) */}
       {preparando && (
         <div
@@ -85,10 +137,10 @@ export default function CatalogoPage() {
           style={{
             position: 'fixed', inset: 0, zIndex: 50, display: 'flex',
             flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px',
-            background: 'rgba(33,31,30,.88)', color: '#fff',
+            background: 'rgba(28,26,24,.92)', color: '#fff',
           }}
         >
-          <div style={{ width: '42px', height: '42px', borderRadius: '50%', border: '3px solid rgba(232,140,74,.25)', borderTopColor: '#e88c4a', animation: 'pn-loader-spin .8s linear infinite' }} />
+          <div style={{ width: '46px', height: '46px', borderRadius: '50%', border: '3px solid rgba(232,140,74,.25)', borderTopColor: '#e88c4a', animation: 'pn-loader-spin .8s linear infinite' }} />
           <p style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '1px' }}>Preparando tu catálogo…</p>
         </div>
       )}
@@ -100,10 +152,10 @@ export default function CatalogoPage() {
           position: 'sticky', top: 0, zIndex: 10,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           gap: '12px', flexWrap: 'wrap',
-          padding: '14px 20px', background: '#211f1e',
+          padding: '14px 20px', background: '#1c1a18', borderBottom: '1px solid rgba(232,140,74,.2)',
         }}
       >
-        <Link href="/" style={{ color: '#f9f7f5', textDecoration: 'none', fontSize: '14px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+        <Link href="/" style={{ color: '#f6f1ea', textDecoration: 'none', fontSize: '14px', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
           ← Volver a la tienda
         </Link>
         <button
@@ -111,7 +163,7 @@ export default function CatalogoPage() {
           style={{
             border: 'none', cursor: 'pointer',
             background: 'linear-gradient(135deg,#c1692b,#e88c4a)',
-            color: '#fff', fontWeight: 900, fontSize: '14px',
+            color: '#fff', fontWeight: 800, fontSize: '14px',
             padding: '12px 26px', borderRadius: '12px',
             boxShadow: '0 6px 18px rgba(193,105,43,.4)',
           }}
@@ -120,106 +172,75 @@ export default function CatalogoPage() {
         </button>
       </div>
 
+      {/* ── Portada ── */}
+      <header className="cov">
+        <div className="cov__glow" />
+        <p className="cov__kicker">Est. Venezuela · Moda Premium</p>
+        <img className="cov__logo" src="/logo-removebg-preview.png" alt="Punto Norte" />
+        <h1 className="cov__title">Catá<em>logo</em></h1>
+        <p className="cov__sub">Colección 2025 — 2026</p>
+        <p className="cov__tag">Moda, accesorios y perfumes de calidad premium. Piezas únicas que cuentan tu historia, con envíos a toda Venezuela.</p>
+        <div className="cov__rule" />
+        <div className="cov__chips">
+          <span className="cov__chip">📍 {CONTACT.ciudad}</span>
+          <span className="cov__chip">💬 WhatsApp +{CONTACT.whatsapp}</span>
+          <span className="cov__chip">📸 @{CONTACT.instagram}</span>
+        </div>
+      </header>
+
       {/* ── Contenido imprimible ── */}
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 28px 80px' }}>
+      <div className="cat-wrap">
+        {products === null && <p className="cat-state">Cargando catálogo…</p>}
+        {products !== null && products.length === 0 && <p className="cat-state">No hay productos disponibles por ahora.</p>}
 
-        {/* Portada / encabezado */}
-        <header style={{ textAlign: 'center', marginBottom: '10px' }}>
-          <img src="/logo.png" alt="Punto Norte" style={{ height: '78px', width: 'auto', objectFit: 'contain', margin: '0 auto 14px' }} />
-          <h1 style={{ fontSize: '34px', fontWeight: 900, letterSpacing: '-.5px', margin: '0 0 6px' }}>
-            Catálogo <span style={{ color: '#c1692b' }}>Punto Norte</span>
-          </h1>
-          <p style={{ color: '#7a7675', fontSize: '14px', margin: 0 }}>
-            Moda, accesorios y perfumes premium · {CONTACT.ciudad}
-          </p>
-          <p style={{ color: '#7a7675', fontSize: '13px', margin: '4px 0 0' }}>
-            WhatsApp: +{CONTACT.whatsapp} · Instagram: @{CONTACT.instagram}
-          </p>
-          <p style={{ color: '#a8a4a2', fontSize: '12px', margin: '8px 0 0' }}>Actualizado el {fecha}</p>
-          <div style={{ height: '3px', width: '90px', margin: '20px auto 0', borderRadius: '2px', background: 'linear-gradient(90deg,#c1692b,#e88c4a)' }} />
-        </header>
+        {categorias.map((cat, ci) => (
+          <section key={cat} className="cat-sec">
+            <div className="cat-head">
+              <span className="cat-idx">{String(ci + 1).padStart(2, '0')}</span>
+              <h2 className="cat-name">{catLabel(cat)}</h2>
+              <span className="cat-hr" />
+              <span className="cat-count">{groups[cat].length} {groups[cat].length === 1 ? 'pieza' : 'piezas'}</span>
+            </div>
 
-        {/* Estados */}
-        {products === null && (
-          <p style={{ textAlign: 'center', color: '#7a7675', padding: '60px 0' }}>Cargando catálogo…</p>
-        )}
-        {products !== null && products.length === 0 && (
-          <p style={{ textAlign: 'center', color: '#7a7675', padding: '60px 0' }}>No hay productos disponibles por ahora.</p>
-        )}
-
-        {/* Secciones por categoría */}
-        {categorias.map(cat => (
-          <section key={cat} className="cat-section" style={{ marginTop: '40px' }}>
-            <h2
-              className="cat-section-title"
-              style={{
-                fontSize: '13px', fontWeight: 800, letterSpacing: '3px', textTransform: 'uppercase',
-                color: '#c1692b', margin: '0 0 18px', display: 'flex', alignItems: 'center', gap: '10px',
-              }}
-            >
-              <span style={{ width: '22px', height: '2px', background: '#c1692b', borderRadius: '1px' }} />
-              {catLabel(cat)}
-              <span style={{ color: '#a8a4a2', fontWeight: 700 }}>({groups[cat].length})</span>
-            </h2>
-
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
-                gap: '18px',
-              }}
-            >
+            <div className="cat-grid">
               {groups[cat].map(p => {
                 const img = p.images?.[0] ?? null
                 const disc = p.originalPrice && p.originalPrice > p.price
                   ? Math.round(((p.originalPrice - p.price) / p.originalPrice) * 100)
                   : 0
                 return (
-                  <div
-                    key={p.id}
-                    className="cat-card"
-                    style={{
-                      background: '#fff', borderRadius: '12px', overflow: 'hidden',
-                      border: '1px solid #e8e5e2', boxShadow: '0 1px 8px rgba(33,31,30,.05)',
-                    }}
-                  >
-                    <div style={{ position: 'relative', aspectRatio: '3/4', background: '#f4f2f0' }}>
+                  <article key={p.id} className="cat-card">
+                    <div className="cat-imgbox">
                       {img
-                        ? <img src={img} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-                        : <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#c9c5c2', fontSize: '12px' }}>Sin imagen</div>}
-                      {disc > 0 && (
-                        <span style={{ position: 'absolute', top: '10px', left: '10px', background: '#c1692b', color: '#fff', fontSize: '11px', fontWeight: 900, padding: '4px 8px', borderRadius: '20px' }}>
-                          -{disc}%
-                        </span>
-                      )}
-                      {!p.inStock && (
-                        <span style={{ position: 'absolute', top: '10px', right: '10px', background: '#211f1e', color: '#fff', fontSize: '10px', fontWeight: 800, padding: '4px 8px', borderRadius: '20px' }}>
-                          Agotado
-                        </span>
-                      )}
+                        ? <img src={img} alt={p.name} />
+                        : <div className="cat-noimg">Sin imagen</div>}
+                      {disc > 0 && <span className="cat-disc">−{disc}%</span>}
+                      {!p.inStock && <span className="cat-out">Agotado</span>}
                     </div>
-                    <div style={{ padding: '12px 14px 14px' }}>
-                      <p style={{ fontSize: '15px', fontWeight: 700, margin: '0 0 6px', lineHeight: 1.25 }}>{p.name}</p>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                        <span style={{ fontSize: '18px', fontWeight: 900, color: '#c1692b' }}>${p.price.toFixed(2)}</span>
+                    <div className="cat-body">
+                      <span className="cat-kick">{catLabel(p.category)}</span>
+                      <p className="cat-pname">{p.name}</p>
+                      <div className="cat-price">
+                        <span className="cat-now">${p.price.toFixed(2)}</span>
                         {p.originalPrice && p.originalPrice > p.price && (
-                          <span style={{ fontSize: '13px', color: '#a8a4a2', textDecoration: 'line-through' }}>${p.originalPrice.toFixed(2)}</span>
+                          <span className="cat-old">${p.originalPrice.toFixed(2)}</span>
                         )}
                       </div>
                     </div>
-                  </div>
+                  </article>
                 )
               })}
             </div>
           </section>
         ))}
 
-        {/* Pie */}
         {products !== null && products.length > 0 && (
-          <footer style={{ marginTop: '50px', paddingTop: '24px', borderTop: '1px solid #e8e5e2', textAlign: 'center', color: '#7a7675', fontSize: '13px' }}>
-            <p style={{ margin: '0 0 4px', fontWeight: 700, color: '#211f1e' }}>¿Listo para pedir?</p>
-            <p style={{ margin: 0 }}>Escríbenos por WhatsApp al +{CONTACT.whatsapp} · @{CONTACT.instagram}</p>
-            <p style={{ margin: '10px 0 0', fontSize: '12px', color: '#a8a4a2' }}>puntonorteshop.com</p>
+          <footer className="cat-foot">
+            <h3>¿Listo para pedir?</h3>
+            <p>Escríbenos y te atendemos al instante.</p>
+            <p>WhatsApp +{CONTACT.whatsapp} · @{CONTACT.instagram}</p>
+            <a className="cat-foot__cta no-print" href={`https://wa.me/${CONTACT.whatsapp}`} target="_blank" rel="noopener noreferrer">Pedir por WhatsApp →</a>
+            <p style={{ marginTop: '18px', fontSize: '12px', color: 'rgba(246,241,234,.5)' }}>puntonorteshop.com · Actualizado el {fecha}</p>
           </footer>
         )}
       </div>
