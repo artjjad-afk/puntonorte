@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 import { motion } from 'motion/react'
 import { ProductCard } from '@/components/ui/ProductCard'
 import { FloatingShopIcons } from '@/components/ui/FloatingShopIcons'
+import { Sparkles } from '@/components/ui/Sparkles'
 import { SlidersHorizontal, X, Search, Package, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Product } from '@/types'
 
@@ -64,6 +65,26 @@ function TiendaContent() {
         .tienda-hero__blob { position:absolute; border-radius:50%; filter:blur(12px); pointer-events:none; }
         .tienda-hero__blob--1 { width:420px; height:420px; top:-140px; left:-90px; background:radial-gradient(circle,rgba(232,140,74,.20),transparent 70%); animation:pn-halo 6s ease-in-out infinite; }
         .tienda-hero__blob--2 { width:380px; height:380px; bottom:-160px; right:8%; background:radial-gradient(circle,rgba(193,105,43,.15),transparent 70%); animation:pn-halo 5s ease-in-out infinite reverse; }
+
+        /* ── Sección de productos (fondo cálido + destellos) ── */
+        .tienda-body { position:relative; overflow:hidden; background:linear-gradient(180deg,#fdfbf9 0%,#faf6f1 55%,#fbf8f4 100%); }
+        .tienda-body__glow { position:absolute; top:0; left:50%; transform:translateX(-50%); width:960px; max-width:120%; height:440px; background:radial-gradient(ellipse at center top, rgba(232,140,74,.12), transparent 70%); pointer-events:none; }
+        .tienda-body__blob { position:absolute; border-radius:50%; filter:blur(18px); pointer-events:none; }
+        .tienda-body__blob--1 { width:360px; height:360px; top:140px; left:-130px; background:radial-gradient(circle,rgba(193,105,43,.12),transparent 70%); animation:pn-halo 7s ease-in-out infinite; }
+        .tienda-body__blob--2 { width:320px; height:320px; bottom:100px; right:-110px; background:radial-gradient(circle,rgba(232,140,74,.12),transparent 70%); animation:pn-halo 6s ease-in-out infinite reverse; }
+
+        /* Destellos de luz */
+        .pn-spark { position:absolute; border-radius:50%; background:radial-gradient(circle, #ffffff 0%, #f2b56a 45%, transparent 72%); box-shadow:0 0 10px 2px rgba(232,140,74,.55); animation-name:pn-twinkle; animation-timing-function:ease-in-out; animation-iteration-count:infinite; }
+        @keyframes pn-twinkle { 0%,100% { opacity:0; transform:scale(.3); } 50% { opacity:.95; transform:scale(1); } }
+
+        /* Glow cálido al pasar el mouse sobre una card */
+        .tienda-grid .product-card { transition: box-shadow .35s ease, transform .35s ease; }
+        .tienda-grid .product-card:hover { box-shadow:0 20px 55px rgba(193,105,43,.28), 0 0 0 1px rgba(232,140,74,.25); }
+
+        @media (prefers-reduced-motion: reduce) {
+          .tienda-body__blob, .pn-spark { animation:none; }
+          .pn-spark { opacity:.5; }
+        }
 
         /* ── Entrada escalonada de las cards ── */
         @keyframes tienda-card-in { from { opacity:0; transform:translateY(28px) scale(.97); } to { opacity:1; transform:none; } }
@@ -132,7 +153,12 @@ function TiendaContent() {
         </div>
       </div>
 
-      <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '40px 32px' }}>
+      <section className="tienda-body">
+        <div className="tienda-body__glow" />
+        <div className="tienda-body__blob tienda-body__blob--1" />
+        <div className="tienda-body__blob tienda-body__blob--2" />
+        <Sparkles />
+        <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '40px 32px', position: 'relative', zIndex: 2 }}>
         {/* Filtros */}
         <div className="filters-bar" style={{ marginBottom: '40px' }}>
           <div className="filters-chips-wrap">
@@ -193,7 +219,8 @@ function TiendaContent() {
             {filtered.map(product => <ProductCard key={product.id} product={product} />)}
           </div>
         )}
-      </div>
+        </div>
+      </section>
     </>
   )
 }
