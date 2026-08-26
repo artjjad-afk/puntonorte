@@ -648,12 +648,22 @@ export default function HomePage() {
             <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'1px', background:'linear-gradient(90deg,transparent,rgba(232,140,74,.3),transparent)', zIndex:2 }} />
           </section>
 
-          {/* Wave oscuro→crema al salir del carrusel */}
-          <div style={{ background:'#111009', marginBottom:'-2px' }}>
-            <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
-              <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
-            </svg>
-          </div>
+          {/* Wave oscuro→crema al salir del carrusel — solo si hay productos */}
+          {(!featuredLoaded || featured.length > 0) && (
+            <div style={{ background:'#111009', marginBottom:'-2px' }}>
+              <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
+                <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
+              </svg>
+            </div>
+          )}
+          {/* Si no hay productos, conectar directo oscuro→oscuro-stats */}
+          {featuredLoaded && featured.length === 0 && (
+            <div style={{ background:'#111009', marginBottom:'-2px' }}>
+              <svg viewBox="0 0 1440 40" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
+                <path d="M0,20 C720,-20 720,60 1440,20 L1440,40 L0,40 Z" fill="#1a1817"/>
+              </svg>
+            </div>
+          )}
         </>
       )}
 
