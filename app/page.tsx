@@ -86,7 +86,9 @@ export default function HomePage() {
   const [dbCategories, setDbCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
   const [homeCategories, setHomeCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
   const carouselRef        = useRef<HTMLDivElement>(null)
-  const [carouselIdx, setCarouselIdx]           = useState(1) // empieza en 1 porque 0 es el clon del último
+  const CARD_W = 300  // ancho fijo de cada slot — el efecto "activo" usa scale, no width
+  const CARD_GAP = 24
+  const [carouselIdx, setCarouselIdx]           = useState(1) // 0 = clon del último
   const [carouselTransition, setCarouselTransition] = useState(true)
   const [carouselClickAnim, setCarouselClickAnim]   = useState(false)
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -470,19 +472,17 @@ export default function HomePage() {
 
               {/* ── Track del carrusel — loop infinito ── */}
               <div style={{ overflow:'hidden', position:'relative' }}>
-                <div style={{ position:'absolute', left:0, top:0, bottom:0, width:'80px', background:'linear-gradient(to right,#111009,transparent)', zIndex:4, pointerEvents:'none' }} />
-                <div style={{ position:'absolute', right:0, top:0, bottom:0, width:'80px', background:'linear-gradient(to left,#111009,transparent)', zIndex:4, pointerEvents:'none' }} />
+                <div style={{ position:'absolute', left:0, top:0, bottom:0, width:'120px', background:'linear-gradient(to right,#111009,transparent)', zIndex:4, pointerEvents:'none' }} />
+                <div style={{ position:'absolute', right:0, top:0, bottom:0, width:'120px', background:'linear-gradient(to left,#111009,transparent)', zIndex:4, pointerEvents:'none' }} />
 
                 <div
                   ref={carouselRef}
-                  className="carousel-track"
                   onTransitionEnd={() => {
                     const total = homeCategories.length
                     if (carouselIdx >= total + 1) {
                       setCarouselTransition(false)
                       requestAnimationFrame(() => requestAnimationFrame(() => {
                         setCarouselIdx(1)
-                        // Re-habilitar transición en el siguiente frame para que el jump sea invisible
                         requestAnimationFrame(() => setCarouselTransition(true))
                       }))
                     }
@@ -495,83 +495,104 @@ export default function HomePage() {
                     }
                   }}
                   style={{
+                    display: 'flex',
+                    gap: `${CARD_GAP}px`,
                     paddingLeft: 'max(40px, calc((100vw - 1320px) / 2 + 40px))',
                     paddingRight: '40px',
-                    paddingTop: '20px',
-                    paddingBottom: '30px',
-                    gap: '24px',
-                    transition: carouselTransition ? 'transform .6s cubic-bezier(.25,.46,.45,.94)' : 'none',
-                    transform: `translateX(calc(-${carouselIdx} * (284px)))`,
+                    paddingTop: '40px',
+                    paddingBottom: '40px',
+                    transition: carouselTransition ? `transform .65s cubic-bezier(.25,.46,.45,.94)` : 'none',
+                    transform: `translateX(calc(-${carouselIdx} * ${CARD_W + CARD_GAP}px))`,
+                    willChange: 'transform',
                   }}
                 >
-                  {/* Clon del último */}
-                  {(() => { const cat = homeCategories[homeCategories.length - 1]; return (
-                    <Link key="clone-last" href={`/tienda?cat=${cat.id}`} className="hcat-card"
-                      style={{ width:'260px', height:'360px', textDecoration:'none', boxShadow:'0 8px 32px rgba(0,0,0,.5)', filter:'brightness(0.7)', flexShrink:0 }}>
-                      {cat.image ? <img src={cat.image} alt={cat.label} className="hcat-img" style={{filter:'saturate(0.6)'}} /> // eslint-disable-line @next/next/no-img-element
-                        : <div style={{width:'100%',height:'100%',background:'linear-gradient(145deg,#2d1a06,#4a2e10)'}} />}
-                      <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.7) 35%,transparent 100%)',zIndex:1}} />
-                      <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'22px 20px',zIndex:4}}>
-                        <p style={{color:'rgba(232,140,74,.5)',fontSize:'9px',letterSpacing:'2.5px',textTransform:'uppercase',margin:'0 0 8px',fontFamily:'var(--font-mono)'}}>Colección ✦</p>
-                        <p style={{color:'#fff',fontWeight:'900',fontSize:'18px',letterSpacing:'-0.5px',margin:0,lineHeight:1.05}}>{cat.label}</p>
+                  {/* ── Clon del último ── */}
+                  {(() => {
+                    const cat = homeCategories[homeCategories.length - 1]
+                    return (
+                      <div key="clone-last"
+                        style={{ width:`${CARD_W}px`, height:'380px', flexShrink:0, borderRadius:20, overflow:'hidden', position:'relative',
+                          filter:'brightness(0.55) saturate(0.5)', transform:'scale(0.88)', transition:'none',
+                          boxShadow:'0 8px 32px rgba(0,0,0,.5)' }}>
+                        {cat.image ? <img src={cat.image} alt="" className="hcat-img" /> // eslint-disable-line @next/next/no-img-element
+                          : <div style={{width:'100%',height:'100%',background:'linear-gradient(145deg,#2d1a06,#4a2e10)'}} />}
+                        <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.5) 50%,transparent 100%)',zIndex:1}} />
+                        <p style={{position:'absolute',bottom:20,left:20,zIndex:2,color:'#fff',fontWeight:'900',fontSize:'17px',margin:0}}>{cat.label}</p>
                       </div>
-                    </Link>
-                  )})()}
+                    )
+                  })()}
 
-                  {/* Cards reales */}
+                  {/* ── Cards reales ── */}
                   {homeCategories.map((cat, i) => {
                     const realIdx = i + 1
                     const isActive = realIdx === carouselIdx
                     const gradients = ['linear-gradient(145deg,#2d1a06,#4a2e10)','linear-gradient(145deg,#0d1528,#1a2540)','linear-gradient(145deg,#0a2010,#143520)','linear-gradient(145deg,#200815,#3a1228)']
                     return (
                       <Link key={cat.id} href={`/tienda?cat=${cat.id}`}
-                        className={`hcat-card ${isActive ? 'hcat-active' : ''}`}
-                        style={{ width:isActive?'320px':'260px', height:isActive?'440px':'360px', textDecoration:'none',
-                          boxShadow:isActive?'0 0 0 1px rgba(232,140,74,.4),0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(193,105,43,.2)':'0 8px 32px rgba(0,0,0,.5)',
-                          transition:'width .5s cubic-bezier(.34,1.2,.64,1),height .5s cubic-bezier(.34,1.2,.64,1),box-shadow .4s ease',
-                          filter:isActive?'none':'brightness(0.7)', flexShrink:0 }}>
+                        style={{
+                          width: `${CARD_W}px`,
+                          height: '380px',
+                          flexShrink: 0,
+                          borderRadius: 20,
+                          overflow: 'hidden',
+                          position: 'relative',
+                          textDecoration: 'none',
+                          cursor: 'pointer',
+                          // Efecto activo: scale + lift, no width
+                          transform: isActive ? 'scale(1.12) translateY(-12px)' : 'scale(0.88) translateY(0)',
+                          transition: 'transform .55s cubic-bezier(.34,1.2,.64,1), filter .4s ease, box-shadow .4s ease',
+                          filter: isActive ? 'none' : 'brightness(0.55) saturate(0.5)',
+                          boxShadow: isActive
+                            ? '0 0 0 2px rgba(232,140,74,.5), 0 24px 60px rgba(0,0,0,.7), 0 0 50px rgba(193,105,43,.25)'
+                            : '0 8px 32px rgba(0,0,0,.5)',
+                          zIndex: isActive ? 3 : 1,
+                        }}
+                      >
                         {cat.image
                           // eslint-disable-next-line @next/next/no-img-element
-                          ? <img src={cat.image} alt={cat.label} className="hcat-img" style={{filter:isActive?'none':'saturate(0.6)'}} />
-                          : <div style={{width:'100%',height:'100%',background:gradients[i%gradients.length]}} />}
-                        <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.7) 35%,rgba(5,4,3,.1) 65%,transparent 100%)',zIndex:1}} />
-                        {isActive && <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 0%,rgba(232,140,74,.12),transparent 60%)',zIndex:2}} />}
-                        {isActive && <div style={{position:'absolute',top:0,left:0,right:0,height:'2px',background:'linear-gradient(90deg,transparent,rgba(232,140,74,.9) 50%,transparent)',zIndex:5,boxShadow:'0 0 12px rgba(232,140,74,.6)'}} />}
-                        <div style={{position:'absolute',top:18,right:18,zIndex:6,width:34,height:34,borderRadius:'50%',background:'rgba(5,4,3,.7)',backdropFilter:'blur(12px)',border:'1px solid rgba(232,140,74,.2)',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                          <span style={{color:isActive?'#e88c4a':'rgba(232,140,74,.4)',fontSize:'11px',fontWeight:'900',fontFamily:'var(--font-mono)'}}>0{i+1}</span>
+                          ? <img src={cat.image} alt={cat.label} className="hcat-img" />
+                          : <div style={{width:'100%',height:'100%',background:gradients[i%gradients.length]}} />
+                        }
+                        <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.6) 40%,rgba(5,4,3,.05) 70%,transparent 100%)',zIndex:1}} />
+                        {isActive && <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 0%,rgba(232,140,74,.1),transparent 60%)',zIndex:2}} />}
+                        {isActive && <div style={{position:'absolute',top:0,left:0,right:0,height:'2px',background:'linear-gradient(90deg,transparent,rgba(232,140,74,.9) 50%,transparent)',zIndex:5,boxShadow:'0 0 14px rgba(232,140,74,.7)'}} />}
+                        <div style={{position:'absolute',top:16,right:16,zIndex:6,width:30,height:30,borderRadius:'50%',background:'rgba(5,4,3,.75)',backdropFilter:'blur(10px)',border:`1px solid ${isActive?'rgba(232,140,74,.4)':'rgba(232,140,74,.15)'}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
+                          <span style={{color:isActive?'#e88c4a':'rgba(232,140,74,.35)',fontSize:'10px',fontWeight:'900',fontFamily:'var(--font-mono)'}}>0{i+1}</span>
                         </div>
                         {isActive && (
-                          <div style={{position:'absolute',top:18,left:18,zIndex:6,display:'flex',alignItems:'center',gap:5,padding:'5px 12px',borderRadius:'100px',background:'linear-gradient(135deg,rgba(193,105,43,.95),rgba(232,140,74,.9))',boxShadow:'0 4px 16px rgba(193,105,43,.5)'}}>
-                            <div style={{width:5,height:5,borderRadius:'50%',background:'#fff',opacity:0.9}} />
+                          <div style={{position:'absolute',top:16,left:16,zIndex:6,display:'flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:'100px',background:'linear-gradient(135deg,rgba(193,105,43,.95),rgba(232,140,74,.9))',boxShadow:'0 4px 16px rgba(193,105,43,.5)'}}>
+                            <div style={{width:4,height:4,borderRadius:'50%',background:'#fff'}} />
                             <span style={{color:'#fff',fontSize:'9px',fontWeight:'900',letterSpacing:'2px',fontFamily:'var(--font-mono)'}}>DESTACADA</span>
                           </div>
                         )}
-                        <div style={{position:'absolute',bottom:0,left:0,right:0,padding:isActive?'32px 26px':'22px 20px',zIndex:4,transition:'padding .5s ease'}}>
-                          <p style={{color:'rgba(232,140,74,.5)',fontSize:'9px',letterSpacing:'2.5px',textTransform:'uppercase',margin:'0 0 8px',fontFamily:'var(--font-mono)'}}>Colección ✦</p>
-                          <p style={{color:'#fff',fontWeight:'900',fontSize:isActive?'28px':'18px',letterSpacing:'-0.5px',margin:'0 0 12px',textShadow:'0 2px 20px rgba(0,0,0,.8)',lineHeight:1.05,transition:'font-size .5s ease'}}>{cat.label}</p>
-                          <div style={{display:'flex',alignItems:'center',gap:8,opacity:isActive?1:0,transform:isActive?'translateY(0)':'translateY(10px)',transition:'all .4s ease .1s'}}>
-                            <div style={{height:'1px',width:'24px',background:'linear-gradient(to right,#e88c4a,transparent)'}} />
-                            <span style={{color:'#e88c4a',fontSize:'12px',fontWeight:'800',letterSpacing:'0.5px'}}>Ver colección</span>
-                            <span style={{color:'#e88c4a',fontSize:'16px',fontWeight:'900',display:'inline-block',animation:'bounceX .8s ease-in-out infinite'}}>→</span>
+                        <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'24px 22px',zIndex:4}}>
+                          <p style={{color:'rgba(232,140,74,.55)',fontSize:'9px',letterSpacing:'2.5px',textTransform:'uppercase',margin:'0 0 7px',fontFamily:'var(--font-mono)'}}>Colección ✦</p>
+                          <p style={{color:'#fff',fontWeight:'900',fontSize:isActive?'24px':'17px',letterSpacing:'-0.5px',margin:'0 0 10px',textShadow:'0 2px 16px rgba(0,0,0,.9)',lineHeight:1.05,transition:'font-size .4s ease'}}>{cat.label}</p>
+                          <div style={{display:'flex',alignItems:'center',gap:8,opacity:isActive?1:0,transform:isActive?'translateY(0)':'translateY(8px)',transition:'all .35s ease .1s'}}>
+                            <div style={{height:'1px',width:'20px',background:'linear-gradient(to right,#e88c4a,transparent)'}} />
+                            <span style={{color:'#e88c4a',fontSize:'12px',fontWeight:'800'}}>Ver colección</span>
+                            <span style={{color:'#e88c4a',fontSize:'15px',fontWeight:'900',display:'inline-block',animation:'bounceX .8s ease-in-out infinite'}}>→</span>
                           </div>
                         </div>
                       </Link>
                     )
                   })}
 
-                  {/* Clon del primero */}
-                  {(() => { const cat = homeCategories[0]; return (
-                    <Link key="clone-first" href={`/tienda?cat=${cat.id}`} className="hcat-card"
-                      style={{width:'260px',height:'360px',textDecoration:'none',boxShadow:'0 8px 32px rgba(0,0,0,.5)',filter:'brightness(0.7)',flexShrink:0}}>
-                      {cat.image ? <img src={cat.image} alt={cat.label} className="hcat-img" style={{filter:'saturate(0.6)'}} /> // eslint-disable-line @next/next/no-img-element
-                        : <div style={{width:'100%',height:'100%',background:'linear-gradient(145deg,#2d1a06,#4a2e10)'}} />}
-                      <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.7) 35%,transparent 100%)',zIndex:1}} />
-                      <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'22px 20px',zIndex:4}}>
-                        <p style={{color:'rgba(232,140,74,.5)',fontSize:'9px',letterSpacing:'2.5px',textTransform:'uppercase',margin:'0 0 8px',fontFamily:'var(--font-mono)'}}>Colección ✦</p>
-                        <p style={{color:'#fff',fontWeight:'900',fontSize:'18px',letterSpacing:'-0.5px',margin:0,lineHeight:1.05}}>{cat.label}</p>
+                  {/* ── Clon del primero ── */}
+                  {(() => {
+                    const cat = homeCategories[0]
+                    return (
+                      <div key="clone-first"
+                        style={{ width:`${CARD_W}px`, height:'380px', flexShrink:0, borderRadius:20, overflow:'hidden', position:'relative',
+                          filter:'brightness(0.55) saturate(0.5)', transform:'scale(0.88)', transition:'none',
+                          boxShadow:'0 8px 32px rgba(0,0,0,.5)' }}>
+                        {cat.image ? <img src={cat.image} alt="" className="hcat-img" /> // eslint-disable-line @next/next/no-img-element
+                          : <div style={{width:'100%',height:'100%',background:'linear-gradient(145deg,#2d1a06,#4a2e10)'}} />}
+                        <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.5) 50%,transparent 100%)',zIndex:1}} />
+                        <p style={{position:'absolute',bottom:20,left:20,zIndex:2,color:'#fff',fontWeight:'900',fontSize:'17px',margin:0}}>{cat.label}</p>
                       </div>
-                    </Link>
-                  )})()}
+                    )
+                  })()}
                 </div>
               </div>
 
