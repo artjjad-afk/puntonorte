@@ -1,12 +1,16 @@
 'use client'
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check, GripVertical, Upload, Link as LinkIcon } from 'lucide-react'
+import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check, GripVertical, Upload, Link as LinkIcon, AlertCircle, CheckCircle2 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 
 interface Category {
   id: number; name: string; slug: string
   image: string | null; active: boolean
   showInNav: boolean; showInHome: boolean; order: number
+}
+
+interface Toast {
+  id: number; type: 'success' | 'error' | 'info'; message: string
 }
 
 function slugify(str: string) {
@@ -33,7 +37,7 @@ export default function AdminCategorias() {
   const [cats, setCats]           = useState<Category[]>([])
   const [loading, setLoading]     = useState(true)
   const [form, setForm]           = useState({ name: '', image: '', order: '0' })
-  const [imageData, setImageData] = useState<string | null>(null) // base64
+  const [imageData, setImageData] = useState<string | null>(null)
   const [imgMode, setImgMode]     = useState<'url' | 'upload'>('upload')
   const [dragging, setDragging]   = useState(false)
   const fileRef                   = useRef<HTMLInputElement>(null)
@@ -42,6 +46,14 @@ export default function AdminCategorias() {
   const [editingId, setEditingId] = useState<number | null>(null)
   const [editForm, setEditForm]   = useState({ name: '', image: '', order: '0' })
   const [editImageData, setEditImageData] = useState<string | null>(null)
+  const [toasts, setToasts]       = useState<Toast[]>([])
+  const toastIdRef                = useRef(0)
+
+  const showToast = useCallback((type: Toast['type'], message: string) => {
+    const id = ++toastIdRef.current
+    setToasts(t => [...t, { id, type, message }])
+    setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500)
+  }, [])
 
   /* Convierte archivo a base64 */
   const fileToBase64 = useCallback((file: File): Promise<string> => {
@@ -120,33 +132,37 @@ export default function AdminCategorias() {
     try {
       const res = await fetch(`/api/categories/${cat.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ active: !cat.active }) })
       if (!res.ok) throw new Error()
+      showToast('success', cat.active ? `"${cat.name}" ocultada` : `"${cat.name}" activada`)
       fetchCats()
-    } catch { alert('No se pudo actualizar la categoría.') }
+    } catch { showToast('error', 'No se pudo cambiar el estado de la categoría') }
   }
 
   const handleToggleNav = async (cat: Category) => {
     try {
       const res = await fetch(`/api/categories/${cat.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ showInNav: !cat.showInNav }) })
       if (!res.ok) throw new Error()
+      showToast('success', cat.showInNav ? `"${cat.name}" quitada del menú` : `"${cat.name}" agregada al menú`)
       fetchCats()
-    } catch { alert('No se pudo actualizar.') }
+    } catch { showToast('error', 'No se pudo actualizar el menú') }
   }
 
   const handleToggleHome = async (cat: Category) => {
     try {
       const res = await fetch(`/api/categories/${cat.id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ showInHome: !cat.showInHome }) })
       if (!res.ok) throw new Error()
+      showToast('success', cat.showInHome ? `"${cat.name}" quitada del inicio` : `"${cat.name}" destacada en el inicio ✦`)
       fetchCats()
-    } catch { alert('No se pudo actualizar.') }
+    } catch { showToast('error', 'No se pudo actualizar. Intenta de nuevo.') }
   }
 
   const handleDelete = async (id: number, name: string) => {
-    if (!confirm(`¿Eliminar "${name}"? Los productos quedarán sin categoría visible.`)) return
+    if (!window.confirm(`¿Eliminar "${name}"? Los productos quedarán sin categoría visible.`)) return
     try {
       const res = await fetch(`/api/categories/${id}`, { method: 'DELETE' })
       if (!res.ok) throw new Error()
+      showToast('success', `"${name}" eliminada`)
       fetchCats()
-    } catch { alert('No se pudo eliminar la categoría.') }
+    } catch { showToast('error', 'No se pudo eliminar la categoría') }
   }
 
   const startEdit = (cat: Category) => {
@@ -171,8 +187,9 @@ export default function AdminCategorias() {
       if (!res.ok) throw new Error()
       setEditingId(null)
       setEditImageData(null)
+      showToast('success', 'Categoría actualizada')
       fetchCats()
-    } catch { alert('No se pudo guardar los cambios.') }
+    } catch { showToast('error', 'No se pudieron guardar los cambios') }
   }
 
   return (
@@ -182,8 +199,45 @@ export default function AdminCategorias() {
         .cat-row { transition: background .18s; }
         .cat-row:hover { background: rgba(255,255,255,0.03); }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes toast-in { from { opacity:0; transform:translateX(40px) scale(.95); } to { opacity:1; transform:translateX(0) scale(1); } }
+        @keyframes toast-out { from { opacity:1; transform:translateX(0) scale(1); } to { opacity:0; transform:translateX(40px) scale(.95); } }
         @media(max-width:900px) { .cat-grid { grid-template-columns: 1fr !important; } }
       `}</style>
+
+      {/* ── Toasts ── */}
+      <div style={{ position: 'fixed', bottom: 28, right: 28, zIndex: 9999, display: 'flex', flexDirection: 'column', gap: 10, pointerEvents: 'none' }}>
+        <AnimatePresence>
+          {toasts.map(t => (
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0, x: 40, scale: 0.95 }}
+              animate={{ opacity: 1, x: 0, scale: 1 }}
+              exit={{ opacity: 0, x: 40, scale: 0.95 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 10,
+                padding: '12px 18px', borderRadius: 14, pointerEvents: 'auto',
+                backdropFilter: 'blur(20px)',
+                background: t.type === 'success'
+                  ? 'rgba(34,197,94,0.15)'
+                  : t.type === 'error'
+                    ? 'rgba(248,113,113,0.15)'
+                    : 'rgba(96,165,250,0.15)',
+                border: `1px solid ${t.type === 'success' ? 'rgba(34,197,94,0.3)' : t.type === 'error' ? 'rgba(248,113,113,0.3)' : 'rgba(96,165,250,0.3)'}`,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
+                maxWidth: 320, fontSize: 13, fontWeight: 600,
+                color: t.type === 'success' ? '#86efac' : t.type === 'error' ? '#fca5a5' : '#93c5fd',
+              }}
+            >
+              {t.type === 'success'
+                ? <CheckCircle2 size={16} style={{ flexShrink: 0 }} />
+                : <AlertCircle size={16} style={{ flexShrink: 0 }} />
+              }
+              {t.message}
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </div>
 
       {/* ── Header ── */}
       <div style={{ marginBottom: 28 }}>
