@@ -112,7 +112,11 @@ export default function HomePage() {
     etiqueta: string | null; titulo: string; subtitulo: string | null
     descripcion: string | null; linkUrl: string; linkTexto: string
     imagen: string | null; precioDesde: number | null
-  } | null | undefined>(undefined) // undefined = cargando, null = no hay banner
+  } | null | undefined>(undefined)
+  const [offerProducts, setOfferProducts] = useState<{
+    id: number; name: string; slug: string; price: number
+    originalPrice: number | null; images: string[]; category: string; badge: string | null
+  }[] | undefined>(undefined)
   const [scrollY, setScrollY] = useState(0)
 
   useEffect(() => {
@@ -161,6 +165,12 @@ export default function HomePage() {
         }
       })
       .catch(() => setHomeCategories([]))
+
+    // Cargar productos en oferta
+    fetch('/api/products?offers=true')
+      .then(r => r.json())
+      .then(data => setOfferProducts(Array.isArray(data) ? data : []))
+      .catch(() => setOfferProducts([]))
   }, [])
 
   useEffect(() => {
@@ -220,17 +230,17 @@ export default function HomePage() {
         /* ── Home categories carousel ── */
         @keyframes text-pan{0%{background-position:0% center;}100%{background-position:200% center;}}
         @keyframes progress-fill{from{width:0%;}to{width:100%;}}
-        .hcat-card{position:relative;overflow:hidden;border-radius:20px;cursor:pointer;flex:0 0 auto;animation:hcat-in .55s cubic-bezier(.34,1.2,.64,1) both;}
-        .hcat-card:hover{transform:translateY(-8px) scale(1.02);}
-        .hcat-card:hover .hcat-img{transform:scale(1.08);}
-        .hcat-card::before{content:'';position:absolute;top:0;left:-120%;width:55%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);transform:skewX(-18deg);pointer-events:none;z-index:7;}
-        .hcat-card:hover::before{animation:card-shine .75s ease forwards;}
-        .hcat-img{width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.25,.46,.45,.94);}
-        .hcat-active{animation:glow-pulse 2.5s ease-in-out infinite!important;}
-        .carousel-track{display:flex;align-items:center;transition:transform .6s cubic-bezier(.25,.46,.45,.94);}
-        @media(max-width:768px){
-          .hcat-card{width:220px!important;height:300px!important;}
-        }
+
+        /* ── Ofertas section ── */
+        @keyframes price-tag-in{0%{opacity:0;transform:scale(.7) rotate(-8deg);}60%{transform:scale(1.1) rotate(2deg);}100%{opacity:1;transform:scale(1) rotate(0deg);}}
+        @keyframes shimmer-loop{0%{transform:translateX(-100%);}100%{transform:translateX(200%);}}
+        @keyframes badge-pulse{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,.5);}50%{box-shadow:0 0 0 8px rgba(249,115,22,0);}}
+        .offer-card{position:relative;border-radius:20px;overflow:hidden;cursor:pointer;background:#1a1208;}
+        .offer-card::after{content:'';position:absolute;top:0;left:-100%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);transform:skewX(-15deg);pointer-events:none;transition:none;}
+        .offer-card:hover::after{animation:shimmer-loop .8s ease forwards;}
+        .offer-card:hover .offer-img{transform:scale(1.06);}
+        .offer-img{transition:transform .7s cubic-bezier(.25,.46,.45,.94);}
+        .discount-badge{animation:badge-pulse 2s ease-in-out infinite;}
       `}</style>
 
       {/* ════════════════════════════════
@@ -648,16 +658,14 @@ export default function HomePage() {
             <div style={{ position:'absolute', bottom:0, left:0, right:0, height:'1px', background:'linear-gradient(90deg,transparent,rgba(232,140,74,.3),transparent)', zIndex:2 }} />
           </section>
 
-          {/* Wave oscuro→crema al salir del carrusel — solo si hay productos reales */}
-          {featuredLoaded && featured.length > 0 && (
+          {/* Wave oscuro→crema — solo si hay productos en oferta O productos destacados */}
+          {(offerProducts && offerProducts.length > 0) || (featuredLoaded && featured.length > 0) ? (
             <div style={{ background:'#111009', marginBottom:'-2px' }}>
               <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
                 <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
               </svg>
             </div>
-          )}
-          {/* Si no hay productos o aún carga, conectar directo oscuro→oscuro-stats */}
-          {(!featuredLoaded || featured.length === 0) && (
+          ) : (
             <div style={{ background:'#111009', marginBottom:'-2px' }}>
               <svg viewBox="0 0 1440 40" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
                 <path d="M0,20 C720,-20 720,60 1440,20 L1440,40 L0,40 Z" fill="#1a1817"/>
@@ -665,6 +673,125 @@ export default function HomePage() {
             </div>
           )}
         </>
+      )}
+
+      {/* ════════════════════════════════
+          OFERTAS — sección crema con cards WOW
+      ════════════════════════════════ */}
+      {offerProducts && offerProducts.length > 0 && (
+        <section style={{ padding:'90px 32px 100px', background:'#f9f7f5', position:'relative', overflow:'hidden' }}>
+          {/* Blobs */}
+          <div className="aurora-blob animate-aurora-1" style={{ width:'600px', height:'500px', top:'-120px', right:'-100px', background:'radial-gradient(ellipse,rgba(249,115,22,.1),transparent 70%)', pointerEvents:'none' }} />
+          <div className="aurora-blob animate-aurora-2" style={{ width:'400px', height:'400px', bottom:'-80px', left:'-60px', background:'radial-gradient(circle,rgba(193,105,43,.08),transparent 70%)', pointerEvents:'none' }} />
+
+          <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
+
+            {/* Header */}
+            <motion.div
+              initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }}
+              viewport={{ once:true, margin:'-60px' }}
+              transition={{ duration:.7, ease:[.25,.46,.45,.94] }}
+              style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'52px', flexWrap:'wrap', gap:'20px' }}
+            >
+              <div>
+                <div style={{ display:'inline-flex', alignItems:'center', gap:8, padding:'5px 14px', borderRadius:100, background:'rgba(249,115,22,.1)', border:'1px solid rgba(249,115,22,.25)', marginBottom:14 }}>
+                  <div style={{ width:6, height:6, borderRadius:'50%', background:'#f97316', boxShadow:'0 0 8px rgba(249,115,22,.8)', animation:'orb-pulse 1.8s ease-in-out infinite' }} />
+                  <span style={{ color:'#f97316', fontSize:'11px', fontWeight:'800', letterSpacing:'2.5px', textTransform:'uppercase', fontFamily:'var(--font-mono)' }}>Ofertas especiales</span>
+                </div>
+                <h2 style={{ fontSize:'clamp(28px,4vw,52px)', fontWeight:'900', color:'#211f1e', letterSpacing:'-1.5px', lineHeight:1.05, margin:0 }}>
+                  Precios que no<br />
+                  <span style={{ background:'linear-gradient(90deg,#f97316,#c1692b,#f97316)', backgroundSize:'200% auto', WebkitBackgroundClip:'text', backgroundClip:'text', color:'transparent', animation:'text-pan 3s linear infinite' }}>
+                    puedes ignorar
+                  </span>
+                </h2>
+              </div>
+              <Link href="/tienda" style={{ color:'#c1692b', textDecoration:'none', fontWeight:'800', fontSize:'14px', padding:'12px 20px', borderRadius:'12px', border:'2px solid rgba(193,105,43,.25)', background:'rgba(193,105,43,.04)', letterSpacing:'0.5px' }}>
+                Ver todo →
+              </Link>
+            </motion.div>
+
+            {/* Grid de ofertas */}
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:'24px' }}>
+              {offerProducts.map((product, i) => {
+                const disc = product.originalPrice && product.originalPrice > product.price
+                  ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+                  : null
+                const img = product.images?.[0] ?? null
+
+                return (
+                  <motion.div
+                    key={product.id}
+                    initial={{ opacity:0, y:40, scale:.95 }}
+                    whileInView={{ opacity:1, y:0, scale:1 }}
+                    viewport={{ once:true, margin:'-40px' }}
+                    transition={{ duration:.6, delay: i * 0.08, ease:[.34,1.2,.64,1] }}
+                    whileHover={{ y:-6, transition:{ duration:.25, ease:'easeOut' } }}
+                  >
+                    <Link href={`/tienda/${product.slug}`} className="offer-card"
+                      style={{ boxShadow:'0 4px 24px rgba(33,31,30,.1)', border:'1px solid rgba(193,105,43,.12)', display:'block', textDecoration:'none' }}>
+
+                      {/* Imagen */}
+                      <div style={{ position:'relative', aspectRatio:'4/3', overflow:'hidden', background:'linear-gradient(135deg,#1a1208,#2d1e0e)' }}>
+                        {img
+                          // eslint-disable-next-line @next/next/no-img-element
+                          ? <img src={img} alt={product.name} className="offer-img" style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+                          : <div style={{ width:'100%', height:'100%', background:'linear-gradient(135deg,#1a1208,#2d1e0e)' }} />
+                        }
+
+                        {/* Badge descuento */}
+                        {disc !== null && (
+                          <div className="discount-badge" style={{ position:'absolute', top:14, left:14, zIndex:3, background:'linear-gradient(135deg,#f97316,#c1692b)', borderRadius:100, padding:'5px 12px', display:'flex', alignItems:'center', gap:4 }}>
+                            <span style={{ color:'#fff', fontSize:'13px', fontWeight:'900', fontFamily:'var(--font-mono)', letterSpacing:'.03em' }}>-{disc}%</span>
+                          </div>
+                        )}
+
+                        {/* Overlay hover */}
+                        <div style={{ position:'absolute', inset:0, background:'linear-gradient(to top,rgba(33,31,30,.6) 0%,transparent 50%)', zIndex:1 }} />
+
+                        {/* Botón ver */}
+                        <motion.div
+                          initial={{ opacity:0, y:10 }}
+                          whileHover={{ opacity:1, y:0 }}
+                          style={{ position:'absolute', bottom:14, left:'50%', transform:'translateX(-50%)', zIndex:4, background:'rgba(249,115,22,.9)', backdropFilter:'blur(8px)', borderRadius:10, padding:'8px 20px', whiteSpace:'nowrap' }}
+                        >
+                          <span style={{ color:'#fff', fontSize:'12px', fontWeight:'800', letterSpacing:'.5px' }}>Ver oferta →</span>
+                        </motion.div>
+                      </div>
+
+                      {/* Info */}
+                      <div style={{ padding:'20px 22px 22px', background:'#fff' }}>
+                        {/* Categoría */}
+                        <p style={{ margin:'0 0 6px', fontSize:'10px', fontWeight:'700', color:'rgba(193,105,43,.7)', letterSpacing:'2px', textTransform:'uppercase', fontFamily:'var(--font-mono)' }}>
+                          {product.category}
+                        </p>
+                        {/* Nombre */}
+                        <p style={{ margin:'0 0 14px', fontWeight:'800', color:'#211f1e', fontSize:'16px', letterSpacing:'-0.3px', lineHeight:1.3 }}>
+                          {product.name}
+                        </p>
+                        {/* Precios */}
+                        <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+                          <span style={{ fontSize:'24px', fontWeight:'900', color:'#c1692b', letterSpacing:'-0.5px', textShadow:'0 0 20px rgba(193,105,43,.2)' }}>
+                            ${product.price.toFixed(2)}
+                          </span>
+                          {product.originalPrice && (
+                            <span style={{ fontSize:'15px', color:'rgba(122,118,117,.5)', textDecoration:'line-through', fontFamily:'var(--font-mono)' }}>
+                              ${product.originalPrice.toFixed(2)}
+                            </span>
+                          )}
+                          {disc !== null && (
+                            <span style={{ marginLeft:'auto', fontSize:'12px', fontWeight:'800', color:'#22c55e', background:'rgba(34,197,94,.1)', border:'1px solid rgba(34,197,94,.2)', padding:'2px 8px', borderRadius:100, fontFamily:'var(--font-mono)' }}>
+                              Ahorras ${((product.originalPrice ?? 0) - product.price).toFixed(2)}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  </motion.div>
+                )
+              })}
+            </div>
+          </div>
+        </section>
       )}
 
       {/* PRODUCTOS DESTACADOS - solo cuando ya cargó y tiene productos */}
@@ -724,14 +851,14 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Wave divider crema→oscuro - solo si hay productos confirmados */}
-      {featuredLoaded && featured.length > 0 && (
+      {/* Wave divider crema→oscuro - solo si hay productos confirmados o hay ofertas */}
+      {(featuredLoaded && featured.length > 0) || (offerProducts && offerProducts.length > 0) ? (
         <div style={{ background:'#f9f7f5', marginBottom:'-2px' }}>
           <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
             <path d="M0,0 C360,60 1080,0 1440,50 L1440,60 L0,60 Z" fill="#211f1e"/>
           </svg>
         </div>
-      )}
+      ) : null}
 
       {/* BANNER PROMOCIONAL — solo si hay un banner activo en la DB */}
       {activeBanner && (
