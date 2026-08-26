@@ -334,6 +334,7 @@ export default function HomePage() {
 
       {/* CATEGORÍAS GRID - solo si homeCategories ya cargó (no undefined) y está vacío, y hay dbCategories */}
       {homeCategories !== undefined && (!homeCategories || homeCategories.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
+        <section style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
           <div className="aurora-blob animate-aurora-1" style={{ width:'500px', height:'500px', top:'-150px', left:'-100px', background:'radial-gradient(circle,rgba(193,105,43,.18),rgba(232,140,74,.08))' }} />
           <div className="aurora-blob animate-aurora-2" style={{ width:'400px', height:'400px', bottom:'-100px', right:'-80px', background:'radial-gradient(circle,rgba(232,140,74,.15),rgba(193,105,43,.05))' }} />
           <div className="aurora-blob animate-aurora-3" style={{ width:'300px', height:'300px', top:'40%', left:'40%', background:'radial-gradient(circle,rgba(255,200,100,.12),transparent)' }} />
