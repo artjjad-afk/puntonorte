@@ -85,37 +85,47 @@ export default function HomePage() {
   const [featuredLoaded, setFeaturedLoaded] = useState(false)
   const [dbCategories, setDbCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
   const [homeCategories, setHomeCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
-  const carouselRef        = useRef<HTMLDivElement>(null)
-  const CARD_W = 300  // ancho fijo de cada slot — el efecto "activo" usa scale, no width
-  const CARD_GAP = 24
-  const [carouselIdx, setCarouselIdx]           = useState(1) // 0 = clon del último
-  const [carouselTransition, setCarouselTransition] = useState(true)
-  const [carouselClickAnim, setCarouselClickAnim]   = useState(false)
-  const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const [carouselOffset, setCarouselOffset] = useState(0)      // índice del primer elemento visible en el array rotado
+  const [carouselAnim, setCarouselAnim]     = useState(false)  // true = animando salida
+  const [carouselDir, setCarouselDir]       = useState(1)      // 1 = →, -1 = ←
+  const [carouselClickAnim, setCarouselClickAnim] = useState(false)
+  const autoplayRef   = useRef<ReturnType<typeof setInterval> | null>(null)
+  const animatingRef  = useRef(false)
 
-  // Función para avanzar (usada por autoplay y botón)
-  const carouselNext = useCallback((cats: { id: string }[]) => {
-    setCarouselClickAnim(true)
-    setTimeout(() => setCarouselClickAnim(false), 350)
-    setCarouselTransition(true)
-    setCarouselIdx(i => i + 1)
-    // Si llegamos al clon del primero (índice = cats.length + 1), teleport silencioso al real
-    // Lo manejamos en el onTransitionEnd del track
+  // Rota el array para que index `offset` sea el primero
+  const rotated = useCallback((arr: typeof homeCategories, offset: number) => {
+    if (!arr || arr.length === 0) return []
+    const n = arr.length
+    return Array.from({ length: n }, (_, i) => arr[(offset + i) % n])
   }, [])
 
-  // Reiniciar autoplay (se llama al hacer click manual)
+  const advance = useCallback((dir: 1 | -1, cats: NonNullable<typeof homeCategories>) => {
+    if (animatingRef.current) return
+    animatingRef.current = true
+    setCarouselDir(dir)
+    setCarouselAnim(true)               // dispara animación de salida (~350ms)
+    if (dir === 1) {
+      setCarouselClickAnim(true)
+      setTimeout(() => setCarouselClickAnim(false), 350)
+    }
+    setTimeout(() => {
+      setCarouselOffset(o => (o + dir + cats.length) % cats.length)
+      setCarouselAnim(false)            // quita clase de animación → entrada limpia
+      animatingRef.current = false
+    }, 360)
+  }, [])
+
   const resetAutoplay = useCallback(() => {
     if (autoplayRef.current) clearInterval(autoplayRef.current)
     if (!homeCategories || homeCategories.length <= 1) return
-    autoplayRef.current = setInterval(() => carouselNext(homeCategories), 3500)
-  }, [homeCategories, carouselNext])
+    autoplayRef.current = setInterval(() => advance(1, homeCategories), 3500)
+  }, [homeCategories, advance])
 
-  // Autoplay
   useEffect(() => {
     if (!homeCategories || homeCategories.length <= 1) return
-    autoplayRef.current = setInterval(() => carouselNext(homeCategories), 3500)
+    autoplayRef.current = setInterval(() => advance(1, homeCategories), 3500)
     return () => { if (autoplayRef.current) clearInterval(autoplayRef.current) }
-  }, [homeCategories, carouselNext])
+  }, [homeCategories, advance])
   const [activeBanner, setActiveBanner] = useState<{
     etiqueta: string | null; titulo: string; subtitulo: string | null
     descripcion: string | null; linkUrl: string; linkTexto: string
@@ -451,12 +461,12 @@ export default function HomePage() {
                   {/* Controles derecha */}
                   <div style={{ display:'flex', alignItems:'center', gap:'12px' }}>
                     <button aria-label="Anterior"
-                      onClick={() => { setCarouselTransition(true); setCarouselIdx(i => i - 1); resetAutoplay() }}
+                      onClick={() => { if(homeCategories) { advance(-1, homeCategories); resetAutoplay() } }}
                       style={{ width:52, height:52, borderRadius:'50%', border:'1px solid rgba(232,140,74,.3)', background:'rgba(232,140,74,.12)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px', color:'#e88c4a', transition:'all .25s', outline:'none', backdropFilter:'blur(8px)' }}>
                       ←
                     </button>
                     <button aria-label="Siguiente"
-                      onClick={() => { setCarouselTransition(true); setCarouselIdx(i => i + 1); setCarouselClickAnim(true); setTimeout(() => setCarouselClickAnim(false), 350); resetAutoplay() }}
+                      onClick={() => { if(homeCategories) { advance(1, homeCategories); resetAutoplay() } }}
                       style={{ width:52, height:52, borderRadius:'50%', border:'1px solid rgba(232,140,74,.3)', background:'rgba(232,140,74,.12)', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px', color:'#e88c4a', transition:'all .25s', outline:'none', backdropFilter:'blur(8px)',
                         transform: carouselClickAnim ? 'scale(0.82)' : 'scale(1)',
                         boxShadow: carouselClickAnim ? '0 0 0 4px rgba(232,140,74,.35), 0 0 20px rgba(193,105,43,.5)' : 'none',
@@ -475,89 +485,48 @@ export default function HomePage() {
                 <div style={{ position:'absolute', left:0, top:0, bottom:0, width:'120px', background:'linear-gradient(to right,#111009,transparent)', zIndex:4, pointerEvents:'none' }} />
                 <div style={{ position:'absolute', right:0, top:0, bottom:0, width:'120px', background:'linear-gradient(to left,#111009,transparent)', zIndex:4, pointerEvents:'none' }} />
 
-                <div
-                  ref={carouselRef}
-                  onTransitionEnd={() => {
-                    const total = homeCategories.length
-                    if (carouselIdx >= total + 1) {
-                      setCarouselTransition(false)
-                      requestAnimationFrame(() => requestAnimationFrame(() => {
-                        setCarouselIdx(1)
-                        requestAnimationFrame(() => setCarouselTransition(true))
-                      }))
-                    }
-                    if (carouselIdx <= 0) {
-                      setCarouselTransition(false)
-                      requestAnimationFrame(() => requestAnimationFrame(() => {
-                        setCarouselIdx(total)
-                        requestAnimationFrame(() => setCarouselTransition(true))
-                      }))
-                    }
-                  }}
-                  style={{
-                    display: 'flex',
-                    gap: `${CARD_GAP}px`,
-                    paddingLeft: 'max(40px, calc((100vw - 1320px) / 2 + 40px))',
-                    paddingRight: '40px',
-                    paddingTop: '40px',
-                    paddingBottom: '40px',
-                    transition: carouselTransition ? `transform .65s cubic-bezier(.25,.46,.45,.94)` : 'none',
-                    transform: `translateX(calc(-${carouselIdx} * ${CARD_W + CARD_GAP}px))`,
-                    willChange: 'transform',
-                  }}
-                >
-                  {/* ── Clon del último ── */}
-                  {(() => {
-                    const cat = homeCategories[homeCategories.length - 1]
-                    return (
-                      <div key="clone-last"
-                        style={{ width:`${CARD_W}px`, height:'380px', flexShrink:0, borderRadius:20, overflow:'hidden', position:'relative',
-                          filter:'brightness(0.55) saturate(0.5)', transform:'scale(0.88)', transition:'none',
-                          boxShadow:'0 8px 32px rgba(0,0,0,.5)' }}>
-                        {cat.image ? <img src={cat.image} alt="" className="hcat-img" /> // eslint-disable-line @next/next/no-img-element
-                          : <div style={{width:'100%',height:'100%',background:'linear-gradient(145deg,#2d1a06,#4a2e10)'}} />}
-                        <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.5) 50%,transparent 100%)',zIndex:1}} />
-                        <p style={{position:'absolute',bottom:20,left:20,zIndex:2,color:'#fff',fontWeight:'900',fontSize:'17px',margin:0}}>{cat.label}</p>
-                      </div>
-                    )
-                  })()}
-
-                  {/* ── Cards reales ── */}
-                  {homeCategories.map((cat, i) => {
-                    const realIdx = i + 1
-                    const isActive = realIdx === carouselIdx
+                {/* Cards — rotación de array, sin translateX ni clones */}
+                <div style={{
+                  display: 'flex',
+                  gap: '24px',
+                  paddingLeft: 'max(40px, calc((100vw - 1320px) / 2 + 40px))',
+                  paddingRight: '40px',
+                  paddingTop: '40px',
+                  paddingBottom: '40px',
+                }}>
+                  {rotated(homeCategories, carouselOffset).map((cat, i) => {
+                    const isActive = i === 0
                     const gradients = ['linear-gradient(145deg,#2d1a06,#4a2e10)','linear-gradient(145deg,#0d1528,#1a2540)','linear-gradient(145deg,#0a2010,#143520)','linear-gradient(145deg,#200815,#3a1228)']
+                    const sc    = isActive ? 1.1  : Math.max(0.78, 1 - i * 0.055)
+                    const br    = isActive ? 1    : Math.max(0.4,  1 - i * 0.14)
+                    const tyUp  = isActive ? -14  : 0
                     return (
-                      <Link key={cat.id} href={`/tienda?cat=${cat.id}`}
+                      <Link
+                        key={`${cat.id}-${i}`}
+                        href={`/tienda?cat=${cat.id}`}
                         style={{
-                          width: `${CARD_W}px`,
-                          height: '380px',
-                          flexShrink: 0,
-                          borderRadius: 20,
-                          overflow: 'hidden',
-                          position: 'relative',
-                          textDecoration: 'none',
-                          cursor: 'pointer',
-                          // Efecto activo: scale + lift, no width
-                          transform: isActive ? 'scale(1.12) translateY(-12px)' : 'scale(0.88) translateY(0)',
-                          transition: 'transform .55s cubic-bezier(.34,1.2,.64,1), filter .4s ease, box-shadow .4s ease',
-                          filter: isActive ? 'none' : 'brightness(0.55) saturate(0.5)',
+                          width: '300px', height: '390px', flexShrink: 0,
+                          borderRadius: 20, overflow: 'hidden', position: 'relative',
+                          textDecoration: 'none', cursor: 'pointer',
+                          transform: `scale(${sc}) translateY(${tyUp}px)`,
+                          filter: `brightness(${br}) saturate(${isActive ? 1 : 0.55})`,
                           boxShadow: isActive
-                            ? '0 0 0 2px rgba(232,140,74,.5), 0 24px 60px rgba(0,0,0,.7), 0 0 50px rgba(193,105,43,.25)'
+                            ? '0 0 0 2px rgba(232,140,74,.5),0 24px 60px rgba(0,0,0,.7),0 0 50px rgba(193,105,43,.25)'
                             : '0 8px 32px rgba(0,0,0,.5)',
-                          zIndex: isActive ? 3 : 1,
+                          zIndex: isActive ? 3 : Math.max(1, 6 - i),
+                          transition: `transform .55s cubic-bezier(.34,1.2,.64,1) ${i*35}ms, filter .5s ease ${i*25}ms, box-shadow .4s ease`,
                         }}
                       >
                         {cat.image
                           // eslint-disable-next-line @next/next/no-img-element
-                          ? <img src={cat.image} alt={cat.label} className="hcat-img" />
+                          ? <img src={cat.image} alt={cat.label} style={{width:'100%',height:'100%',objectFit:'cover'}} />
                           : <div style={{width:'100%',height:'100%',background:gradients[i%gradients.length]}} />
                         }
                         <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.6) 40%,rgba(5,4,3,.05) 70%,transparent 100%)',zIndex:1}} />
                         {isActive && <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 0%,rgba(232,140,74,.1),transparent 60%)',zIndex:2}} />}
                         {isActive && <div style={{position:'absolute',top:0,left:0,right:0,height:'2px',background:'linear-gradient(90deg,transparent,rgba(232,140,74,.9) 50%,transparent)',zIndex:5,boxShadow:'0 0 14px rgba(232,140,74,.7)'}} />}
                         <div style={{position:'absolute',top:16,right:16,zIndex:6,width:30,height:30,borderRadius:'50%',background:'rgba(5,4,3,.75)',backdropFilter:'blur(10px)',border:`1px solid ${isActive?'rgba(232,140,74,.4)':'rgba(232,140,74,.15)'}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                          <span style={{color:isActive?'#e88c4a':'rgba(232,140,74,.35)',fontSize:'10px',fontWeight:'900',fontFamily:'var(--font-mono)'}}>0{i+1}</span>
+                          <span style={{color:isActive?'#e88c4a':'rgba(232,140,74,.3)',fontSize:'10px',fontWeight:'900',fontFamily:'var(--font-mono)'}}>0{((carouselOffset + i) % homeCategories.length) + 1}</span>
                         </div>
                         {isActive && (
                           <div style={{position:'absolute',top:16,left:16,zIndex:6,display:'flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:'100px',background:'linear-gradient(135deg,rgba(193,105,43,.95),rgba(232,140,74,.9))',boxShadow:'0 4px 16px rgba(193,105,43,.5)'}}>
@@ -565,9 +534,9 @@ export default function HomePage() {
                             <span style={{color:'#fff',fontSize:'9px',fontWeight:'900',letterSpacing:'2px',fontFamily:'var(--font-mono)'}}>DESTACADA</span>
                           </div>
                         )}
-                        <div style={{position:'absolute',bottom:0,left:0,right:0,padding:'24px 22px',zIndex:4}}>
+                        <div style={{position:'absolute',bottom:0,left:0,right:0,padding:isActive?'28px 22px':'20px 18px',zIndex:4}}>
                           <p style={{color:'rgba(232,140,74,.55)',fontSize:'9px',letterSpacing:'2.5px',textTransform:'uppercase',margin:'0 0 7px',fontFamily:'var(--font-mono)'}}>Colección ✦</p>
-                          <p style={{color:'#fff',fontWeight:'900',fontSize:isActive?'24px':'17px',letterSpacing:'-0.5px',margin:'0 0 10px',textShadow:'0 2px 16px rgba(0,0,0,.9)',lineHeight:1.05,transition:'font-size .4s ease'}}>{cat.label}</p>
+                          <p style={{color:'#fff',fontWeight:'900',fontSize:isActive?'24px':'16px',letterSpacing:'-0.5px',margin:'0 0 10px',textShadow:'0 2px 16px rgba(0,0,0,.9)',lineHeight:1.05}}>{cat.label}</p>
                           <div style={{display:'flex',alignItems:'center',gap:8,opacity:isActive?1:0,transform:isActive?'translateY(0)':'translateY(8px)',transition:'all .35s ease .1s'}}>
                             <div style={{height:'1px',width:'20px',background:'linear-gradient(to right,#e88c4a,transparent)'}} />
                             <span style={{color:'#e88c4a',fontSize:'12px',fontWeight:'800'}}>Ver colección</span>
@@ -577,36 +546,17 @@ export default function HomePage() {
                       </Link>
                     )
                   })}
-
-                  {/* ── Clon del primero ── */}
-                  {(() => {
-                    const cat = homeCategories[0]
-                    return (
-                      <div key="clone-first"
-                        style={{ width:`${CARD_W}px`, height:'380px', flexShrink:0, borderRadius:20, overflow:'hidden', position:'relative',
-                          filter:'brightness(0.55) saturate(0.5)', transform:'scale(0.88)', transition:'none',
-                          boxShadow:'0 8px 32px rgba(0,0,0,.5)' }}>
-                        {cat.image ? <img src={cat.image} alt="" className="hcat-img" /> // eslint-disable-line @next/next/no-img-element
-                          : <div style={{width:'100%',height:'100%',background:'linear-gradient(145deg,#2d1a06,#4a2e10)'}} />}
-                        <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.5) 50%,transparent 100%)',zIndex:1}} />
-                        <p style={{position:'absolute',bottom:20,left:20,zIndex:2,color:'#fff',fontWeight:'900',fontSize:'17px',margin:0}}>{cat.label}</p>
-                      </div>
-                    )
-                  })()}
                 </div>
               </div>
 
               {/* ── Dots + contador + barra progreso ── */}
               <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'16px', marginTop:'40px', padding:'0 32px' }}>
-                <span style={{ color:'rgba(232,140,74,.4)', fontSize:'11px', fontFamily:'var(--font-mono)', fontWeight:'700' }}>0{Math.max(1, Math.min(homeCategories.length, carouselIdx))}</span>
+                <span style={{ color:'rgba(232,140,74,.4)', fontSize:'11px', fontFamily:'var(--font-mono)', fontWeight:'700' }}>0{carouselOffset + 1}</span>
                 <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
-                  {homeCategories.map((_, i) => {
-                    const realActive = Math.max(1, Math.min(homeCategories.length, carouselIdx)) - 1
-                    return (
-                      <button key={i} onClick={() => { setCarouselTransition(true); setCarouselIdx(i + 1); resetAutoplay() }} aria-label={`Categoría ${i + 1}`}
-                        style={{ width: i === realActive ? '32px' : '6px', height: '6px', borderRadius: '100px', border: 'none', background: i === realActive ? 'linear-gradient(90deg,#c1692b,#e88c4a)' : 'rgba(232,140,74,.2)', cursor: 'pointer', padding: 0, transition: 'all .4s cubic-bezier(.34,1.3,.64,1)', boxShadow: i === realActive ? '0 0 12px rgba(193,105,43,.6)' : 'none' }} />
-                    )
-                  })}
+                  {homeCategories.map((_, i) => (
+                    <button key={i} onClick={() => { setCarouselOffset(i); resetAutoplay() }} aria-label={`Categoría ${i + 1}`}
+                      style={{ width: i === carouselOffset ? '32px' : '6px', height: '6px', borderRadius: '100px', border: 'none', background: i === carouselOffset ? 'linear-gradient(90deg,#c1692b,#e88c4a)' : 'rgba(232,140,74,.2)', cursor: 'pointer', padding: 0, transition: 'all .4s cubic-bezier(.34,1.3,.64,1)', boxShadow: i === carouselOffset ? '0 0 12px rgba(193,105,43,.6)' : 'none' }} />
+                  ))}
                 </div>
                 <span style={{ color:'rgba(232,140,74,.4)', fontSize:'11px', fontFamily:'var(--font-mono)', fontWeight:'700' }}>0{homeCategories.length}</span>
               </div>
@@ -614,7 +564,7 @@ export default function HomePage() {
               {/* Barra de progreso autoplay */}
               <div style={{ maxWidth:'200px', margin:'16px auto 0', height:'2px', borderRadius:'100px', background:'rgba(232,140,74,.12)', overflow:'hidden' }}>
                 <div
-                  key={carouselIdx}
+                  key={carouselOffset}
                   style={{
                     height:'100%', borderRadius:'100px',
                     background:'linear-gradient(90deg,#c1692b,#e88c4a)',
