@@ -217,7 +217,7 @@ export default function CheckoutPage() {
         .checkout-layout { display:grid; grid-template-columns:1fr 400px; gap:32px; align-items:start; }
         @media(max-width:900px){
           .checkout-layout { grid-template-columns:1fr !important; }
-          .checkout-layout > div:last-child { position:static !important; order:-1; }
+          .checkout-layout > div:last-child { position:static !important; }
           .checkout-summary { border-radius:16px !important; }
         }
         .pay-option { padding:18px 20px; border-radius:14px; border:1.5px solid #e8e5e2; cursor:pointer; transition:all .2s; background:#fff; text-align:left; width:100%; }
