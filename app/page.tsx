@@ -6,6 +6,7 @@ import { BubblesCanvas } from '@/components/ui/BubblesCanvas'
 import { LightRays } from '@/components/ui/LightRays'
 import { ParticlesBurst, fireBurst } from '@/components/ui/ParticlesBurst'
 import { FloatingShopIcons } from '@/components/ui/FloatingShopIcons'
+import { FileDown } from 'lucide-react'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Product } from '@/types'
 
@@ -339,7 +340,7 @@ export default function HomePage() {
                 Explorar colección →
               </Link>
               <Link href="/catalogo?auto=1" className="btn-download" style={{ padding:'17px 30px', borderRadius:'14px', fontSize:'14px', fontWeight:900, display:'inline-flex', alignItems:'center', gap:'11px' }}>
-                <span className="btn-download__ic">⬇</span>
+                <span className="btn-download__ic"><FileDown size={15} strokeWidth={2.4} /></span>
                 Descargar catálogo
               </Link>
             </div>
