@@ -3,6 +3,7 @@ import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { CheckCircle, MessageCircle, Home, ShoppingBag, ArrowRight, AlertCircle, Loader2 } from 'lucide-react'
+import { buildOrderWAMessage } from '@/lib/whatsappOrder'
 
 const PAYMENT_LABELS: Record<string, string> = {
   'zelle':      'Zelle',
@@ -39,13 +40,24 @@ const steps = [
 ]
 
 function buildWAMessage(order: Order): string {
-  const list = order.items.map(i =>
-    `• ${i.product.name}${i.selectedSize ? ` | Talla: ${i.selectedSize}` : ''}${i.selectedColor ? ` | Color: ${i.selectedColor}` : ''} × ${i.quantity} = $${(i.product.price * i.quantity).toFixed(2)}`
-  ).join('\n')
   const pm = PAYMENT_LABELS[order.paymentMethod] || order.paymentMethod
-  return encodeURIComponent(
-    `¡Hola Punto Norte! 🛍️ Quiero realizar un pedido:\n\n*PRODUCTOS:*\n${list}\n\n*TOTAL: $${order.total.toFixed(2)}*\n\n*DATOS DE ENVÍO:*\nNombre: ${order.customerName}\nTeléfono: ${order.customerPhone}\nDirección: ${order.address}\nCiudad: ${order.city}${order.notes ? `\nNotas: ${order.notes}` : ''}\n\n*Pago preferido:* ${pm}\n*Pedido #${order.id}*`
-  )
+  return buildOrderWAMessage({
+    items: order.items.map(i => ({
+      name: i.product.name,
+      size: i.selectedSize,
+      color: i.selectedColor,
+      quantity: i.quantity,
+      price: i.product.price,
+    })),
+    total: order.total,
+    name: order.customerName,
+    phone: order.customerPhone,
+    address: order.address,
+    city: order.city,
+    notes: order.notes,
+    paymentLabel: pm,
+    orderId: order.id,
+  })
 }
 
 function ConfirmacionContent() {

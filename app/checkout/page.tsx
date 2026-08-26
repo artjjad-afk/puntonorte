@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
 import { CustomerInfo } from '@/types'
 import { ChevronLeft, Check, MapPin, CreditCard, ClipboardCheck, ShoppingBag } from 'lucide-react'
+import { buildOrderWAMessage } from '@/lib/whatsappOrder'
 
 const PAYMENT_METHODS = [
   { id: 'zelle',     label: 'Zelle',               desc: 'Transferencia USD desde banco americano', icon: '🏦' },
@@ -75,13 +76,23 @@ export default function CheckoutPage() {
   }
 
   const buildMsg = () => {
-    const list = items.map(i =>
-      `• ${i.product.name}${i.selectedSize ? ` | Talla: ${i.selectedSize}` : ''}${i.selectedColor ? ` | Color: ${i.selectedColor}` : ''} × ${i.quantity} = $${(i.product.price * i.quantity).toFixed(2)}`
-    ).join('\n')
     const pm = PAYMENT_METHODS.find(p => p.id === paymentMethod)?.label || paymentMethod
-    return encodeURIComponent(
-      `¡Hola Punto Norte! 🛍️ Quiero realizar un pedido:\n\n*PRODUCTOS:*\n${list}\n\n*TOTAL: $${subtotal.toFixed(2)}*\n\n*DATOS DE ENVÍO:*\nNombre: ${form.name}\nTeléfono: ${form.phone}\nDirección: ${form.address}\nCiudad: ${form.city}${form.notes ? `\nNotas: ${form.notes}` : ''}\n\n*Pago preferido:* ${pm}`
-    )
+    return buildOrderWAMessage({
+      items: items.map(i => ({
+        name: i.product.name,
+        size: i.selectedSize,
+        color: i.selectedColor,
+        quantity: i.quantity,
+        price: i.product.price,
+      })),
+      total: subtotal,
+      name: form.name,
+      phone: form.phone,
+      address: form.address,
+      city: form.city,
+      notes: form.notes,
+      paymentLabel: pm,
+    })
   }
 
   const handleConfirm = async () => {
