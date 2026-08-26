@@ -1,9 +1,9 @@
 'use client'
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { ProductCard } from '@/components/ui/ProductCard'
-import { SlidersHorizontal, X, Search, Package } from 'lucide-react'
+import { SlidersHorizontal, X, Search, Package, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Product } from '@/types'
 
 function TiendaContent() {
@@ -49,6 +49,9 @@ function TiendaContent() {
 
   const currentLabel = allCategories.find(c => c.id === selectedCat)?.label || 'Tienda'
 
+  const chipsRef = useRef<HTMLDivElement>(null)
+  const scrollChips = (dir: number) => chipsRef.current?.scrollBy({ left: dir * 220, behavior: 'smooth' })
+
   return (
     <>
       <style>{`
@@ -60,8 +63,13 @@ function TiendaContent() {
         .search-input { padding:10px 16px 10px 44px; border-radius:10px; border:1.5px solid #e8e5e2; font-size:14px; width:200px; outline:none; transition:border-color .2s; min-height:40px; }
         .search-input:focus { border-color:#c1692b; }
         .filters-bar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; }
-        .filters-chips { display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-bottom:2px; flex-shrink:1; min-width:0; }
+        .filters-chips-wrap { display:flex; align-items:center; gap:6px; flex-shrink:1; min-width:0; }
+        .filters-chips { display:flex; gap:8px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; padding-bottom:2px; flex:1; min-width:0; scroll-behavior:smooth; }
         .filters-chips::-webkit-scrollbar { display:none; }
+        .chips-arrow { flex-shrink:0; width:34px; height:40px; border-radius:10px; border:1.5px solid #e8e5e2; background:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#393738; transition:all .2s; padding:0; }
+        .chips-arrow:hover { border-color:#c1692b; color:#c1692b; background:#fff7f3; }
+        .chips-arrow:active { transform:scale(.92); }
+        @media(min-width:769px){ .chips-arrow { display:none; } }
         .filters-right { display:flex; gap:10px; align-items:center; flex-shrink:0; }
         @keyframes spin { to { transform: rotate(360deg); } }
         @media(max-width:640px){
@@ -70,7 +78,7 @@ function TiendaContent() {
           .filters-right > div { width:100%; }
           .search-input { width:100% !important; }
           .sort-select { flex:1; }
-          .filters-chips { width:100%; }
+          .filters-chips-wrap { width:100%; }
         }
       `}</style>
 
@@ -91,12 +99,20 @@ function TiendaContent() {
       <div style={{ maxWidth: '1320px', margin: '0 auto', padding: '40px 32px' }}>
         {/* Filtros */}
         <div className="filters-bar" style={{ marginBottom: '40px' }}>
-          <div className="filters-chips">
-            {allCategories.map(cat => (
-              <button key={cat.id} onClick={() => setSelectedCat(cat.id)} className={`filter-chip ${selectedCat === cat.id ? 'active' : ''}`}>
-                {cat.label}
-              </button>
-            ))}
+          <div className="filters-chips-wrap">
+            <button type="button" aria-label="Anterior" className="chips-arrow" onClick={() => scrollChips(-1)}>
+              <ChevronLeft size={18} />
+            </button>
+            <div className="filters-chips" ref={chipsRef}>
+              {allCategories.map(cat => (
+                <button key={cat.id} onClick={() => setSelectedCat(cat.id)} className={`filter-chip ${selectedCat === cat.id ? 'active' : ''}`}>
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+            <button type="button" aria-label="Siguiente" className="chips-arrow" onClick={() => scrollChips(1)}>
+              <ChevronRight size={18} />
+            </button>
           </div>
           <div className="filters-right">
             <div style={{ position: 'relative' }}>
