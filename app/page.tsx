@@ -51,12 +51,14 @@ function useInView() {
   const [inView, setInView] = useState(false)
   useEffect(() => {
     const el = ref.current; if (!el) return
+    // Fallback: si en 1.5s no disparó el observer, forzar visible
+    const fallback = setTimeout(() => setInView(true), 1500)
     const obs = new IntersectionObserver(
-      ([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect() } },
-      { threshold: 0, rootMargin: '0px 0px -50px 0px' }
+      ([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); clearTimeout(fallback) } },
+      { threshold: 0, rootMargin: '0px 0px 0px 0px' }
     )
     obs.observe(el)
-    return () => obs.disconnect()
+    return () => { obs.disconnect(); clearTimeout(fallback) }
   }, [])
   return { ref, inView }
 }
@@ -203,7 +205,8 @@ export default function HomePage() {
         @keyframes carousel-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
         @keyframes glow-pulse{0%,100%{box-shadow:0 0 20px rgba(193,105,43,.3),0 8px 40px rgba(0,0,0,.3);}50%{box-shadow:0 0 40px rgba(193,105,43,.6),0 8px 60px rgba(0,0,0,.4);}}
         @keyframes card-shine{0%{left:-120%;}100%{left:120%;}}
-        .hcat-card{position:relative;overflow:hidden;border-radius:24px;cursor:pointer;flex:0 0 auto;transition:transform .4s cubic-bezier(.34,1.3,.64,1),box-shadow .4s ease;}
+        @keyframes hcat-in{from{opacity:0;transform:translateY(24px) scale(.95);}to{opacity:1;transform:translateY(0) scale(1);}}
+        .hcat-card{position:relative;overflow:hidden;border-radius:24px;cursor:pointer;flex:0 0 auto;transition:transform .4s cubic-bezier(.34,1.3,.64,1),box-shadow .4s ease;animation:hcat-in .5s cubic-bezier(.34,1.2,.64,1) both;}
         .hcat-card:hover{transform:scale(1.04) translateY(-6px);}
         .hcat-card:hover .hcat-img{transform:scale(1.1);}
         .hcat-card::before{content:'';position:absolute;top:0;left:-120%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:skewX(-20deg);pointer-events:none;z-index:4;transition:none;}
@@ -379,7 +382,9 @@ export default function HomePage() {
       {/* CARRUSEL CATEGORÍAS DESTACADAS */}
       {homeCategories !== null && homeCategories.length > 0 && (
         <>
-          <section ref={secHome.ref} style={{ padding:'80px 0 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
+          <section style={{ padding:'80px 0 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
+            {/* div sentinela para IntersectionObserver */}
+            <div ref={secHome.ref} style={{ position:'absolute', top:0, left:0, width:'1px', height:'1px' }} />
             {/* Blobs decorativos */}
             <div className="aurora-blob animate-aurora-1" style={{ width:'600px', height:'400px', top:'-80px', left:'-100px', background:'radial-gradient(ellipse,rgba(193,105,43,.12),transparent 70%)', pointerEvents:'none' }} />
             <div className="aurora-blob animate-aurora-3" style={{ width:'500px', height:'500px', bottom:'-120px', right:'-80px', background:'radial-gradient(circle,rgba(232,140,74,.1),transparent 70%)', pointerEvents:'none' }} />
@@ -454,11 +459,9 @@ export default function HomePage() {
                         boxShadow: isActive
                           ? '0 0 32px rgba(193,105,43,.45), 0 16px 48px rgba(0,0,0,.35)'
                           : '0 8px 32px rgba(0,0,0,.2)',
-                        opacity: secHome.inView ? 1 : 0,
-                        transform: secHome.inView
-                          ? `translateY(0) scale(${isActive ? 1 : 0.97})`
-                          : 'translateY(40px) scale(.94)',
-                        transition: `opacity .6s ease ${i * 80}ms, transform .7s cubic-bezier(.34,1.2,.64,1) ${i * 80}ms, width .5s cubic-bezier(.34,1.2,.64,1), height .5s cubic-bezier(.34,1.2,.64,1), box-shadow .4s ease`,
+                        opacity: 1,
+                        transition: `width .5s cubic-bezier(.34,1.2,.64,1), height .5s cubic-bezier(.34,1.2,.64,1), box-shadow .4s ease`,
+                        animationDelay: `${i * 80}ms`,
                       }}
                     >
                       {/* Imagen o gradiente */}
