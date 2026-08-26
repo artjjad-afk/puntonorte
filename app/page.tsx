@@ -314,8 +314,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Wave divider oscuro→blanco - solo si hay categorias o productos */}
-      {(dbCategories !== null && dbCategories.length > 0) && (
+      {/* Wave divider oscuro→blanco - solo si hay categorias */}
+      {((homeCategories !== null && homeCategories.length > 0) || (dbCategories !== null && dbCategories.length > 0)) && (
         <div style={{ background:'#0d0c0b', marginBottom:'-2px' }}>
           <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
             <path d="M0,40 C360,80 1080,0 1440,40 L1440,60 L0,60 Z" fill="#ffffff"/>
@@ -323,8 +323,8 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* CATEGORÍAS GRID - solo si hay categorias en la DB */}
-      {dbCategories !== null && dbCategories.length > 0 && (
+      {/* CATEGORÍAS GRID - solo si NO hay homeCategories pero sí hay dbCategories */}
+      {(homeCategories === null || homeCategories.length === 0) && dbCategories !== null && dbCategories.length > 0 && (
         <section ref={sec1.ref} style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
           <div className="aurora-blob animate-aurora-1" style={{ width:'500px', height:'500px', top:'-150px', left:'-100px', background:'radial-gradient(circle,rgba(193,105,43,.18),rgba(232,140,74,.08))' }} />
           <div className="aurora-blob animate-aurora-2" style={{ width:'400px', height:'400px', bottom:'-100px', right:'-80px', background:'radial-gradient(circle,rgba(232,140,74,.15),rgba(193,105,43,.05))' }} />
@@ -367,8 +367,8 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Wave divider blanco→crema - solo si hay categorias */}
-      {dbCategories !== null && dbCategories.length > 0 && (
+      {/* Wave divider blanco→crema - solo si se muestra el grid (sin homeCategories) */}
+      {(homeCategories === null || homeCategories.length === 0) && dbCategories !== null && dbCategories.length > 0 && (
         <div style={{ background:'#fff', marginBottom:'-2px' }}>
           <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
             <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
@@ -376,18 +376,9 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* ════════════════════════════════
-          CARRUSEL CATEGORÍAS DESTACADAS
-      ════════════════════════════════ */}
+      {/* CARRUSEL CATEGORÍAS DESTACADAS */}
       {homeCategories !== null && homeCategories.length > 0 && (
         <>
-          {/* Wave oscuro→blanco para el carrusel */}
-          <div style={{ background:'#0d0c0b', marginBottom:'-2px' }}>
-            <svg viewBox="0 0 1440 60" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
-              <path d="M0,40 C360,80 1080,0 1440,40 L1440,60 L0,60 Z" fill="#ffffff"/>
-            </svg>
-          </div>
-
           <section ref={secHome.ref} style={{ padding:'80px 0 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
             {/* Blobs decorativos */}
             <div className="aurora-blob animate-aurora-1" style={{ width:'600px', height:'400px', top:'-80px', left:'-100px', background:'radial-gradient(ellipse,rgba(193,105,43,.12),transparent 70%)', pointerEvents:'none' }} />
