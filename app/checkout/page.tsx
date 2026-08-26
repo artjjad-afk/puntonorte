@@ -6,6 +6,7 @@ import { useCartStore } from '@/store/cart'
 import { CustomerInfo } from '@/types'
 import { ChevronLeft, Check, MapPin, CreditCard, ClipboardCheck, ShoppingBag } from 'lucide-react'
 import { buildOrderWAMessage } from '@/lib/whatsappOrder'
+import { VENEZUELA } from '@/lib/venezuela'
 
 const PAYMENT_METHODS = [
   { id: 'zelle',     label: 'Zelle',               desc: 'Transferencia USD desde banco americano', icon: '🏦' },
@@ -30,6 +31,9 @@ export default function CheckoutPage() {
   const [orderError, setOrderError] = useState(false)
   const [form, setForm] = useState<CustomerInfo>({ name:'', phone:'', address:'', city:'', notes:'' })
   const [errors, setErrors] = useState<Partial<CustomerInfo>>({})
+  const [estado, setEstado] = useState('')
+  const [ciudad, setCiudad] = useState('')
+  const ciudadesDelEstado = VENEZUELA.find(e => e.estado === estado)?.ciudades ?? []
 
   if (items.length === 0) return (
     <div style={{ minHeight:'70vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'20px', padding:'40px', textAlign:'center' }}>
@@ -305,7 +309,60 @@ export default function CheckoutPage() {
                   {field('name', 'Nombre completo', 'Ej: María González')}
                   {field('phone', 'Teléfono / WhatsApp', 'Ej: 0414-1234567')}
                   {field('address', 'Dirección de entrega', 'Av. Principal, Edificio Norte, Apto 3B')}
-                  {field('city', 'Ciudad / Estado', 'Ej: Caracas, Miranda')}
+
+                  {/* Estado + Ciudad (dropdowns dependientes) */}
+                  <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'14px' }} className="checkout-loc-grid">
+                    <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+                      <label style={{ fontSize:'12px', fontWeight:'700', color:'#393738', letterSpacing:'0.8px', textTransform:'uppercase' }}>
+                        Estado <span style={{ color:'#c1692b' }}>*</span>
+                      </label>
+                      <select
+                        value={estado}
+                        onChange={e => { const v = e.target.value; setEstado(v); setCiudad(''); setForm(f => ({ ...f, city:'' })) }}
+                        style={{
+                          width:'100%', padding:'13px 14px', borderRadius:'12px',
+                          border:`1.5px solid ${errors.city && !estado ? '#e53e3e' : '#e8e5e2'}`,
+                          fontSize:'14px', outline:'none', background:'#fff', cursor:'pointer',
+                          color: estado ? '#211f1e' : '#9a9694', appearance:'auto', boxSizing:'border-box',
+                        }}
+                        onFocus={e => (e.target.style.borderColor = '#c1692b')}
+                        onBlur={e => (e.target.style.borderColor = errors.city && !estado ? '#e53e3e' : '#e8e5e2')}
+                      >
+                        <option value="">Selecciona…</option>
+                        {VENEZUELA.map(e => <option key={e.estado} value={e.estado} style={{ color:'#211f1e' }}>{e.estado}</option>)}
+                      </select>
+                    </div>
+
+                    <div style={{ display:'flex', flexDirection:'column', gap:'6px' }}>
+                      <label style={{ fontSize:'12px', fontWeight:'700', color:'#393738', letterSpacing:'0.8px', textTransform:'uppercase' }}>
+                        Ciudad <span style={{ color:'#c1692b' }}>*</span>
+                      </label>
+                      <select
+                        value={ciudad}
+                        disabled={!estado}
+                        onChange={e => { const v = e.target.value; setCiudad(v); setForm(f => ({ ...f, city: v ? `${v}, ${estado}` : '' })) }}
+                        style={{
+                          width:'100%', padding:'13px 14px', borderRadius:'12px',
+                          border:`1.5px solid ${errors.city && estado && !ciudad ? '#e53e3e' : '#e8e5e2'}`,
+                          fontSize:'14px', outline:'none', background: estado ? '#fff' : '#f4f2f0',
+                          cursor: estado ? 'pointer' : 'not-allowed',
+                          color: ciudad ? '#211f1e' : '#9a9694', appearance:'auto', boxSizing:'border-box',
+                        }}
+                        onFocus={e => (e.target.style.borderColor = '#c1692b')}
+                        onBlur={e => (e.target.style.borderColor = errors.city && estado && !ciudad ? '#e53e3e' : '#e8e5e2')}
+                      >
+                        <option value="">{estado ? 'Selecciona…' : 'Elige estado primero'}</option>
+                        {ciudadesDelEstado.map(c => <option key={c} value={c} style={{ color:'#211f1e' }}>{c}</option>)}
+                      </select>
+                    </div>
+
+                    {errors.city && (
+                      <span style={{ gridColumn:'1 / -1', fontSize:'12px', color:'#e53e3e', display:'flex', alignItems:'center', gap:'4px' }}>
+                        ⚠️ Selecciona tu estado y ciudad
+                      </span>
+                    )}
+                  </div>
+
                   {field('notes', 'Notas adicionales', 'Instrucciones especiales para la entrega... (opcional)')}
                 </div>
               </div>
