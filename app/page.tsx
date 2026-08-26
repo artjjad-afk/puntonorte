@@ -528,7 +528,6 @@ export default function HomePage() {
                               ? '0 0 0 2px rgba(232,140,74,.5),0 24px 60px rgba(0,0,0,.7),0 0 60px rgba(193,105,43,.3)'
                               : '0 8px 32px rgba(0,0,0,.5)',
                             zIndex: isActive ? 3 : Math.max(1, 6 - i),
-                            saturate: isActive ? 1 : 0.55,
                           }}
                           whileHover={isActive ? {
                             scale: 1.14,
