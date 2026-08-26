@@ -4,6 +4,7 @@ import { ConditionalLayout } from '@/components/layout/ConditionalLayout'
 import { ToastProvider } from '@/components/ui/Toast'
 import { StoreJsonLd } from '@/components/ui/JsonLd'
 import { NavbarServer } from '@/components/layout/NavbarServer'
+import { InitialLoader } from '@/components/ui/InitialLoader'
 
 const BASE = 'https://puntonorteshop.com'
 
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" className="h-full">
       <body className="min-h-full flex flex-col" style={{ fontFamily: 'Arial, Helvetica, sans-serif' }}>
+        <InitialLoader />
         <StoreJsonLd />
         <ToastProvider>
           <ConditionalLayout navbar={<NavbarServer />}>

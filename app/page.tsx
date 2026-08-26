@@ -189,22 +189,11 @@ export default function HomePage() {
     homeCategories !== undefined &&
     offerProducts !== undefined
 
-  // El loader arranca visible (va en el HTML del servidor → aparece al instante).
-  const [loaderHidden, setLoaderHidden] = useState(false)
-
-  // Cuando todo cargó, esperamos a que termine el fade y lo desmontamos.
+  // Avisar al loader global (InitialLoader en el layout) que ya cargaron
+  // todos los datos de la home para que haga el fade-out.
   useEffect(() => {
-    if (!dataReady) return
-    const t = setTimeout(() => setLoaderHidden(true), 550)
-    return () => clearTimeout(t)
+    if (dataReady) window.dispatchEvent(new Event('pn:ready'))
   }, [dataReady])
-
-  // Red de seguridad: pase lo que pase, nunca dejar el loader más de 7s
-  // (si un fetch quedó colgado en móvil, revelamos igual lo que sí cargó).
-  useEffect(() => {
-    const t = setTimeout(() => setLoaderHidden(true), 7000)
-    return () => clearTimeout(t)
-  }, [])
 
   useEffect(() => {
     const fn = () => setScrollY(window.scrollY)
@@ -221,16 +210,6 @@ export default function HomePage() {
 
   return (
     <>
-      {/* ── Loader de carga inicial (marca Punto Norte) ── */}
-      {!loaderHidden && (
-        <div className={`pn-loader${dataReady ? ' pn-loader--out' : ''}`} aria-hidden={dataReady} role="status">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Punto Norte" className="pn-loader__logo" width={64} height={64} />
-          <div className="pn-loader__ring" />
-          <div className="pn-loader__text">Cargando</div>
-        </div>
-      )}
-
       <style>{`
         /* ── Cat items ── */
         .cat-item{position:relative;overflow:hidden;border-radius:20px;cursor:pointer;display:block;}
