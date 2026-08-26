@@ -236,31 +236,61 @@ export default function HomePage() {
 
         /* ── Home categories carousel ── */
         @keyframes carousel-float{0%,100%{transform:translateY(0);}50%{transform:translateY(-8px);}}
-        @keyframes glow-pulse{0%,100%{box-shadow:0 0 0 1px rgba(232,140,74,.4),0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(193,105,43,.2);}50%{box-shadow:0 0 0 1px rgba(232,140,74,.7),0 20px 60px rgba(0,0,0,.7),0 0 60px rgba(193,105,43,.35);}}
+        @keyframes glow-pulse{
+          0%,100%{box-shadow:0 0 0 1px rgba(232,140,74,.4),0 20px 60px rgba(0,0,0,.6),0 0 40px rgba(193,105,43,.2);}
+          50%{box-shadow:0 0 0 2px rgba(232,140,74,.8),0 20px 80px rgba(0,0,0,.7),0 0 80px rgba(193,105,43,.5);}
+        }
         @keyframes card-shine{0%{left:-120%;}100%{left:120%;}}
         @keyframes hcat-in{from{opacity:0;transform:translateY(32px) scale(.93);}to{opacity:1;transform:translateY(0) scale(1);}}
         @keyframes text-pan{0%{background-position:0% center;}100%{background-position:200% center;}}
-        @keyframes bounceX{0%,100%{transform:translateX(0);}50%{transform:translateX(5px);}}
+        @keyframes bounceX{0%,100%{transform:translateX(0);}50%{transform:translateX(6px);}}
         @keyframes progress-fill{from{width:0%;}to{width:100%;}}
-        @keyframes card-enter-right{
-          0%  { transform:scale(0.7) translateX(120px) translateY(0px) rotate(6deg); opacity:0; filter:brightness(0.3); }
-          60% { transform:scale(1.15) translateX(-8px) translateY(-18px) rotate(-1deg); opacity:1; filter:brightness(1.1); }
-          100%{ transform:scale(1.1) translateX(0) translateY(-14px) rotate(0deg); opacity:1; filter:brightness(1); }
+
+        /* Card activa entra — flip 3D + zoom + glow explosion */
+        @keyframes card-wow-right{
+          0%   { transform:scale(0.4) translateX(200px) translateY(60px) rotateY(-70deg) rotateZ(12deg); opacity:0; filter:brightness(2) blur(4px); }
+          35%  { transform:scale(1.22) translateX(-15px) translateY(-22px) rotateY(8deg) rotateZ(-2deg); opacity:1; filter:brightness(1.3) blur(0px); }
+          65%  { transform:scale(1.08) translateX(5px) translateY(-12px) rotateY(-3deg) rotateZ(0.5deg); filter:brightness(1.05); }
+          100% { transform:scale(1.1) translateX(0) translateY(-14px) rotateY(0deg) rotateZ(0deg); opacity:1; filter:brightness(1); }
         }
-        @keyframes card-enter-left{
-          0%  { transform:scale(0.7) translateX(-120px) translateY(0px) rotate(-6deg); opacity:0; filter:brightness(0.3); }
-          60% { transform:scale(1.15) translateX(8px) translateY(-18px) rotate(1deg); opacity:1; filter:brightness(1.1); }
-          100%{ transform:scale(1.1) translateX(0) translateY(-14px) rotate(0deg); opacity:1; filter:brightness(1); }
+        @keyframes card-wow-left{
+          0%   { transform:scale(0.4) translateX(-200px) translateY(60px) rotateY(70deg) rotateZ(-12deg); opacity:0; filter:brightness(2) blur(4px); }
+          35%  { transform:scale(1.22) translateX(15px) translateY(-22px) rotateY(-8deg) rotateZ(2deg); opacity:1; filter:brightness(1.3) blur(0px); }
+          65%  { transform:scale(1.08) translateX(-5px) translateY(-12px) rotateY(3deg) rotateZ(-0.5deg); filter:brightness(1.05); }
+          100% { transform:scale(1.1) translateX(0) translateY(-14px) rotateY(0deg) rotateZ(0deg); opacity:1; filter:brightness(1); }
         }
-        @keyframes card-slide-over{
-          0%  { transform:scale(0.95) translateX(-30px); opacity:0.5; }
-          100%{ transform:scale(var(--sc,0.88)) translateX(0); opacity:1; }
+
+        /* Cards secundarias se reordenan con bounce */
+        @keyframes card-queue-in{
+          0%   { transform:scale(0.6) translateX(80px) translateY(20px); opacity:0; filter:brightness(0.2); }
+          50%  { transform:scale(0.92) translateX(-6px); opacity:0.8; }
+          100% { opacity:1; }
         }
-        @keyframes card-flash{
-          0%  { opacity:1; }
-          40% { opacity:0.8; }
-          100%{ opacity:0; }
+
+        /* Glow ring que explota al cambiar */
+        @keyframes ring-explode{
+          0%   { transform:scale(0.3); opacity:1; }
+          60%  { transform:scale(1.8); opacity:0.4; }
+          100% { transform:scale(2.5); opacity:0; }
         }
+
+        /* Shimmer sweep en la card activa */
+        @keyframes shimmer-sweep{
+          0%   { left:-100%; opacity:0.8; }
+          100% { left:150%; opacity:0; }
+        }
+
+        /* Partícula de burst al cambiar */
+        @keyframes burst-particle{
+          0%   { transform:translate(0,0) scale(1); opacity:1; }
+          100% { transform:translate(var(--tx),var(--ty)) scale(0); opacity:0; }
+        }
+
+        .hcat-card-3d { perspective: 1000px; transform-style: preserve-3d; }
+        .hcat-card-3d:hover { transform:scale(1.1) translateY(-14px) rotateY(4deg) !important; }
+        .hcat-shimmer{position:absolute;top:0;left:-100%;width:50%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent);transform:skewX(-15deg);z-index:9;pointer-events:none;animation:shimmer-sweep .7s ease .1s both;}
+        .hcat-ring{position:absolute;inset:-20px;border-radius:28px;border:2px solid rgba(232,140,74,.6);z-index:8;pointer-events:none;animation:ring-explode .6s ease forwards;}
+        .hcat-active-glow{animation:glow-pulse 2s ease-in-out infinite;}
         .hcat-card{position:relative;overflow:hidden;border-radius:20px;cursor:pointer;flex:0 0 auto;animation:hcat-in .55s cubic-bezier(.34,1.2,.64,1) both;}
         .hcat-card:hover{transform:translateY(-8px) scale(1.02);}
         .hcat-card:hover .hcat-img{transform:scale(1.08);}
@@ -513,16 +543,17 @@ export default function HomePage() {
                     const sc   = isActive ? 1.1  : Math.max(0.78, 1 - i * 0.055)
                     const br   = isActive ? 1    : Math.max(0.4,  1 - i * 0.14)
                     const tyUp = isActive ? -14  : 0
-                    // Animación de entrada: la activa entra desde la dirección del avance
-                    const enterAnim = carouselEntering && isActive
-                      ? (carouselDir === 1 ? 'card-enter-right' : 'card-enter-left')
-                      : carouselEntering && i > 0
-                        ? 'card-slide-over'
-                        : 'none'
+                    // Animación de entrada: la activa entra con flip 3D WOW
+                    const enterAnim = carouselEntering
+                      ? isActive
+                        ? (carouselDir === 1 ? 'card-wow-right' : 'card-wow-left')
+                        : 'card-queue-in'
+                      : 'none'
                     return (
                       <Link
                         key={`${cat.id}-${carouselOffset}-${i}`}
                         href={`/tienda?cat=${cat.id}`}
+                        className={isActive ? 'hcat-card-3d' : ''}
                         style={{
                           width: '300px', height: '390px', flexShrink: 0,
                           borderRadius: 20, overflow: 'hidden', position: 'relative',
@@ -530,40 +561,47 @@ export default function HomePage() {
                           transform: `scale(${sc}) translateY(${tyUp}px)`,
                           filter: `brightness(${br}) saturate(${isActive ? 1 : 0.55})`,
                           boxShadow: isActive
-                            ? '0 0 0 2px rgba(232,140,74,.5),0 24px 60px rgba(0,0,0,.7),0 0 50px rgba(193,105,43,.25)'
+                            ? '0 0 0 2px rgba(232,140,74,.5),0 24px 60px rgba(0,0,0,.7),0 0 60px rgba(193,105,43,.3)'
                             : '0 8px 32px rgba(0,0,0,.5)',
                           zIndex: isActive ? 3 : Math.max(1, 6 - i),
-                          transition: `transform .6s cubic-bezier(.34,1.2,.64,1) ${i*45}ms, filter .55s ease ${i*30}ms, box-shadow .4s ease`,
-                          animation: enterAnim !== 'none' ? `${enterAnim} .6s cubic-bezier(.34,1.2,.64,1) ${i*45}ms both` : undefined,
+                          transition: enterAnim !== 'none' ? 'none' : `transform .6s cubic-bezier(.34,1.2,.64,1) ${i*45}ms, filter .55s ease ${i*30}ms, box-shadow .4s ease`,
+                          animation: enterAnim !== 'none' ? `${enterAnim} .7s cubic-bezier(.34,1.2,.64,1) ${i*55}ms both` : undefined,
                         }}
                       >
                         {cat.image
                           // eslint-disable-next-line @next/next/no-img-element
-                          ? <img src={cat.image} alt={cat.label} style={{width:'100%',height:'100%',objectFit:'cover'}} />
+                          ? <img src={cat.image} alt={cat.label} style={{width:'100%',height:'100%',objectFit:'cover',transition:'transform .7s ease',transform:isActive?'scale(1.05)':'scale(1.1)'}} />
                           : <div style={{width:'100%',height:'100%',background:gradients[i%gradients.length]}} />
                         }
+                        {/* Overlay */}
                         <div style={{position:'absolute',inset:0,background:'linear-gradient(to top,rgba(5,4,3,1) 0%,rgba(5,4,3,.6) 40%,rgba(5,4,3,.05) 70%,transparent 100%)',zIndex:1}} />
-                        {isActive && <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 0%,rgba(232,140,74,.1),transparent 60%)',zIndex:2}} />}
-                        {isActive && <div style={{position:'absolute',top:0,left:0,right:0,height:'2px',background:'linear-gradient(90deg,transparent,rgba(232,140,74,.9) 50%,transparent)',zIndex:5,boxShadow:'0 0 14px rgba(232,140,74,.7)'}} />}
-                        {/* Flash de entrada */}
-                        {isActive && carouselEntering && (
-                          <div style={{position:'absolute',inset:0,zIndex:8,pointerEvents:'none',
-                            animation:'card-flash .5s ease forwards',
-                            background:'radial-gradient(ellipse at 50% 40%,rgba(232,140,74,.25),transparent 70%)'}} />
-                        )}
-                        <div style={{position:'absolute',top:16,right:16,zIndex:6,width:30,height:30,borderRadius:'50%',background:'rgba(5,4,3,.75)',backdropFilter:'blur(10px)',border:`1px solid ${isActive?'rgba(232,140,74,.4)':'rgba(232,140,74,.15)'}`,display:'flex',alignItems:'center',justifyContent:'center'}}>
-                          <span style={{color:isActive?'#e88c4a':'rgba(232,140,74,.3)',fontSize:'10px',fontWeight:'900',fontFamily:'var(--font-mono)'}}>0{((carouselOffset + i) % homeCategories.length) + 1}</span>
+                        {isActive && <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 50% 20%,rgba(232,140,74,.15),transparent 65%)',zIndex:2}} />}
+                        {/* Línea top glow */}
+                        {isActive && <div style={{position:'absolute',top:0,left:0,right:0,height:'2px',background:'linear-gradient(90deg,transparent,rgba(232,140,74,.9) 50%,transparent)',zIndex:5,boxShadow:'0 0 20px rgba(232,140,74,.8)'}} />}
+                        {/* Ring explosion al entrar */}
+                        {isActive && carouselEntering && <div className="hcat-ring" />}
+                        {/* Shimmer sweep al entrar */}
+                        {isActive && carouselEntering && <div className="hcat-shimmer" />}
+                        {/* Número */}
+                        <div style={{position:'absolute',top:16,right:16,zIndex:6,width:30,height:30,borderRadius:'50%',background:'rgba(5,4,3,.75)',backdropFilter:'blur(10px)',border:`1px solid ${isActive?'rgba(232,140,74,.5)':'rgba(232,140,74,.15)'}`,display:'flex',alignItems:'center',justifyContent:'center',
+                          transition:'border-color .4s, box-shadow .4s',
+                          boxShadow: isActive ? '0 0 12px rgba(232,140,74,.4)' : 'none'}}>
+                          <span style={{color:isActive?'#e88c4a':'rgba(232,140,74,.3)',fontSize:'10px',fontWeight:'900',fontFamily:'var(--font-mono)',transition:'color .4s'}}>0{((carouselOffset + i) % homeCategories.length) + 1}</span>
                         </div>
+                        {/* Badge */}
                         {isActive && (
-                          <div style={{position:'absolute',top:16,left:16,zIndex:6,display:'flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:'100px',background:'linear-gradient(135deg,rgba(193,105,43,.95),rgba(232,140,74,.9))',boxShadow:'0 4px 16px rgba(193,105,43,.5)'}}>
-                            <div style={{width:4,height:4,borderRadius:'50%',background:'#fff'}} />
+                          <div style={{position:'absolute',top:16,left:16,zIndex:6,display:'flex',alignItems:'center',gap:5,padding:'4px 10px',borderRadius:'100px',background:'linear-gradient(135deg,rgba(193,105,43,.95),rgba(232,140,74,.9))',boxShadow:'0 4px 20px rgba(193,105,43,.6)',animation: carouselEntering ? 'hcat-in .5s .3s both' : undefined}}>
+                            <div style={{width:4,height:4,borderRadius:'50%',background:'#fff',animation:'orb-pulse 1.5s infinite'}} />
                             <span style={{color:'#fff',fontSize:'9px',fontWeight:'900',letterSpacing:'2px',fontFamily:'var(--font-mono)'}}>DESTACADA</span>
                           </div>
                         )}
+                        {/* Contenido */}
                         <div style={{position:'absolute',bottom:0,left:0,right:0,padding:isActive?'28px 22px':'20px 18px',zIndex:4}}>
                           <p style={{color:'rgba(232,140,74,.55)',fontSize:'9px',letterSpacing:'2.5px',textTransform:'uppercase',margin:'0 0 7px',fontFamily:'var(--font-mono)'}}>Colección ✦</p>
-                          <p style={{color:'#fff',fontWeight:'900',fontSize:isActive?'24px':'16px',letterSpacing:'-0.5px',margin:'0 0 10px',textShadow:'0 2px 16px rgba(0,0,0,.9)',lineHeight:1.05}}>{cat.label}</p>
-                          <div style={{display:'flex',alignItems:'center',gap:8,opacity:isActive?1:0,transform:isActive?'translateY(0)':'translateY(8px)',transition:'all .35s ease .1s'}}>
+                          <p style={{color:'#fff',fontWeight:'900',fontSize:isActive?'24px':'16px',letterSpacing:'-0.5px',margin:'0 0 10px',textShadow:'0 2px 16px rgba(0,0,0,.9)',lineHeight:1.05,
+                            animation: isActive && carouselEntering ? 'hcat-in .5s .2s both' : undefined}}>{cat.label}</p>
+                          <div style={{display:'flex',alignItems:'center',gap:8,opacity:isActive?1:0,transform:isActive?'translateY(0)':'translateY(8px)',transition:'all .4s ease .2s',
+                            animation: isActive && carouselEntering ? 'hcat-in .5s .35s both' : undefined}}>
                             <div style={{height:'1px',width:'20px',background:'linear-gradient(to right,#e88c4a,transparent)'}} />
                             <span style={{color:'#e88c4a',fontSize:'12px',fontWeight:'800'}}>Ver colección</span>
                             <span style={{color:'#e88c4a',fontSize:'15px',fontWeight:'900',display:'inline-block',animation:'bounceX .8s ease-in-out infinite'}}>→</span>
