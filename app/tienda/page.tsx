@@ -64,7 +64,14 @@ function TiendaContent() {
         .filters-chips::-webkit-scrollbar { display:none; }
         .filters-right { display:flex; gap:10px; align-items:center; flex-shrink:0; }
         @keyframes spin { to { transform: rotate(360deg); } }
-        @media(max-width:640px){ .search-input { width:140px; } .filters-bar { flex-direction:column; align-items:stretch; } .filters-right { justify-content:flex-end; } }
+        @media(max-width:640px){
+          .filters-bar { flex-direction:column; align-items:stretch; gap:14px; }
+          .filters-right { order:-1; flex-direction:column; align-items:stretch; gap:10px; width:100%; }
+          .filters-right > div { width:100%; }
+          .search-input { width:100% !important; }
+          .sort-select { flex:1; }
+          .filters-chips { width:100%; }
+        }
       `}</style>
 
       {/* Banner */}

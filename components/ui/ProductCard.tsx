@@ -41,10 +41,11 @@ export function ProductCard({ product }: { product: Product }) {
     : null
 
   return (
-    <Link href={`/tienda/${product.slug}`} style={{ textDecoration:'none', color:'inherit', display:'block' }}>
+    <Link href={`/tienda/${product.slug}`} style={{ textDecoration:'none', color:'inherit', display:'block', height:'100%' }}>
       <article
         ref={cardRef}
         className="product-card"
+        style={{ height:'100%', display:'flex', flexDirection:'column' }}
         onMouseMove={handleMouseMove}
         onMouseEnter={() => product.images.length > 1 && setImgIdx(1)}
         onMouseLeave={() => setImgIdx(0)}
@@ -172,17 +173,17 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
 
         {/* ── Info ── */}
-        <div style={{ padding:'16px 16px 20px' }}>
+        <div style={{ padding:'16px 16px 20px', flex:1, display:'flex', flexDirection:'column' }}>
           <p style={{
             fontSize:'11px', color:'#7a7675', fontWeight:'600',
             letterSpacing:'1.5px', textTransform:'uppercase', marginBottom:'5px',
           }}>
             {product.category}
           </p>
-          <p className="line-clamp-2" style={{ fontSize:'14px', fontWeight:'600', color:'#211f1e', lineHeight:'1.4', marginBottom:'12px' }}>
+          <p className="line-clamp-2" style={{ fontSize:'14px', fontWeight:'600', color:'#211f1e', lineHeight:'1.4', marginBottom:'12px', minHeight:'2.8em' }}>
             {product.name}
           </p>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginTop:'auto' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'8px' }}>
               <span style={{
                 fontSize:'19px', fontWeight:'800', color:'#c1692b',
