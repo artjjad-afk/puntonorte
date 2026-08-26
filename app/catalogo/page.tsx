@@ -122,13 +122,22 @@ export default function CatalogoPage() {
         .cat-now{font-size:22px;font-weight:800;color:var(--ink);letter-spacing:-.5px;}
         .cat-old{font-size:14px;color:var(--muted);text-decoration:line-through;}
         /* ── Pie ── */
-        .cat-foot{margin-top:70px;text-align:center;padding:44px 28px;background:radial-gradient(circle at 50% 0%, #322d2a, #1c1a18);color:#f6f1ea;border-radius:22px;}
-        .cat-foot h3{font-family:var(--serif);font-size:28px;font-weight:700;margin:0 0 8px;}
-        .cat-foot p{margin:4px 0;font-size:14px;color:rgba(246,241,234,.8);}
-        .cat-foot .cat-foot__cta{display:inline-block;margin-top:16px;background:linear-gradient(135deg,var(--copper),var(--copper2));color:#fff;font-weight:800;font-size:14px;padding:13px 28px;border-radius:12px;text-decoration:none;}
+        /* ── Contraportada (página completa) ── */
+        .backcov{position:relative;overflow:hidden;background:radial-gradient(circle at 50% 60%, #322d2a 0%, #1c1a18 58%, #141210 100%);color:#f6f1ea;text-align:center;min-height:100vh;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 28px;}
+        .backcov__glow{position:absolute;bottom:-160px;left:50%;transform:translateX(-50%);width:660px;height:660px;border-radius:50%;background:radial-gradient(circle,rgba(232,140,74,.2),transparent 62%);pointer-events:none;}
+        .backcov__logo{position:relative;height:64px;width:auto;object-fit:contain;margin:0 auto 24px;filter:drop-shadow(0 6px 22px rgba(232,140,74,.35));}
+        .backcov h3{position:relative;font-family:var(--serif);font-size:clamp(36px,6vw,56px);font-weight:800;margin:0 0 14px;letter-spacing:-.5px;}
+        .backcov h3 em{font-style:italic;color:var(--copper2);}
+        .backcov p{position:relative;margin:4px 0;font-size:15px;color:rgba(246,241,234,.82);}
+        .backcov__rule{position:relative;width:64px;height:2px;margin:26px auto;background:linear-gradient(90deg,transparent,var(--copper2),transparent);}
+        .backcov__chips{position:relative;display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:6px auto 0;}
+        .backcov__chip{font-size:12px;font-weight:600;color:rgba(246,241,234,.9);border:1px solid rgba(232,140,74,.35);border-radius:40px;padding:8px 16px;background:rgba(255,255,255,.04);}
+        .backcov__cta{position:relative;display:inline-block;margin-top:26px;background:linear-gradient(135deg,var(--copper),var(--copper2));color:#fff;font-weight:800;font-size:14px;padding:14px 30px;border-radius:12px;text-decoration:none;box-shadow:0 10px 26px rgba(193,105,43,.4);}
+        .backcov__foot{position:relative;margin-top:28px;font-size:12px;color:rgba(246,241,234,.5);}
         @media(max-width:520px){ .cat-card{flex:1 1 150px;} .cat-name{font-size:24px;} .cat-idx{font-size:34px;} }
         @media print{
           .cov{break-after:page;min-height:100vh;height:100vh;}
+          .backcov{break-before:page;min-height:100vh;height:100vh;}
           .cat-wrap{padding:46px 40px 60px;}
           .cat-card{flex:0 0 30%;}
         }
@@ -238,16 +247,25 @@ export default function CatalogoPage() {
           </section>
         ))}
 
-        {products !== null && products.length > 0 && (
-          <footer className="cat-foot">
-            <h3>¿Listo para pedir?</h3>
-            <p>Escríbenos y te atendemos al instante.</p>
-            <p>WhatsApp +{CONTACT.whatsapp} · @{CONTACT.instagram}</p>
-            <a className="cat-foot__cta no-print" href={`https://wa.me/${CONTACT.whatsapp}`} target="_blank" rel="noopener noreferrer">Pedir por WhatsApp →</a>
-            <p style={{ marginTop: '18px', fontSize: '12px', color: 'rgba(246,241,234,.5)' }}>puntonorteshop.com · Actualizado el {fecha}</p>
-          </footer>
-        )}
       </div>
+
+      {/* ── Contraportada (página completa) ── */}
+      {products !== null && products.length > 0 && (
+        <footer className="backcov">
+          <div className="backcov__glow" />
+          <img className="backcov__logo" src="/logo-removebg-preview.png" alt="Punto Norte" />
+          <h3>¿Listo para <em>pedir</em>?</h3>
+          <p>Escríbenos y te atendemos al instante.</p>
+          <div className="backcov__rule" />
+          <div className="backcov__chips">
+            <span className="backcov__chip">💬 WhatsApp +{CONTACT.whatsapp}</span>
+            <span className="backcov__chip">📸 @{CONTACT.instagram}</span>
+            <span className="backcov__chip">📍 {CONTACT.ciudad}</span>
+          </div>
+          <a className="backcov__cta no-print" href={`https://wa.me/${CONTACT.whatsapp}`} target="_blank" rel="noopener noreferrer">Pedir por WhatsApp →</a>
+          <p className="backcov__foot">puntonorteshop.com · Actualizado el {fecha}</p>
+        </footer>
+      )}
     </div>
   )
 }
