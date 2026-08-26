@@ -235,6 +235,7 @@ export default function CheckoutPage() {
         }
         @media(max-width:480px){
           .checkout-confirm-grid { grid-template-columns:1fr !important; }
+          .checkout-loc-grid { grid-template-columns:1fr !important; }
         }
       `}</style>
 
