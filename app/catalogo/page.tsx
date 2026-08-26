@@ -87,7 +87,7 @@ export default function CatalogoPage() {
           font-family:var(--sans); color:var(--ink); background:var(--paper);
         }
         /* ── Portada ── */
-        .cov{position:relative;overflow:hidden;background:radial-gradient(circle at 50% 30%, #322d2a 0%, #1c1a18 55%, #141210 100%);color:#f6f1ea;text-align:center;padding:90px 28px 84px;}
+        .cov{position:relative;overflow:hidden;background:radial-gradient(circle at 50% 38%, #322d2a 0%, #1c1a18 55%, #141210 100%);color:#f6f1ea;text-align:center;padding:60px 28px;min-height:100vh;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;justify-content:center;}
         .cov__glow{position:absolute;top:-120px;left:50%;transform:translateX(-50%);width:640px;height:640px;border-radius:50%;background:radial-gradient(circle,rgba(232,140,74,.22),transparent 62%);pointer-events:none;}
         .cov__kicker{position:relative;font-size:11px;letter-spacing:6px;text-transform:uppercase;color:var(--copper2);font-weight:700;margin:0 0 22px;}
         .cov__logo{position:relative;height:86px;width:auto;object-fit:contain;margin:0 auto 22px;display:block;filter:drop-shadow(0 6px 22px rgba(232,140,74,.35));}
@@ -127,7 +127,11 @@ export default function CatalogoPage() {
         .cat-foot p{margin:4px 0;font-size:14px;color:rgba(246,241,234,.8);}
         .cat-foot .cat-foot__cta{display:inline-block;margin-top:16px;background:linear-gradient(135deg,var(--copper),var(--copper2));color:#fff;font-weight:800;font-size:14px;padding:13px 28px;border-radius:12px;text-decoration:none;}
         @media(max-width:520px){ .cat-card{flex:1 1 150px;} .cat-name{font-size:24px;} .cat-idx{font-size:34px;} }
-        @media print{ .cov{break-after:page;} .cat-card{flex:0 0 30%;} }
+        @media print{
+          .cov{break-after:page;min-height:100vh;height:100vh;}
+          .cat-wrap{padding:46px 40px 60px;}
+          .cat-card{flex:0 0 30%;}
+        }
       `}</style>
 
       {/* Aviso mientras se prepara la descarga automática (no se imprime) */}

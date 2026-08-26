@@ -434,8 +434,8 @@ body {
    ══════════════════════════════════════════════ */
 @media print {
   .no-print, .pn-loader { display: none !important; }
-  @page { size: A4; margin: 1.2cm; }
-  html, body { background: #fff !important; }
+  @page { size: A4; margin: 0; }
+  html, body { background: #fff !important; margin: 0 !important; }
   .catalogo-root { background: #fff !important; }
   .cat-card { break-inside: avoid; page-break-inside: avoid; }
   .cat-section-title { break-after: avoid; page-break-after: avoid; }
