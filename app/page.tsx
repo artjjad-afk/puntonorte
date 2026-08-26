@@ -133,7 +133,7 @@ export default function HomePage() {
             id:    c.slug,
             slug:  c.slug,
             label: c.name,
-            image: c.image && !c.image.startsWith('data:') ? c.image : '',
+            image: c.image ?? '',  // base64 se acepta aquí
           })))
         } else {
           setHomeCategories([])
