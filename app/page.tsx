@@ -87,6 +87,18 @@ export default function HomePage() {
   const [homeCategories, setHomeCategories] = useState<{ id: string; slug: string; label: string; image: string }[] | null>(null)
   const carouselRef = useRef<HTMLDivElement>(null)
   const [carouselIdx, setCarouselIdx] = useState(0)
+  const [carouselClickAnim, setCarouselClickAnim] = useState(false)
+
+  // Autoplay — avanza solo cada 3.5s con efecto de click visual
+  useEffect(() => {
+    if (!homeCategories || homeCategories.length <= 1) return
+    const interval = setInterval(() => {
+      setCarouselClickAnim(true)
+      setTimeout(() => setCarouselClickAnim(false), 350)
+      setCarouselIdx(i => (i + 1) % homeCategories.length)
+    }, 3500)
+    return () => clearInterval(interval)
+  }, [homeCategories])
   const [activeBanner, setActiveBanner] = useState<{
     etiqueta: string | null; titulo: string; subtitulo: string | null
     descripcion: string | null; linkUrl: string; linkTexto: string
@@ -208,6 +220,7 @@ export default function HomePage() {
         @keyframes hcat-in{from{opacity:0;transform:translateY(32px) scale(.93);}to{opacity:1;transform:translateY(0) scale(1);}}
         @keyframes text-pan{0%{background-position:0% center;}100%{background-position:200% center;}}
         @keyframes bounceX{0%,100%{transform:translateX(0);}50%{transform:translateX(5px);}}
+        @keyframes progress-fill{from{width:0%;}to{width:100%;}}
         .hcat-card{position:relative;overflow:hidden;border-radius:20px;cursor:pointer;flex:0 0 auto;animation:hcat-in .55s cubic-bezier(.34,1.2,.64,1) both;}
         .hcat-card:hover{transform:translateY(-8px) scale(1.02);}
         .hcat-card:hover .hcat-img{transform:scale(1.08);}
@@ -427,7 +440,10 @@ export default function HomePage() {
                     </button>
                     <button aria-label="Siguiente"
                       onClick={() => setCarouselIdx(i => Math.min(homeCategories.length - 1, i + 1))}
-                      style={{ width:52, height:52, borderRadius:'50%', border:'1px solid rgba(232,140,74,.3)', background: carouselIdx >= homeCategories.length - 1 ? 'rgba(255,255,255,.04)' : 'rgba(232,140,74,.12)', cursor: carouselIdx >= homeCategories.length - 1 ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px', color: carouselIdx >= homeCategories.length - 1 ? 'rgba(232,140,74,.2)' : '#e88c4a', transition:'all .25s', outline:'none', backdropFilter:'blur(8px)' }}>
+                      style={{ width:52, height:52, borderRadius:'50%', border:'1px solid rgba(232,140,74,.3)', background: carouselIdx >= homeCategories.length - 1 ? 'rgba(255,255,255,.04)' : 'rgba(232,140,74,.12)', cursor: carouselIdx >= homeCategories.length - 1 ? 'not-allowed' : 'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'20px', color: carouselIdx >= homeCategories.length - 1 ? 'rgba(232,140,74,.2)' : '#e88c4a', transition:'all .25s', outline:'none', backdropFilter:'blur(8px)',
+                        transform: carouselClickAnim ? 'scale(0.82)' : 'scale(1)',
+                        boxShadow: carouselClickAnim ? '0 0 0 4px rgba(232,140,74,.35), 0 0 20px rgba(193,105,43,.5)' : 'none',
+                      }}>
                       →
                     </button>
                     <Link href="/tienda" style={{ color:'#fff', textDecoration:'none', fontWeight:'700', fontSize:'13px', padding:'13px 22px', borderRadius:'12px', background:'linear-gradient(135deg,rgba(193,105,43,.8),rgba(232,140,74,.6))', border:'1px solid rgba(232,140,74,.4)', letterSpacing:'0.3px', backdropFilter:'blur(8px)', boxShadow:'0 4px 20px rgba(193,105,43,.3)' }}>
@@ -532,7 +548,7 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* ── Dots + contador ── */}
+              {/* ── Dots + contador + barra progreso ── */}
               <div style={{ display:'flex', justifyContent:'center', alignItems:'center', gap:'16px', marginTop:'40px', padding:'0 32px' }}>
                 <span style={{ color:'rgba(232,140,74,.4)', fontSize:'11px', fontFamily:'var(--font-mono)', fontWeight:'700' }}>0{carouselIdx + 1}</span>
                 <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
@@ -542,6 +558,19 @@ export default function HomePage() {
                   ))}
                 </div>
                 <span style={{ color:'rgba(232,140,74,.4)', fontSize:'11px', fontFamily:'var(--font-mono)', fontWeight:'700' }}>0{homeCategories.length}</span>
+              </div>
+
+              {/* Barra de progreso autoplay */}
+              <div style={{ maxWidth:'200px', margin:'16px auto 0', height:'2px', borderRadius:'100px', background:'rgba(232,140,74,.12)', overflow:'hidden' }}>
+                <div
+                  key={carouselIdx}
+                  style={{
+                    height:'100%', borderRadius:'100px',
+                    background:'linear-gradient(90deg,#c1692b,#e88c4a)',
+                    animation:'progress-fill 3.5s linear forwards',
+                    boxShadow:'0 0 6px rgba(193,105,43,.6)',
+                  }}
+                />
               </div>
 
             </div>
