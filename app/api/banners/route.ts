@@ -8,14 +8,25 @@ function isAdmin(req: NextRequest) {
   try { jwt.verify(token, process.env.JWT_SECRET!); return true } catch { return false }
 }
 
-// GET — devuelve el banner activo (público)
-export async function GET() {
+// GET — devuelve el banner activo (público) o todos (admin con ?all=true)
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url)
+    const showAll = searchParams.get('all') === 'true'
+
+    if (showAll) {
+      // Solo admin puede ver todos
+      if (!isAdmin(req)) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+      const banners = await prisma.banner.findMany({ orderBy: { orden: 'asc' } })
+      const parsed = banners.map(b => ({ ...b, imagen: b.imageData ?? b.imagen ?? null }))
+      return NextResponse.json(parsed)
+    }
+
     const banner = await prisma.banner.findFirst({
       where: { active: true },
       orderBy: { orden: 'asc' },
     })
-    return NextResponse.json(banner ?? null)
+    return NextResponse.json(banner ? { ...banner, imagen: banner.imageData ?? banner.imagen ?? null } : null)
   } catch (e) {
     console.error(e)
     return NextResponse.json(null)

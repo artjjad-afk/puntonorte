@@ -76,13 +76,10 @@ export default function AdminBanners() {
   const fetchBanners = async () => {
     setLoading(true)
     try {
-      // Usamos el GET público para mostrar todos — en producción haría falta un endpoint admin
-      const res = await fetch('/api/banners')
+      const res = await fetch('/api/banners?all=true')
       if (res.ok) {
         const data = await res.json()
-        // GET devuelve solo el activo — cargamos todos con un endpoint alternativo
-        // Por ahora cargamos el activo y lo mostramos
-        setBanners(data ? [data] : [])
+        setBanners(Array.isArray(data) ? data : [])
       }
     } finally { setLoading(false) }
   }
