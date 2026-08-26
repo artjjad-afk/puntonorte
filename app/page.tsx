@@ -332,7 +332,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* Scroll indicator */}
+        {/* Scroll indicators */}
         <div className="scroll-indicator" style={{ position:'absolute', bottom:'32px', left:'50%', transform:'translateX(-50%)', zIndex:4 }}>
           <span style={{ color:'rgba(232,229,226,.3)', fontSize:'9px', letterSpacing:'3px', textTransform:'uppercase' }}>SCROLL</span>
           <div className="scroll-indicator-dot" />
@@ -354,7 +354,7 @@ export default function HomePage() {
           <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
             <motion.div
               initial={{ opacity:0, y:28 }} whileInView={{ opacity:1, y:0 }}
-              viewport={{ once:true, margin:'-60px' }}
+              viewport={{ once:true, amount:0 }}
               transition={{ duration:.7, ease:[.25,.46,.45,.94] }}
               style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'52px', flexWrap:'wrap', gap:'20px' }}
             >
@@ -370,7 +370,7 @@ export default function HomePage() {
             </motion.div>
             <motion.div
               initial={{ opacity:0, y:36 }} whileInView={{ opacity:1, y:0 }}
-              viewport={{ once:true, margin:'-60px' }}
+              viewport={{ once:true, amount:0 }}
               transition={{ duration:.8, delay:.12, ease:[.25,.46,.45,.94] }}
               style={{ display:'grid', gridTemplateColumns:'1.6fr 1fr 1fr', gridTemplateRows:'300px 300px', gap:'16px' }}
               className="cats-grid"
@@ -433,7 +433,7 @@ export default function HomePage() {
                 <motion.div
                   initial={{ opacity:0, y:40 }}
                   whileInView={{ opacity:1, y:0 }}
-                  viewport={{ once:true, margin:'-80px' }}
+                  viewport={{ once:true, amount:0 }}
                   transition={{ duration:.8, ease:[.25,.46,.45,.94] }}
                   style={{
                     display:'flex', justifyContent:'space-between', alignItems:'flex-end',
@@ -689,7 +689,7 @@ export default function HomePage() {
             {/* Header */}
             <motion.div
               initial={{ opacity:0, y:32 }} whileInView={{ opacity:1, y:0 }}
-              viewport={{ once:true, margin:'-60px' }}
+              viewport={{ once:true, amount:0 }}
               transition={{ duration:.7, ease:[.25,.46,.45,.94] }}
               style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'52px', flexWrap:'wrap', gap:'20px' }}
             >
@@ -723,8 +723,8 @@ export default function HomePage() {
                     key={product.id}
                     initial={{ opacity:0, y:40, scale:.95 }}
                     whileInView={{ opacity:1, y:0, scale:1 }}
-                    viewport={{ once:true, margin:'-40px' }}
-                    transition={{ duration:.6, delay: i * 0.08, ease:[.34,1.2,.64,1] }}
+                    viewport={{ once:true, amount:0 }}
+                    transition={{ duration:.6, delay:i*0.08, ease:[.34,1.2,.64,1] }}
                     whileHover={{ y:-6, transition:{ duration:.25, ease:'easeOut' } }}
                   >
                     <Link href={`/tienda/${product.slug}`} className="offer-card"
@@ -803,7 +803,7 @@ export default function HomePage() {
           <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
             <motion.div
               initial={{ opacity:0, y:28 }} whileInView={{ opacity:1, y:0 }}
-              viewport={{ once:true, margin:'-60px' }}
+              viewport={{ once:true, amount:0 }}
               transition={{ duration:.7, ease:[.25,.46,.45,.94] }}
               style={{ textAlign:'center', marginBottom:'60px' }}
             >
@@ -832,7 +832,7 @@ export default function HomePage() {
                       key={product.id}
                       initial={{ opacity:0, y:36, scale:.96 }}
                       whileInView={{ opacity:1, y:0, scale:1 }}
-                      viewport={{ once:true, margin:'-40px' }}
+                      viewport={{ once:true, amount:0 }}
                       transition={{ duration:.6, delay:i*0.08, ease:[.34,1.2,.64,1] }}
                     >
                       <ProductCard product={product} />
@@ -874,7 +874,7 @@ export default function HomePage() {
             )}
             <motion.h2
               initial={{ opacity:0, x:-36 }} whileInView={{ opacity:1, x:0 }}
-              viewport={{ once:true, margin:'-60px' }}
+              viewport={{ once:true, amount:0 }}
               transition={{ duration:.8, ease:[.25,.46,.45,.94] }}
               style={{ color:'#fff', fontSize:'clamp(28px,3.5vw,50px)', fontWeight:'900', letterSpacing:'-1.5px', lineHeight:'1.05', marginBottom:'18px' }}
             >
@@ -940,7 +940,7 @@ export default function HomePage() {
             <p className="section-label" style={{ justifyContent:'center', marginBottom:'14px' }}>Números reales</p>
             <motion.h2
               initial={{ opacity:0, y:20 }} whileInView={{ opacity:1, y:0 }}
-              viewport={{ once:true, margin:'-60px' }}
+              viewport={{ once:true, amount:0 }}
               transition={{ duration:.7, ease:[.25,.46,.45,.94] }}
               style={{ color:'#fff', fontSize:'clamp(24px,3.5vw,42px)', fontWeight:'900', letterSpacing:'-1px' }}
             >
@@ -954,7 +954,7 @@ export default function HomePage() {
                 key={i}
                 initial={{ opacity:0, y:32, scale:.93 }}
                 whileInView={{ opacity:1, y:0, scale:1 }}
-                viewport={{ once:true, margin:'-40px' }}
+                viewport={{ once:true, amount:0 }}
                 transition={{ duration:.7, delay:i*0.13, ease:[.34,1.3,.64,1] }}
                 className="stat-card"
               >
@@ -1005,7 +1005,7 @@ export default function HomePage() {
         <div style={{ maxWidth:'1320px', margin:'0 auto', position:'relative', zIndex:2 }}>
           <motion.div
             initial={{ opacity:0, y:24 }} whileInView={{ opacity:1, y:0 }}
-            viewport={{ once:true, margin:'-60px' }}
+            viewport={{ once:true, amount:0 }}
             transition={{ duration:.7, ease:[.25,.46,.45,.94] }}
             style={{ textAlign:'center', marginBottom:'60px' }}
           >
@@ -1021,7 +1021,7 @@ export default function HomePage() {
                 key={i}
                 initial={{ opacity:0, y:36, rotate: i%2===0 ? -1 : 1 }}
                 whileInView={{ opacity:1, y:0, rotate:0 }}
-                viewport={{ once:true, margin:'-40px' }}
+                viewport={{ once:true, amount:0 }}
                 transition={{ duration:.7, delay:i*0.15, ease:[.34,1.2,.64,1] }}
                 className="testimonial-wow glow-card"
               >
@@ -1097,7 +1097,7 @@ export default function HomePage() {
           <motion.div
             initial={{ opacity:0, y:36 }}
             whileInView={{ opacity:1, y:0 }}
-            viewport={{ once:true, margin:'-60px' }}
+            viewport={{ once:true, amount:0 }}
             transition={{ duration:.9, ease:[.22,1,.36,1] }}
           >
           <p className="section-label" style={{ justifyContent:'center', marginBottom:'22px' }}>✦ Comunidad Punto Norte ✦</p>
