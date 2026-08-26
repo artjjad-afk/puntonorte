@@ -15,6 +15,7 @@ const CLOSE_CART_ON = ['/checkout', '/confirmacion', '/admin']
 export function ConditionalLayout({ children, navbar }: { children: React.ReactNode; navbar?: React.ReactNode }) {
   const pathname = usePathname()
   const isAdmin = pathname.startsWith('/admin')
+  const isCatalogo = pathname.startsWith('/catalogo')
   const closeCart = useCartStore(s => s.closeCart)
 
   // Cerrar el carrito cada vez que el usuario navega a una ruta incompatible
@@ -23,7 +24,7 @@ export function ConditionalLayout({ children, navbar }: { children: React.ReactN
     if (shouldClose) closeCart()
   }, [pathname, closeCart])
 
-  if (isAdmin) {
+  if (isAdmin || isCatalogo) {
     return <>{children}</>
   }
 

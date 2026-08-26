@@ -338,8 +338,8 @@ export default function HomePage() {
                 <span className="shine" />
                 Explorar colección →
               </Link>
-              <Link href="/tienda?cat=perfumes" className="btn-ghost" style={{ padding:'18px 34px', borderRadius:'14px', fontSize:'14px' }}>
-                Ver perfumes ✦
+              <Link href="/catalogo" className="btn-ghost" style={{ padding:'18px 34px', borderRadius:'14px', fontSize:'14px' }}>
+                Descargar catálogo ⬇
               </Link>
             </div>
 

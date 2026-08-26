@@ -403,6 +403,20 @@ body {
   .pn-floaticon { animation: none !important; }
 }
 
+/* ══════════════════════════════════════════════
+   IMPRESIÓN / PDF DEL CATÁLOGO
+   ══════════════════════════════════════════════ */
+@media print {
+  .no-print, .pn-loader { display: none !important; }
+  @page { size: A4; margin: 1.2cm; }
+  html, body { background: #fff !important; }
+  .catalogo-root { background: #fff !important; }
+  .cat-card { break-inside: avoid; page-break-inside: avoid; }
+  .cat-section-title { break-after: avoid; page-break-after: avoid; }
+  /* Asegura que los colores/imágenes se impriman tal cual */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+}
+
 /* ── Skeleton loader ── */
 .skeleton {
   background: linear-gradient(90deg, #f0eeec 25%, #e8e5e2 50%, #f0eeec 75%);
