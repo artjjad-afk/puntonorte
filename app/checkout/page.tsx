@@ -225,7 +225,8 @@ export default function CheckoutPage() {
         .pay-option:hover { border-color:#c1692b; background:#fff7f3; }
         .pay-option.selected { border-color:#c1692b; background:#fff7f3; box-shadow:0 0 0 3px rgba(193,105,43,0.12); }
         @media(max-width:480px){
-          .checkout-steps-label { display:none; }
+          /* En movil solo mostramos la etiqueta del paso activo (los demas quedan como circulos) */
+          .checkout-step-label:not(.is-active) { display:none; }
           .checkout-confirm-grid { grid-template-columns:1fr !important; }
         }
       `}</style>
@@ -263,7 +264,7 @@ export default function CheckoutPage() {
                         : <Icon size={16} color={active ? '#c1692b' : 'rgba(255,255,255,0.4)'} />
                       }
                     </div>
-                    <div style={{ display:'flex', flexDirection:'column' }}>
+                    <div className={`checkout-step-label${active ? ' is-active' : ''}`} style={{ display:'flex', flexDirection:'column' }}>
                       <span style={{ fontSize:'10px', color: done || active ? '#c1692b' : 'rgba(232,229,226,0.35)', letterSpacing:'1px', textTransform:'uppercase', fontWeight:'600' }}>Paso {i+1}</span>
                       <span style={{ fontSize:'13px', color: done || active ? '#fff' : 'rgba(232,229,226,0.45)', fontWeight: active ? '700' : '400' }}>{s.label}</span>
                     </div>
