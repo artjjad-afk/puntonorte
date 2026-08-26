@@ -732,8 +732,8 @@ export default function HomePage() {
               </Link>
             </motion.div>
 
-            {/* Grid de ofertas */}
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(280px,1fr))', gap:'24px' }}>
+            {/* Grid de ofertas — flex centrado: se ve balanceado con 1, 2 o muchos productos */}
+            <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:'24px' }}>
               {offerProducts.map((product, i) => {
                 const disc = product.originalPrice && product.originalPrice > product.price
                   ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
@@ -748,6 +748,7 @@ export default function HomePage() {
                     viewport={{ once:true, amount:0 }}
                     transition={{ duration:.6, delay:i*0.08, ease:[.34,1.2,.64,1] }}
                     whileHover={{ y:-6, transition:{ duration:.25, ease:'easeOut' } }}
+                    style={{ flex:'1 1 280px', maxWidth:'340px', minWidth:0 }}
                   >
                     <Link href={`/tienda/${product.slug}`} className="offer-card"
                       style={{ boxShadow:'0 4px 24px rgba(33,31,30,.1)', border:'1px solid rgba(193,105,43,.12)', display:'block', textDecoration:'none' }}>
@@ -837,10 +838,10 @@ export default function HomePage() {
                 Piezas elegidas por cientos de clientes satisfechos en todo Venezuela.
               </p>
             </motion.div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))', gap:'24px' }}>
+            <div style={{ display:'flex', flexWrap:'wrap', justifyContent:'center', gap:'24px' }}>
               {!featuredLoaded
                 ? Array.from({length:4}).map((_,i) => (
-                    <div key={i} style={{ borderRadius:'14px', overflow:'hidden', background:'#fff', boxShadow:'0 2px 20px rgba(33,31,30,.07)' }}>
+                    <div key={i} style={{ flex:'1 1 250px', maxWidth:'300px', minWidth:0, borderRadius:'14px', overflow:'hidden', background:'#fff', boxShadow:'0 2px 20px rgba(33,31,30,.07)' }}>
                       <div className="skeleton" style={{ aspectRatio:'3/4', borderRadius:0 }} />
                       <div style={{ padding:'16px' }}>
                         <div className="skeleton" style={{ height:'12px', width:'40%', marginBottom:'8px' }} />
@@ -856,6 +857,7 @@ export default function HomePage() {
                       whileInView={{ opacity:1, y:0, scale:1 }}
                       viewport={{ once:true, amount:0 }}
                       transition={{ duration:.6, delay:i*0.08, ease:[.34,1.2,.64,1] }}
+                      style={{ flex:'1 1 250px', maxWidth:'300px', minWidth:0 }}
                     >
                       <ProductCard product={product} />
                     </motion.div>
