@@ -2,7 +2,9 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { motion } from 'motion/react'
 import { ProductCard } from '@/components/ui/ProductCard'
+import { FloatingShopIcons } from '@/components/ui/FloatingShopIcons'
 import { SlidersHorizontal, X, Search, Package, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Product } from '@/types'
 
@@ -55,9 +57,28 @@ function TiendaContent() {
   return (
     <>
       <style>{`
-        .filter-chip { padding:9px 20px; border-radius:100px; border:1.5px solid #e8e5e2; background:#fff; cursor:pointer; font-size:13px; font-weight:600; color:#393738; transition:all .2s; white-space:nowrap; flex-shrink:0; min-height:40px; }
-        .filter-chip:hover { border-color:#c1692b; color:#c1692b; }
-        .filter-chip.active { background:#211f1e; border-color:#211f1e; color:#fff; }
+        /* ── Hero animado ── */
+        .tienda-hero { position:relative; overflow:hidden; padding:72px 32px; background:linear-gradient(135deg,#1a1817 0%,#231f1d 45%,#2a2320 100%); }
+        .tienda-hero::before { content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(120deg, transparent 30%, rgba(232,140,74,.12), transparent 70%); background-size:220% 100%; animation:tienda-sheen 6s linear infinite; }
+        @keyframes tienda-sheen { to { background-position:-220% 0; } }
+        .tienda-hero__blob { position:absolute; border-radius:50%; filter:blur(12px); pointer-events:none; }
+        .tienda-hero__blob--1 { width:420px; height:420px; top:-140px; left:-90px; background:radial-gradient(circle,rgba(232,140,74,.20),transparent 70%); animation:pn-halo 6s ease-in-out infinite; }
+        .tienda-hero__blob--2 { width:380px; height:380px; bottom:-160px; right:8%; background:radial-gradient(circle,rgba(193,105,43,.15),transparent 70%); animation:pn-halo 5s ease-in-out infinite reverse; }
+
+        /* ── Entrada escalonada de las cards ── */
+        @keyframes tienda-card-in { from { opacity:0; transform:translateY(28px) scale(.97); } to { opacity:1; transform:none; } }
+        .tienda-grid > * { animation:tienda-card-in .55s cubic-bezier(.22,1,.36,1) both; }
+        .tienda-grid > *:nth-child(1){animation-delay:.04s}.tienda-grid > *:nth-child(2){animation-delay:.10s}
+        .tienda-grid > *:nth-child(3){animation-delay:.16s}.tienda-grid > *:nth-child(4){animation-delay:.22s}
+        .tienda-grid > *:nth-child(5){animation-delay:.28s}.tienda-grid > *:nth-child(6){animation-delay:.34s}
+        .tienda-grid > *:nth-child(7){animation-delay:.40s}.tienda-grid > *:nth-child(8){animation-delay:.46s}
+        .tienda-grid > *:nth-child(9){animation-delay:.52s}.tienda-grid > *:nth-child(10){animation-delay:.58s}
+        .tienda-grid > *:nth-child(11){animation-delay:.64s}.tienda-grid > *:nth-child(12){animation-delay:.70s}
+        @media (prefers-reduced-motion: reduce) { .tienda-grid > * { animation:none; } .tienda-hero::before { animation:none; } }
+
+        .filter-chip { padding:9px 20px; border-radius:100px; border:1.5px solid #e8e5e2; background:#fff; cursor:pointer; font-size:13px; font-weight:600; color:#393738; transition:all .25s cubic-bezier(.34,1.56,.64,1); white-space:nowrap; flex-shrink:0; min-height:40px; }
+        .filter-chip:hover { border-color:#c1692b; color:#c1692b; transform:translateY(-2px); }
+        .filter-chip.active { background:linear-gradient(135deg,#c1692b,#e88c4a); border-color:transparent; color:#fff; box-shadow:0 8px 20px rgba(193,105,43,.38); transform:translateY(-1px); }
         .sort-select { padding:9px 16px; border-radius:10px; border:1.5px solid #e8e5e2; font-size:13px; font-weight:600; color:#393738; outline:none; cursor:pointer; background:#fff; min-height:40px; }
         .sort-select:focus { border-color:#c1692b; }
         .search-input { padding:10px 16px 10px 44px; border-radius:10px; border:1.5px solid #e8e5e2; font-size:14px; width:200px; outline:none; transition:border-color .2s; min-height:40px; }
@@ -82,17 +103,32 @@ function TiendaContent() {
         }
       `}</style>
 
-      {/* Banner */}
-      <div style={{ background: 'linear-gradient(135deg, #211f1e 0%, #393738 100%)', padding: '60px 32px', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-60px', right: '-60px', width: '240px', height: '240px', borderRadius: '50%', border: '1px solid rgba(193,105,43,0.12)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: '1320px', margin: '0 auto' }}>
-          <p className="section-label" style={{ marginBottom: '10px' }}>Catálogo</p>
-          <h1 style={{ color: '#fff', fontSize: 'clamp(32px, 5vw, 52px)', fontWeight: '800', letterSpacing: '-1.5px', margin: '0 0 6px' }}>
-            {selectedCat === 'all' ? 'Toda la Tienda' : currentLabel}
-          </h1>
-          <p style={{ color: 'rgba(232,229,226,0.5)', fontSize: '15px', margin: 0 }}>
-            {loading ? 'Cargando...' : `${filtered.length} producto${filtered.length !== 1 ? 's' : ''} disponible${filtered.length !== 1 ? 's' : ''}`}
-          </p>
+      {/* Banner animado */}
+      <div className="tienda-hero">
+        <FloatingShopIcons opacity={0.4} />
+        <div className="tienda-hero__blob tienda-hero__blob--1" />
+        <div className="tienda-hero__blob tienda-hero__blob--2" />
+        <div className="ring-spin" style={{ position: 'absolute', top: '-80px', right: '-80px', width: '260px', height: '260px', borderRadius: '50%', border: '1px solid rgba(193,105,43,0.18)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: '1320px', margin: '0 auto', position: 'relative', zIndex: 3 }}>
+          <motion.p className="section-label" initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: .5 }} style={{ marginBottom: '14px', color: '#e88c4a' }}>
+            Catálogo
+          </motion.p>
+          <motion.h1
+            key={currentLabel}
+            initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .7, ease: [.22, 1, .36, 1] }}
+            style={{ color: '#fff', fontSize: 'clamp(38px, 6.5vw, 66px)', fontWeight: '900', letterSpacing: '-2px', margin: '0 0 12px', lineHeight: 1 }}
+          >
+            {selectedCat === 'all'
+              ? <>Toda la <span className="text-shimmer">Tienda</span></>
+              : <span className="text-shimmer">{currentLabel}</span>}
+          </motion.h1>
+          <motion.p
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: .3, duration: .6 }}
+            style={{ color: 'rgba(232,229,226,0.65)', fontSize: '16px', margin: 0, display: 'flex', alignItems: 'center', gap: '9px' }}
+          >
+            <span style={{ display: 'inline-flex', width: '8px', height: '8px', borderRadius: '50%', background: '#25a244', boxShadow: '0 0 8px #25a244', flexShrink: 0 }} />
+            {loading ? 'Cargando…' : `${filtered.length} producto${filtered.length !== 1 ? 's' : ''} disponible${filtered.length !== 1 ? 's' : ''}`}
+          </motion.p>
         </div>
       </div>
 
