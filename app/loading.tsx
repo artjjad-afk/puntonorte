@@ -3,7 +3,7 @@
 // premium definido en globals.css (.pn-loader).
 export default function Loading() {
   return (
-    <div className="pn-loader" role="status" aria-label="Cargando">
+    <div className="pn-loader pn-loader--route" role="status" aria-label="Cargando">
       <div className="pn-loader__halo" />
       <div className="pn-loader__badge">
         <div className="pn-loader__ring" />
