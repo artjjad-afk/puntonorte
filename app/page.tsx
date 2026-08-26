@@ -478,8 +478,21 @@ export default function HomePage() {
                   className="carousel-track"
                   onTransitionEnd={() => {
                     const total = homeCategories.length
-                    if (carouselIdx >= total + 1) { setCarouselTransition(false); setCarouselIdx(1) }
-                    if (carouselIdx <= 0)         { setCarouselTransition(false); setCarouselIdx(total) }
+                    if (carouselIdx >= total + 1) {
+                      setCarouselTransition(false)
+                      requestAnimationFrame(() => requestAnimationFrame(() => {
+                        setCarouselIdx(1)
+                        // Re-habilitar transición en el siguiente frame para que el jump sea invisible
+                        requestAnimationFrame(() => setCarouselTransition(true))
+                      }))
+                    }
+                    if (carouselIdx <= 0) {
+                      setCarouselTransition(false)
+                      requestAnimationFrame(() => requestAnimationFrame(() => {
+                        setCarouselIdx(total)
+                        requestAnimationFrame(() => setCarouselTransition(true))
+                      }))
+                    }
                   }}
                   style={{
                     paddingLeft: 'max(40px, calc((100vw - 1320px) / 2 + 40px))',
