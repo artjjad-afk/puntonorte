@@ -332,30 +332,8 @@ export default function HomePage() {
 
             {/* Sin wave separador — la sección del carrusel es oscura como el hero, fluye directo */}
 
-      {/* SKELETON carrusel mientras carga */}
-      {homeCategories === undefined && (
-        <section style={{ padding:'80px 0 90px', background:'#111009', position:'relative', minHeight:'600px', overflow:'hidden' }}>
-          <div style={{ position:'absolute', inset:0, background:'linear-gradient(135deg,#0d0b08,#1a1208,#0f0d0a)' }} />
-          <div style={{ position:'relative', zIndex:2, maxWidth:'1320px', margin:'0 auto', padding:'0 32px' }}>
-            <div style={{ marginBottom:'60px' }}>
-              <div className="skeleton" style={{ width:'180px', height:'14px', marginBottom:'18px', borderRadius:8, background:'rgba(193,105,43,.1)' }} />
-              <div className="skeleton" style={{ width:'320px', height:'52px', marginBottom:'12px', borderRadius:8, background:'rgba(193,105,43,.08)' }} />
-              <div className="skeleton" style={{ width:'240px', height:'52px', borderRadius:8, background:'rgba(193,105,43,.08)' }} />
-            </div>
-            <div style={{ display:'flex', gap:'24px', paddingBottom:'20px' }}>
-              {[1,2,3,4].map(i => (
-                <div key={i} style={{ width:'300px', height:'390px', flexShrink:0, borderRadius:20, background:'rgba(193,105,43,.06)', border:'1px solid rgba(193,105,43,.08)', transform:`scale(${i===1?1:.88})` }}>
-                  <div style={{ width:'100%', height:'100%', background:'linear-gradient(135deg,rgba(193,105,43,.04),transparent)', borderRadius:20 }} />
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* CATEGORÍAS GRID - solo si NO hay homeCategories pero sí hay dbCategories */}
-      {(!homeCategories || homeCategories.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
-        <section style={{ padding:'80px 32px 100px', background:'#fff', position:'relative', overflow:'hidden' }}>
+      {/* CATEGORÍAS GRID - solo si homeCategories ya cargó (no undefined) y está vacío, y hay dbCategories */}
+      {homeCategories !== undefined && (!homeCategories || homeCategories.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
           <div className="aurora-blob animate-aurora-1" style={{ width:'500px', height:'500px', top:'-150px', left:'-100px', background:'radial-gradient(circle,rgba(193,105,43,.18),rgba(232,140,74,.08))' }} />
           <div className="aurora-blob animate-aurora-2" style={{ width:'400px', height:'400px', bottom:'-100px', right:'-80px', background:'radial-gradient(circle,rgba(232,140,74,.15),rgba(193,105,43,.05))' }} />
           <div className="aurora-blob animate-aurora-3" style={{ width:'300px', height:'300px', top:'40%', left:'40%', background:'radial-gradient(circle,rgba(255,200,100,.12),transparent)' }} />
@@ -408,8 +386,8 @@ export default function HomePage() {
         </section>
       )}
 
-      {/* Wave divider blanco→crema - solo si se muestra el grid (sin homeCategories) */}
-      {(!homeCategories || homeCategories?.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
+      {/* Wave divider blanco→crema - solo si se muestra el grid */}
+      {homeCategories !== undefined && (!homeCategories || homeCategories.length === 0) && dbCategories !== null && dbCategories !== undefined && dbCategories.length > 0 && (
         <div style={{ background:'#fff', marginBottom:'-2px' }}>
           <svg viewBox="0 0 1440 50" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', width:'100%' }}>
             <path d="M0,20 C480,60 960,-10 1440,20 L1440,50 L0,50 Z" fill="#f9f7f5"/>
