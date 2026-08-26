@@ -338,8 +338,9 @@ export default function HomePage() {
                 <span className="shine" />
                 Explorar colección →
               </Link>
-              <Link href="/catalogo" className="btn-ghost" style={{ padding:'18px 34px', borderRadius:'14px', fontSize:'14px' }}>
-                Descargar catálogo ⬇
+              <Link href="/catalogo?auto=1" className="btn-download" style={{ padding:'17px 30px', borderRadius:'14px', fontSize:'14px', fontWeight:900, display:'inline-flex', alignItems:'center', gap:'11px' }}>
+                <span className="btn-download__ic">⬇</span>
+                Descargar catálogo
               </Link>
             </div>
 

@@ -403,6 +403,32 @@ body {
   .pn-floaticon { animation: none !important; }
 }
 
+/* ── Botón "Descargar catálogo" (hero) ── */
+.btn-download {
+  position: relative; color: #fff; text-decoration: none;
+  background: rgba(255,255,255,.06);
+  border: 1.5px solid rgba(232,140,74,.55);
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  transition: background .25s ease, border-color .25s ease, transform .25s ease, box-shadow .25s ease;
+  overflow: hidden;
+}
+.btn-download:hover {
+  background: linear-gradient(135deg,#c1692b,#e88c4a);
+  border-color: transparent; transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(193,105,43,.42);
+}
+.btn-download__ic {
+  display: inline-grid; place-items: center;
+  width: 24px; height: 24px; border-radius: 50%;
+  background: rgba(232,140,74,.95); color: #fff; font-size: 13px; line-height: 1;
+  transition: transform .25s ease, background .25s ease, color .25s ease;
+  animation: pn-dl-bob 1.8s ease-in-out infinite;
+}
+.btn-download:hover .btn-download__ic {
+  background: #fff; color: #c1692b; transform: translateY(3px); animation: none;
+}
+@keyframes pn-dl-bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+
 /* ══════════════════════════════════════════════
    IMPRESIÓN / PDF DEL CATÁLOGO
    ══════════════════════════════════════════════ */

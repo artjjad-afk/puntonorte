@@ -1,6 +1,6 @@
 'use client'
 /* eslint-disable @next/next/no-img-element */
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 
 type CatProduct = {
@@ -30,6 +30,8 @@ function catLabel(cat: string) {
 
 export default function CatalogoPage() {
   const [products, setProducts] = useState<CatProduct[] | null>(null)
+  const [preparando, setPreparando] = useState(false)
+  const printedRef = useRef(false)
 
   useEffect(() => {
     fetch('/api/products')
@@ -37,6 +39,33 @@ export default function CatalogoPage() {
       .then((d: unknown) => setProducts(Array.isArray(d) ? (d as CatProduct[]) : []))
       .catch(() => setProducts([]))
   }, [])
+
+  // Descarga automática: si se llega con ?auto=1, esperamos a que carguen
+  // las imágenes y abrimos el diálogo de guardar PDF (una sola vez).
+  useEffect(() => {
+    if (!products || products.length === 0 || printedRef.current) return
+    if (new URLSearchParams(window.location.search).get('auto') !== '1') return
+
+    setPreparando(true)
+    const doPrint = () => {
+      if (printedRef.current) return
+      printedRef.current = true
+      setPreparando(false)
+      window.print()
+    }
+
+    // Esperar a que todas las imágenes del catálogo terminen de cargar
+    const imgs = Array.from(document.querySelectorAll<HTMLImageElement>('.catalogo-root img'))
+    const pendientes = imgs.filter(i => !i.complete)
+    let restantes = pendientes.length
+    const marcar = () => { if (--restantes <= 0) doPrint() }
+    pendientes.forEach(i => { i.addEventListener('load', marcar); i.addEventListener('error', marcar) })
+
+    const tImmediate = pendientes.length === 0 ? window.setTimeout(doPrint, 400) : undefined
+    const tCap = window.setTimeout(doPrint, 5000) // tope de seguridad
+
+    return () => { if (tImmediate) clearTimeout(tImmediate); clearTimeout(tCap) }
+  }, [products])
 
   // Agrupar por categoría
   const groups: Record<string, CatProduct[]> = {}
@@ -49,6 +78,21 @@ export default function CatalogoPage() {
 
   return (
     <div className="catalogo-root" style={{ minHeight: '100vh', background: '#f4f2f0', color: '#211f1e' }}>
+      {/* Aviso mientras se prepara la descarga automática (no se imprime) */}
+      {preparando && (
+        <div
+          className="no-print"
+          style={{
+            position: 'fixed', inset: 0, zIndex: 50, display: 'flex',
+            flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px',
+            background: 'rgba(33,31,30,.88)', color: '#fff',
+          }}
+        >
+          <div style={{ width: '42px', height: '42px', borderRadius: '50%', border: '3px solid rgba(232,140,74,.25)', borderTopColor: '#e88c4a', animation: 'pn-loader-spin .8s linear infinite' }} />
+          <p style={{ fontSize: '14px', fontWeight: 700, letterSpacing: '1px' }}>Preparando tu catálogo…</p>
+        </div>
+      )}
+
       {/* ── Barra de acciones (no se imprime) ── */}
       <div
         className="no-print"
