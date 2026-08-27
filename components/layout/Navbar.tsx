@@ -1,7 +1,7 @@
 ﻿'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, Menu, X, Search, ChevronRight } from 'lucide-react'
+import { ShoppingCart, Menu, X, Search, ChevronRight, MapPin } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { SearchDropdown } from '@/components/ui/SearchDropdown'
 
@@ -199,7 +199,7 @@ export function Navbar({ initialLinks }: { initialLinks?: { href: string; label:
 
         {/* Location badge */}
         <div style={{ padding: '12px 24px 20px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <span style={{ fontSize: '12px', color: 'rgba(232,229,226,0.35)' }}>📍 Barcelona, Anzoátegui · Envíos nacionales</span>
+          <span style={{ fontSize: '12px', color: 'rgba(232,229,226,0.35)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}><MapPin size={13} /> Barcelona, Anzoátegui · Envíos nacionales</span>
         </div>
       </div>
     </>

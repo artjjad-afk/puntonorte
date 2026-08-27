@@ -1,15 +1,15 @@
 'use client'
-import { Truck, Clock, MapPin, Package, AlertCircle, MessageCircle, CheckCircle } from 'lucide-react'
+import { Truck, Clock, MapPin, Package, AlertCircle, MessageCircle, CheckCircle, Building2, Factory, Fuel, Waves, Wheat, Mountain, Flag } from 'lucide-react'
 
 const zonas = [
-  { zona: 'Barcelona y Anzoátegui', tiempo: '1 – 2 días hábiles', precio: 'A coordinar', icon: '📍' },
-  { zona: 'Caracas y Miranda', tiempo: '2 – 3 días hábiles', precio: 'A coordinar', icon: '🏙️' },
-  { zona: 'Valencia y Carabobo', tiempo: '2 – 3 días hábiles', precio: 'A coordinar', icon: '🏭' },
-  { zona: 'Maracaibo y Zulia', tiempo: '3 – 4 días hábiles', precio: 'A coordinar', icon: '⛽' },
-  { zona: 'Oriente (Sucre, Monagas)', tiempo: '2 – 3 días hábiles', precio: 'A coordinar', icon: '🌊' },
-  { zona: 'Llanos y interior', tiempo: '3 – 5 días hábiles', precio: 'A coordinar', icon: '🌾' },
-  { zona: 'Andes (Mérida, Táchira)', tiempo: '3 – 5 días hábiles', precio: 'A coordinar', icon: '⛰️' },
-  { zona: 'Resto del país', tiempo: '3 – 5 días hábiles', precio: 'A coordinar', icon: '🇻🇪' },
+  { zona: 'Barcelona y Anzoátegui', tiempo: '1 – 2 días hábiles', precio: 'A coordinar', icon: MapPin },
+  { zona: 'Caracas y Miranda', tiempo: '2 – 3 días hábiles', precio: 'A coordinar', icon: Building2 },
+  { zona: 'Valencia y Carabobo', tiempo: '2 – 3 días hábiles', precio: 'A coordinar', icon: Factory },
+  { zona: 'Maracaibo y Zulia', tiempo: '3 – 4 días hábiles', precio: 'A coordinar', icon: Fuel },
+  { zona: 'Oriente (Sucre, Monagas)', tiempo: '2 – 3 días hábiles', precio: 'A coordinar', icon: Waves },
+  { zona: 'Llanos y interior', tiempo: '3 – 5 días hábiles', precio: 'A coordinar', icon: Wheat },
+  { zona: 'Andes (Mérida, Táchira)', tiempo: '3 – 5 días hábiles', precio: 'A coordinar', icon: Mountain },
+  { zona: 'Resto del país', tiempo: '3 – 5 días hábiles', precio: 'A coordinar', icon: Flag },
 ]
 
 const pasos = [
@@ -71,9 +71,11 @@ export default function EnviosPage() {
             <p style={{ color:'#7a7675', fontSize:'15px', margin:0 }}>Los tiempos son estimados en días hábiles desde la confirmación del pago</p>
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(300px, 1fr))', gap:'14px' }}>
-            {zonas.map((z, i) => (
+            {zonas.map((z, i) => {
+              const Icon = z.icon
+              return (
               <div key={i} className="zona-card">
-                <span style={{ fontSize:'28px', flexShrink:0 }}>{z.icon}</span>
+                <span style={{ flexShrink:0, display:'inline-flex' }}><Icon size={28} color="#c1692b" /></span>
                 <div style={{ flex:1 }}>
                   <p style={{ fontSize:'14px', fontWeight:'700', color:'#211f1e', margin:'0 0 2px' }}>{z.zona}</p>
                   <p style={{ fontSize:'12px', color:'#7a7675', margin:0 }}>{z.tiempo}</p>
@@ -82,7 +84,8 @@ export default function EnviosPage() {
                   <span style={{ fontSize:'11px', color:'#c1692b', fontWeight:'700' }}>{z.precio}</span>
                 </div>
               </div>
-            ))}
+              )
+            })}
           </div>
           <div style={{ marginTop:'24px', padding:'16px 20px', background:'rgba(193,105,43,0.08)', border:'1px solid rgba(193,105,43,0.2)', borderRadius:'12px', display:'flex', gap:'12px', alignItems:'flex-start' }}>
             <AlertCircle size={18} color="#c1692b" style={{ flexShrink:0, marginTop:'1px' }} />

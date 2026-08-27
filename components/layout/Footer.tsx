@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import { MapPin } from 'lucide-react'
 
 export function Footer() {
   return (
@@ -70,7 +71,7 @@ export function Footer() {
               0414-0906768
             </a>
             <p style={{ color: '#7a7675', fontSize: '13px', marginTop: '12px' }}>Lun - Sáb: 9am - 7pm</p>
-            <p style={{ color: '#7a7675', fontSize: '13px', marginTop: '6px' }}>📍 Barcelona, Anzoátegui</p>
+            <p style={{ color: '#7a7675', fontSize: '13px', marginTop: '6px' }}><MapPin size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Barcelona, Anzoátegui</p>
           </div>
         </div>
 

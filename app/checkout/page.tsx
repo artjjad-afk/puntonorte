@@ -4,15 +4,15 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
 import { CustomerInfo } from '@/types'
-import { ChevronLeft, Check, MapPin, CreditCard, ClipboardCheck, ShoppingBag } from 'lucide-react'
+import { ChevronLeft, Check, MapPin, CreditCard, ClipboardCheck, ShoppingBag, Landmark, Smartphone, Banknote, MessageCircle, CheckCircle2, XCircle, AlertTriangle, FileText, Lock } from 'lucide-react'
 import { buildOrderWAMessage } from '@/lib/whatsappOrder'
 import { VENEZUELA } from '@/lib/venezuela'
 
 const PAYMENT_METHODS = [
-  { id: 'zelle',     label: 'Zelle',               desc: 'Transferencia USD desde banco americano', icon: '🏦' },
-  { id: 'pago-movil',label: 'Pago Móvil',          desc: 'Transferencia instantánea bancos venezolanos', icon: '📱' },
-  { id: 'efectivo',  label: 'Efectivo USD',         desc: 'Pago en efectivo al momento de entrega', icon: '💵' },
-  { id: 'whatsapp',  label: 'Coordinar por WhatsApp', desc: 'Te contactamos para acordar el método', icon: '💬' },
+  { id: 'zelle',     label: 'Zelle',               desc: 'Transferencia USD desde banco americano', icon: Landmark },
+  { id: 'pago-movil',label: 'Pago Móvil',          desc: 'Transferencia instantánea bancos venezolanos', icon: Smartphone },
+  { id: 'efectivo',  label: 'Efectivo USD',         desc: 'Pago en efectivo al momento de entrega', icon: Banknote },
+  { id: 'whatsapp',  label: 'Coordinar por WhatsApp', desc: 'Te contactamos para acordar el método', icon: MessageCircle },
 ]
 
 const STEPS = [
@@ -185,9 +185,9 @@ export default function CheckoutPage() {
             {isPhone && form.phone.length > 6 && (
               <span style={{
                 position:'absolute', right:'14px', top:'50%', transform:'translateY(-50%)',
-                fontSize:'16px', pointerEvents:'none',
+                fontSize:'16px', pointerEvents:'none', display:'flex', alignItems:'center',
               }}>
-                {phoneValid ? '✅' : '❌'}
+                {phoneValid ? <CheckCircle2 size={18} color="#25a244" /> : <XCircle size={18} color="#e53e3e" />}
               </span>
             )}
           </div>
@@ -196,7 +196,7 @@ export default function CheckoutPage() {
         {/* Mensaje de error */}
         {errors[key] && (
           <span style={{ fontSize:'12px', color:'#e53e3e', display:'flex', alignItems:'center', gap:'4px' }}>
-            ⚠️ {errors[key]}
+            <AlertTriangle size={13} color="#e53e3e" style={{ flexShrink:0 }} /> {errors[key]}
           </span>
         )}
 
@@ -359,7 +359,7 @@ export default function CheckoutPage() {
 
                     {errors.city && (
                       <span style={{ gridColumn:'1 / -1', fontSize:'12px', color:'#e53e3e', display:'flex', alignItems:'center', gap:'4px' }}>
-                        ⚠️ Selecciona tu estado y ciudad
+                        <AlertTriangle size={13} color="#e53e3e" style={{ flexShrink:0 }} /> Selecciona tu estado y ciudad
                       </span>
                     )}
                   </div>
@@ -385,7 +385,7 @@ export default function CheckoutPage() {
                   {PAYMENT_METHODS.map(pm => (
                     <button key={pm.id} onClick={() => setPaymentMethod(pm.id)} className={`pay-option ${paymentMethod === pm.id ? 'selected' : ''}`}>
                       <div style={{ display:'flex', alignItems:'center', gap:'14px' }}>
-                        <span style={{ fontSize:'24px' }}>{pm.icon}</span>
+                        <pm.icon size={24} color="#c1692b" />
                         <div style={{ flex:1 }}>
                           <p style={{ margin:0, fontWeight:'700', fontSize:'15px', color:'#211f1e' }}>{pm.label}</p>
                           <p style={{ margin:'2px 0 0', fontSize:'12px', color:'#7a7675' }}>{pm.desc}</p>
@@ -428,7 +428,7 @@ export default function CheckoutPage() {
                     <p style={{ margin:'0 0 2px', color:'#393738', fontSize:'13px' }}>{form.phone}</p>
                     <p style={{ margin:'0 0 2px', color:'#393738', fontSize:'13px' }}>{form.address}</p>
                     <p style={{ margin:0, color:'#393738', fontSize:'13px' }}>{form.city}</p>
-                    {form.notes && <p style={{ margin:'8px 0 0', color:'#7a7675', fontSize:'12px', fontStyle:'italic' }}>📝 {form.notes}</p>}
+                    {form.notes && <p style={{ margin:'8px 0 0', color:'#7a7675', fontSize:'12px', fontStyle:'italic' }}><FileText size={13} style={{ verticalAlign:'-2px' }} /> {form.notes}</p>}
                   </div>
                   <div style={{ background:'#f9f7f5', borderRadius:'14px', padding:'20px 24px' }}>
                     <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'8px' }}>
@@ -436,7 +436,7 @@ export default function CheckoutPage() {
                       <button onClick={() => setStep(1)} style={{ background:'none', border:'none', color:'#c1692b', fontSize:'12px', fontWeight:'700', cursor:'pointer' }}>Editar</button>
                     </div>
                     <p style={{ margin:0, fontWeight:'700', color:'#211f1e', fontSize:'15px' }}>
-                      {PAYMENT_METHODS.find(p => p.id === paymentMethod)?.icon} {PAYMENT_METHODS.find(p => p.id === paymentMethod)?.label}
+                      {(() => { const Ic = PAYMENT_METHODS.find(p => p.id === paymentMethod)?.icon; return Ic ? <Ic size={16} style={{ verticalAlign:'-3px' }} /> : null })()} {PAYMENT_METHODS.find(p => p.id === paymentMethod)?.label}
                     </p>
                   </div>
                 </div>
@@ -461,7 +461,7 @@ export default function CheckoutPage() {
                     {/* Error de conexión */}
                     {orderError && (
                       <div style={{ width:'100%', background:'#fef2f2', border:'1.5px solid #fca5a5', borderRadius:'12px', padding:'14px 18px', display:'flex', gap:'12px', alignItems:'flex-start' }}>
-                        <span style={{ fontSize:'18px', flexShrink:0 }}>⚠️</span>
+                        <AlertTriangle size={18} color="#e53e3e" style={{ flexShrink:0 }} />
                         <div>
                           <p style={{ margin:'0 0 4px', fontWeight:'700', fontSize:'14px', color:'#dc2626' }}>
                             No pudimos registrar tu pedido
@@ -553,7 +553,7 @@ export default function CheckoutPage() {
             </div>
             <div style={{ marginTop:'20px', padding:'14px 16px', background:'rgba(193,105,43,0.12)', border:'1px solid rgba(193,105,43,0.2)', borderRadius:'12px' }}>
               <p style={{ margin:0, fontSize:'12px', color:'rgba(232,229,226,0.7)', lineHeight:'1.6', textAlign:'center' }}>
-                🔒 Tu información está segura.<br />Pago coordinado directamente contigo.
+<Lock size={14} style={{ verticalAlign:'-2px' }} /> Tu información está segura.<br />Pago coordinado directamente contigo.
               </p>
             </div>
           </div>

@@ -2,6 +2,7 @@
 /* eslint-disable @next/next/no-img-element */
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
+import { Download, MapPin, MessageCircle, Camera } from 'lucide-react'
 
 type CatProduct = {
   id: number
@@ -181,7 +182,7 @@ export default function CatalogoPage() {
             boxShadow: '0 6px 18px rgba(193,105,43,.4)',
           }}
         >
-          ⬇  Descargar catálogo (PDF)
+          <Download size={17} style={{ verticalAlign: '-3px' }} />  Descargar catálogo (PDF)
         </button>
       </div>
 
@@ -195,9 +196,9 @@ export default function CatalogoPage() {
         <p className="cov__tag">Moda, accesorios y perfumes de calidad premium. Piezas únicas que cuentan tu historia, con envíos a toda Venezuela.</p>
         <div className="cov__rule" />
         <div className="cov__chips">
-          <span className="cov__chip">📍 {CONTACT.ciudad}</span>
-          <span className="cov__chip">💬 WhatsApp +{CONTACT.whatsapp}</span>
-          <span className="cov__chip">📸 @{CONTACT.instagram}</span>
+          <span className="cov__chip"><MapPin size={14} style={{ verticalAlign: '-2px' }} /> {CONTACT.ciudad}</span>
+          <span className="cov__chip"><MessageCircle size={14} style={{ verticalAlign: '-2px' }} /> WhatsApp +{CONTACT.whatsapp}</span>
+          <span className="cov__chip"><Camera size={14} style={{ verticalAlign: '-2px' }} /> @{CONTACT.instagram}</span>
         </div>
       </header>
 
@@ -258,9 +259,9 @@ export default function CatalogoPage() {
           <p>Escríbenos y te atendemos al instante.</p>
           <div className="backcov__rule" />
           <div className="backcov__chips">
-            <span className="backcov__chip">💬 WhatsApp +{CONTACT.whatsapp}</span>
-            <span className="backcov__chip">📸 @{CONTACT.instagram}</span>
-            <span className="backcov__chip">📍 {CONTACT.ciudad}</span>
+            <span className="backcov__chip"><MessageCircle size={14} style={{ verticalAlign: '-2px' }} /> WhatsApp +{CONTACT.whatsapp}</span>
+            <span className="backcov__chip"><Camera size={14} style={{ verticalAlign: '-2px' }} /> @{CONTACT.instagram}</span>
+            <span className="backcov__chip"><MapPin size={14} style={{ verticalAlign: '-2px' }} /> {CONTACT.ciudad}</span>
           </div>
           <a className="backcov__cta no-print" href={`https://wa.me/${CONTACT.whatsapp}`} target="_blank" rel="noopener noreferrer">Pedir por WhatsApp →</a>
           <p className="backcov__foot">puntonorteshop.com · Actualizado el {fecha}</p>

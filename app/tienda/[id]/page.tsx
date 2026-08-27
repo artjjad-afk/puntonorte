@@ -2,7 +2,7 @@
 import { useState, use, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, Heart, Shield, Truck, RefreshCw, ChevronLeft, Star, Minus, Plus } from 'lucide-react'
+import { ShoppingCart, Heart, Shield, Truck, RefreshCw, ChevronLeft, Star, Minus, Plus, Flame, CreditCard } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useToast } from '@/components/ui/Toast'
 import { useWishlistStore } from '@/store/wishlist'
@@ -254,7 +254,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
               {/* Últimas unidades — urgencia */}
               {product.stock > 0 && product.stock <= 5 && (
                 <p style={{ margin: '8px 0 0', fontSize: '12px', fontWeight: '700', color: '#c1692b', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                  🔥 ¡Solo quedan {product.stock} {product.stock === 1 ? 'unidad' : 'unidades'}!
+                  <Flame size={14} /> ¡Solo quedan {product.stock} {product.stock === 1 ? 'unidad' : 'unidades'}!
                 </p>
               )}
             </div>
@@ -307,7 +307,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 { icon: <Truck size={16} color="#c1692b" />, text: 'Envío a todo Venezuela' },
                 { icon: <Shield size={16} color="#c1692b" />, text: 'Garantía de calidad' },
                 { icon: <RefreshCw size={16} color="#c1692b" />, text: 'Cambios en 7 días' },
-                { icon: <span style={{ fontSize: '16px' }}>💳</span>, text: 'Zelle / Pago Móvil' },
+                { icon: <CreditCard size={16} color="#c1692b" />, text: 'Zelle / Pago Móvil' },
               ].map((item, i) => (
                 <div key={i} className="guarantee-item">{item.icon}<span style={{ fontSize: '12px', color: '#393738', fontWeight: '600' }}>{item.text}</span></div>
               ))}

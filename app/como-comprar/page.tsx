@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { Search, ShoppingCart, ClipboardList, MessageCircle, Package, CheckCircle } from 'lucide-react'
+import { Search, ShoppingCart, ClipboardList, MessageCircle, Package, CheckCircle, Landmark, Smartphone, Banknote } from 'lucide-react'
 
 const pasos = [
   {
@@ -42,10 +42,10 @@ const pasos = [
 ]
 
 const metodos = [
-  { icon: '🏦', nombre: 'Zelle', desc: 'Transferencia en USD desde cualquier banco americano. Sin comisiones adicionales.', disponible: true },
-  { icon: '📱', nombre: 'Pago Móvil', desc: 'Transferencia instantánea entre bancos venezolanos. Desde tu app bancaria en segundos.', disponible: true },
-  { icon: '💵', nombre: 'Efectivo USD', desc: 'Pago en efectivo al momento de la entrega o en punto acordado.', disponible: true },
-  { icon: '💬', nombre: 'Otro método', desc: 'Si tienes otro método preferido, escríbenos y lo coordinamos juntos.', disponible: true },
+  { icon: Landmark, nombre: 'Zelle', desc: 'Transferencia en USD desde cualquier banco americano. Sin comisiones adicionales.', disponible: true },
+  { icon: Smartphone, nombre: 'Pago Móvil', desc: 'Transferencia instantánea entre bancos venezolanos. Desde tu app bancaria en segundos.', disponible: true },
+  { icon: Banknote, nombre: 'Efectivo USD', desc: 'Pago en efectivo al momento de la entrega o en punto acordado.', disponible: true },
+  { icon: MessageCircle, nombre: 'Otro método', desc: 'Si tienes otro método preferido, escríbenos y lo coordinamos juntos.', disponible: true },
 ]
 
 export default function ComoComprarPage() {
@@ -114,7 +114,7 @@ export default function ComoComprarPage() {
           <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(200px, 1fr))', gap:'16px' }}>
             {metodos.map((m, i) => (
               <div key={i} className="metodo-card">
-                <span style={{ fontSize:'32px', display:'block', marginBottom:'12px' }}>{m.icon}</span>
+                <span style={{ display:'block', marginBottom:'12px' }}><m.icon size={32} color="#c1692b" /></span>
                 <h3 style={{ fontSize:'15px', fontWeight:'800', color:'#211f1e', marginBottom:'8px' }}>{m.nombre}</h3>
                 <p style={{ fontSize:'13px', color:'#7a7675', lineHeight:'1.7', margin:0 }}>{m.desc}</p>
               </div>

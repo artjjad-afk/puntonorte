@@ -6,7 +6,7 @@ import { BubblesCanvas } from '@/components/ui/BubblesCanvas'
 import { LightRays } from '@/components/ui/LightRays'
 import { ParticlesBurst, fireBurst } from '@/components/ui/ParticlesBurst'
 import { FloatingShopIcons } from '@/components/ui/FloatingShopIcons'
-import { FileDown } from 'lucide-react'
+import { FileDown, ShoppingBag, Sparkles, Star, MessageCircle } from 'lucide-react'
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Product } from '@/types'
 
@@ -26,10 +26,10 @@ const testimonials = [
 ]
 
 const stats = [
-  { value: 500, suffix: '+', label: 'Clientes satisfechos',  icon: '🛍️' },
-  { value: 200, suffix: '+', label: 'Productos disponibles', icon: '✨' },
-  { value: 5,   suffix: '★', label: 'Calificación promedio', icon: '⭐' },
-  { value: 24,  suffix: 'h', label: 'Atención WhatsApp',     icon: '💬' },
+  { value: 500, suffix: '+', label: 'Clientes satisfechos',  icon: ShoppingBag },
+  { value: 200, suffix: '+', label: 'Productos disponibles', icon: Sparkles },
+  { value: 5,   suffix: '★', label: 'Calificación promedio', icon: Star },
+  { value: 24,  suffix: 'h', label: 'Atención WhatsApp',     icon: MessageCircle },
 ]
 
 /* Partículas decorativas hero */
@@ -989,7 +989,7 @@ export default function HomePage() {
                 transition={{ duration:.7, delay:i*0.13, ease:[.34,1.3,.64,1] }}
                 className="stat-card"
               >
-                <div style={{ fontSize:'32px', marginBottom:'12px', filter:'drop-shadow(0 0 8px rgba(193,105,43,.5))' }}>{s.icon}</div>
+                <div style={{ marginBottom:'12px', filter:'drop-shadow(0 0 8px rgba(193,105,43,.5))' }}><s.icon size={32} /></div>
                 <p style={{
                   fontSize:'clamp(34px,4.5vw,52px)', fontWeight:'900', letterSpacing:'-2px',
                   margin:'0 0 8px', background:'linear-gradient(135deg,#fff5e6 0%,#e88c4a 40%,#c1692b 100%)',
