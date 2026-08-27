@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, useCallback } from 'react'
-import { Tag, Eye, EyeOff, Search, Percent, Star, X } from 'lucide-react'
+import { Tag, Eye, EyeOff, Search, Percent, Star, X, Flame, Package, Lightbulb } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 
 interface Product {
@@ -131,12 +131,12 @@ export default function AdminOfertas() {
       {/* Stats rápidas */}
       <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:16, marginBottom:24 }}>
         {[
-          { label:'En oferta', value: offersCount, icon:'🔥', color:'rgba(249,115,22,.15)', border:'rgba(249,115,22,.25)' },
-          { label:'Con descuento', value: products.filter(p => discount(p.price, p.originalPrice) !== null).length, icon:'🏷️', color:'rgba(96,165,250,.12)', border:'rgba(96,165,250,.25)' },
-          { label:'Total productos', value: products.length, icon:'📦', color:'rgba(148,163,184,.08)', border:'rgba(148,163,184,.15)' },
+          { label:'En oferta', value: offersCount, icon: <Flame size={24} color="#f97316" strokeWidth={1.75} />, color:'rgba(249,115,22,.15)', border:'rgba(249,115,22,.25)' },
+          { label:'Con descuento', value: products.filter(p => discount(p.price, p.originalPrice) !== null).length, icon: <Tag size={24} color="#60a5fa" strokeWidth={1.75} />, color:'rgba(96,165,250,.12)', border:'rgba(96,165,250,.25)' },
+          { label:'Total productos', value: products.length, icon: <Package size={24} color="#94a3b8" strokeWidth={1.75} />, color:'rgba(148,163,184,.08)', border:'rgba(148,163,184,.15)' },
         ].map(s => (
           <div key={s.label} style={{ background:s.color, border:`1px solid ${s.border}`, borderRadius:14, padding:'16px 20px', display:'flex', alignItems:'center', gap:12 }}>
-            <span style={{ fontSize:24 }}>{s.icon}</span>
+            <span style={{ display:'flex', alignItems:'center' }}>{s.icon}</span>
             <div>
               <p style={{ margin:0, fontSize:24, fontWeight:900, color:'#f1f5f9', letterSpacing:'-1px' }}>{s.value}</p>
               <p style={{ margin:0, fontSize:11, color:'rgba(148,163,184,.6)', fontFamily:'var(--font-mono)', textTransform:'uppercase', letterSpacing:'.08em' }}>{s.label}</p>
@@ -160,7 +160,11 @@ export default function AdminOfertas() {
                 background: filter === f ? 'rgba(249,115,22,.2)' : 'rgba(255,255,255,.05)',
                 color: filter === f ? '#f97316' : 'rgba(148,163,184,.6)',
                 outline: filter === f ? '1px solid rgba(249,115,22,.4)' : '1px solid rgba(255,255,255,.08)' }}>
-              {f === 'all' ? 'Todos' : '🔥 En oferta'}
+              {f === 'all' ? 'Todos' : (
+                <span style={{ display:'inline-flex', alignItems:'center', gap:6 }}>
+                  <Flame size={14} strokeWidth={2} style={{ verticalAlign:'-2px' }} /> En oferta
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -281,7 +285,7 @@ export default function AdminOfertas() {
       {offersCount > 0 && (
         <motion.div initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }} transition={{ delay:.3 }}
           style={{ marginTop:16, padding:'12px 16px', background:'rgba(249,115,22,.06)', border:'1px solid rgba(249,115,22,.14)', borderRadius:12, display:'flex', alignItems:'center', gap:10 }}>
-          <span style={{ fontSize:18 }}>💡</span>
+          <span style={{ display:'flex', alignItems:'center' }}><Lightbulb size={18} color="#f97316" strokeWidth={1.75} /></span>
           <p style={{ margin:0, fontSize:12, color:'rgba(148,163,184,.6)', fontFamily:'var(--font-mono)', lineHeight:1.6 }}>
             Tienes <strong style={{ color:'#f97316' }}>{offersCount} producto{offersCount !== 1 ? 's' : ''}</strong> en oferta. Aparecerán en la sección de ofertas de la página principal.
           </p>

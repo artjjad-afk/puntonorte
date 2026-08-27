@@ -2,7 +2,7 @@
 import { useState, use, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, Heart, Shield, Truck, RefreshCw, ChevronLeft, Star, Minus, Plus, Flame, CreditCard } from 'lucide-react'
+import { ShoppingCart, Heart, Shield, Truck, RefreshCw, ChevronLeft, Star, Minus, Plus, Flame, CreditCard, AlertTriangle } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { useToast } from '@/components/ui/Toast'
 import { useWishlistStore } from '@/store/wishlist'
@@ -191,7 +191,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   </p>
                   {sizeError && (
                     <span style={{ fontSize:'12px', color:'#dc2626', fontWeight:'600', display:'flex', alignItems:'center', gap:'4px' }}>
-                      ⚠️ Selecciona una talla
+                      <AlertTriangle size={13} color="#dc2626" style={{ flexShrink:0 }} /> Selecciona una talla
                     </span>
                   )}
                 </div>
@@ -218,7 +218,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                   </p>
                   {colorError && (
                     <span style={{ fontSize:'12px', color:'#dc2626', fontWeight:'600', display:'flex', alignItems:'center', gap:'4px' }}>
-                      ⚠️ Selecciona un color
+                      <AlertTriangle size={13} color="#dc2626" style={{ flexShrink:0 }} /> Selecciona un color
                     </span>
                   )}
                 </div>

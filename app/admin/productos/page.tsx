@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, useRef } from 'react'
-import { Plus, Pencil, Trash2, Eye, EyeOff, Search, Package, Star, Zap, RefreshCw } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, EyeOff, Search, Package, Star, Zap, RefreshCw, AlertTriangle } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 
@@ -144,7 +144,7 @@ export default function AdminProductos() {
             <h1 style={{ fontSize: 'clamp(20px,3vw,28px)', fontWeight: 800, color: '#f1f5f9', margin: 0, letterSpacing: '-0.5px' }}>Productos</h1>
             <p style={{ color: 'rgba(148,163,184,0.5)', fontSize: 12, margin: 0, fontFamily: 'var(--font-mono)' }}>
               {products.length} en total · {products.filter(p => p.active).length} activos
-              {lowStockCount > 0 && <span style={{ color: '#fbbf24', marginLeft: 6 }}>· ⚠️ {lowStockCount} con stock bajo</span>}
+              {lowStockCount > 0 && <span style={{ color: '#fbbf24', marginLeft: 6 }}>· <AlertTriangle size={13} color="#fbbf24" style={{ verticalAlign: 'middle', flexShrink: 0 }} /> {lowStockCount} con stock bajo</span>}
             </p>
           </div>
         </div>
@@ -156,10 +156,10 @@ export default function AdminProductos() {
       {/* Filtros */}
       <div style={{ display: 'flex', gap: 10, marginBottom: 20, flexWrap: 'wrap', alignItems: 'center' }}>
         <div style={{ display: 'flex', gap: 6 }}>
-          {([['all','Todos',null],['active','Activos',null],['inactive','Ocultos',null],['low','⚠️ Stock bajo',lowStockCount]] as [string,string,number|null][]).map(([val,label,count]) => (
+          {([['all','Todos',null],['active','Activos',null],['inactive','Ocultos',null],['low','Stock bajo',lowStockCount]] as [string,string,number|null][]).map(([val,label,count]) => (
             <button key={val} onClick={() => setFilter(val as typeof filter)}
-              style={{ padding: '7px 14px', borderRadius: 100, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-display)', background: filter === val ? (val === 'low' ? 'rgba(251,191,36,0.15)' : 'rgba(249,115,22,0.2)') : 'rgba(255,255,255,0.05)', color: filter === val ? (val === 'low' ? '#fbbf24' : '#f97316') : 'rgba(148,163,184,0.6)', outline: filter === val ? `1px solid ${val === 'low' ? 'rgba(251,191,36,0.35)' : 'rgba(249,115,22,0.35)'}` : '1px solid rgba(255,255,255,0.08)' }}>
-              {label}{count !== null ? ` (${count})` : ''}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '7px 14px', borderRadius: 100, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-display)', background: filter === val ? (val === 'low' ? 'rgba(251,191,36,0.15)' : 'rgba(249,115,22,0.2)') : 'rgba(255,255,255,0.05)', color: filter === val ? (val === 'low' ? '#fbbf24' : '#f97316') : 'rgba(148,163,184,0.6)', outline: filter === val ? `1px solid ${val === 'low' ? 'rgba(251,191,36,0.35)' : 'rgba(249,115,22,0.35)'}` : '1px solid rgba(255,255,255,0.08)' }}>
+              {val === 'low' && <AlertTriangle size={13} color="#fbbf24" style={{ flexShrink: 0 }} />}{label}{count !== null ? ` (${count})` : ''}
             </button>
           ))}
         </div>

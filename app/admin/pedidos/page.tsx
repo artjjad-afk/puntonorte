@@ -3,7 +3,7 @@ import { useEffect, useState, useMemo } from 'react'
 import {
   Clock, CheckCircle, XCircle, TrendingUp,
   ShoppingBag, MessageCircle, ChevronDown,
-  MapPin, CreditCard, Package, Phone,
+  MapPin, CreditCard, Package, Phone, FileText,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { formatWAPhone } from '@/lib/config'
@@ -232,8 +232,8 @@ export default function AdminPedidos() {
                                 <CreditCard size={11} color="#fbbf24" /> {order.paymentMethod}
                               </div>
                               {order.notes && (
-                                <p style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.5)', fontStyle: 'italic', background: 'rgba(255,255,255,0.04)', borderRadius: 6, padding: '4px 8px' }}>
-                                  📝 {order.notes}
+                                <p style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.5)', fontStyle: 'italic', background: 'rgba(255,255,255,0.04)', borderRadius: 6, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 6 }}>
+                                  <FileText size={14} style={{ flexShrink: 0 }} /> {order.notes}
                                 </p>
                               )}
                             </div>

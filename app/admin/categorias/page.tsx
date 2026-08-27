@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check, GripVertical, Upload, Link as LinkIcon, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check, GripVertical, Upload, Link as LinkIcon, AlertCircle, CheckCircle2, Lightbulb, Home, Star } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 
 interface Category {
@@ -404,8 +404,8 @@ export default function AdminCategorias() {
 
           {/* Tip */}
           <div style={{ marginTop: 16, padding: '10px 12px', background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.14)', borderRadius: 10 }}>
-            <p style={{ margin: 0, fontSize: 11, color: 'rgba(148,163,184,0.6)', lineHeight: 1.6, fontFamily: 'var(--font-mono)' }}>
-              💡 El slug se genera automático. Las categorías aparecen en el menú de la tienda y en el formulario de productos.
+            <p style={{ margin: 0, fontSize: 11, color: 'rgba(148,163,184,0.6)', lineHeight: 1.6, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'flex-start', gap: 6 }}>
+              <Lightbulb size={14} style={{ flexShrink: 0, marginTop: 2 }} /> El slug se genera automático. Las categorías aparecen en el menú de la tienda y en el formulario de productos.
             </p>
           </div>
         </motion.div>
@@ -538,7 +538,7 @@ export default function AdminCategorias() {
                           title={cat.showInHome ? 'Quitar del inicio' : 'Mostrar en inicio'}
                           style={{ height: 32, padding: '0 10px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 5, background: cat.showInHome ? 'rgba(139,92,246,0.15)' : 'rgba(148,163,184,0.08)', border: `1px solid ${cat.showInHome ? 'rgba(139,92,246,0.3)' : 'rgba(148,163,184,0.15)'}`, color: cat.showInHome ? '#a78bfa' : 'rgba(148,163,184,0.5)', cursor: 'pointer', fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}
                         >
-                          {cat.showInHome ? '🏠 INICIO' : '⌂ INICIO'}
+                          <Home size={14} /> INICIO
                         </button>
                         {/* Toggle acceso rápido en navbar */}
                         <button
@@ -546,7 +546,7 @@ export default function AdminCategorias() {
                           title={cat.showInNav ? 'Quitar del menú' : 'Mostrar en menú'}
                           style={{ height: 32, padding: '0 10px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 5, background: cat.showInNav ? 'rgba(249,115,22,0.15)' : 'rgba(148,163,184,0.08)', border: `1px solid ${cat.showInNav ? 'rgba(249,115,22,0.3)' : 'rgba(148,163,184,0.15)'}`, color: cat.showInNav ? '#f97316' : 'rgba(148,163,184,0.5)', cursor: 'pointer', fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}
                         >
-                          {cat.showInNav ? '★ MENÚ' : '☆ MENÚ'}
+                          <Star size={14} fill={cat.showInNav ? 'currentColor' : 'none'} /> MENÚ
                         </button>
                         <button onClick={() => startEdit(cat)} title="Editar" style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', cursor: 'pointer' }}>
                           <Pencil size={13} />

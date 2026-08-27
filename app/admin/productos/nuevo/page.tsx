@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package } from 'lucide-react'
+import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, ClipboardList, ImageIcon, Palette, Settings, AlertTriangle, Lightbulb } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 
@@ -149,7 +149,7 @@ export default function NuevoProducto() {
             {/* Info básica */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }}
               className="card-top" style={card}>
-              <p style={{ ...lbl, fontSize: 11, marginBottom: 16 }}>📋 Información básica</p>
+              <p style={{ ...lbl, fontSize: 11, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}><ClipboardList size={16} color="#f97316" /> Información básica</p>
               <div style={{ display: 'grid', gap: 14 }}>
                 <div>
                   <label style={lbl}>Nombre del producto *</label>
@@ -200,7 +200,7 @@ export default function NuevoProducto() {
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.08 }}
               className="card-top" style={card}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                <p style={{ ...lbl, marginBottom: 0 }}>🖼️ Imágenes *</p>
+                <p style={{ ...lbl, marginBottom: 0, display: 'flex', alignItems: 'center', gap: 6 }}><ImageIcon size={16} color="#f97316" /> Imágenes *</p>
                 <div style={{ display: 'flex', gap: 4 }}>
                   {(['upload', 'url'] as const).map(mode => (
                     <button key={mode} type="button" onClick={() => setImgMode(mode)}
@@ -268,7 +268,7 @@ export default function NuevoProducto() {
             {/* Variantes */}
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.16 }}
               className="card-top" style={card}>
-              <p style={{ ...lbl, fontSize: 11, marginBottom: 16 }}>🎨 Variantes <span style={{ opacity: 0.5 }}>(opcional)</span></p>
+              <p style={{ ...lbl, fontSize: 11, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}><Palette size={16} color="#f97316" /> Variantes <span style={{ opacity: 0.5 }}>(opcional)</span></p>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                 {/* Tallas */}
                 <div>
@@ -322,11 +322,11 @@ export default function NuevoProducto() {
             {/* Opciones */}
             <motion.div initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.35, delay: 0.1 }}
               className="card-top" style={card}>
-              <p style={{ ...lbl, fontSize: 11, marginBottom: 16 }}>⚙️ Opciones</p>
+              <p style={{ ...lbl, fontSize: 11, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}><Settings size={16} color="#f97316" /> Opciones</p>
 
               {/* Stock numérico */}
               <div style={{ marginBottom: 14, padding: '12px 14px', background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12 }}>
-                <label style={{ ...lbl, marginBottom: 6 }}>📦 Unidades en stock</label>
+                <label style={{ ...lbl, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Package size={14} color="#f97316" /> Unidades en stock</label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <input className="pn-inp" type="number" min="0" value={form.stock}
                     onChange={e => set('stock', e.target.value)}
@@ -365,8 +365,8 @@ export default function NuevoProducto() {
             <AnimatePresence>
               {error && (
                 <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-                  style={{ padding: '12px 14px', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: 10, color: '#f87171', fontSize: 13 }}>
-                  ⚠️ {error}
+                  style={{ padding: '12px 14px', background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: 10, color: '#f87171', fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <AlertTriangle size={14} style={{ flexShrink: 0 }} /> {error}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -382,8 +382,8 @@ export default function NuevoProducto() {
                 }
               </button>
               {categories.length === 0 && (
-                <p style={{ margin: 0, fontSize: 11, color: '#fbbf24', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>
-                  ⚠️ Crea al menos una categoría primero
+                <p style={{ margin: 0, fontSize: 11, color: '#fbbf24', textAlign: 'center', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                  <AlertTriangle size={13} style={{ flexShrink: 0 }} /> Crea al menos una categoría primero
                 </p>
               )}
               <Link href="/admin/productos"
@@ -394,8 +394,8 @@ export default function NuevoProducto() {
 
             {/* Tip */}
             <div style={{ padding: '12px 14px', background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.12)', borderRadius: 10 }}>
-              <p style={{ margin: 0, fontSize: 11, color: 'rgba(148,163,184,0.55)', lineHeight: 1.6, fontFamily: 'var(--font-mono)' }}>
-                💡 Puedes subir varias imágenes. La primera es la principal. Máx 2MB por imagen.
+              <p style={{ margin: 0, fontSize: 11, color: 'rgba(148,163,184,0.55)', lineHeight: 1.6, fontFamily: 'var(--font-mono)', display: 'flex', gap: 6 }}>
+                <Lightbulb size={14} color="#f97316" style={{ flexShrink: 0, marginTop: 1 }} /> <span>Puedes subir varias imágenes. La primera es la principal. Máx 2MB por imagen.</span>
               </p>
             </div>
           </div>
