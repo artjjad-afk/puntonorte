@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check, GripVertical, Upload, Link as LinkIcon, AlertCircle, CheckCircle2, Lightbulb, Home, Star } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
+import { compressImage } from '@/lib/imageCompress'
 
 interface Category {
   id: number; name: string; slug: string
@@ -55,15 +56,10 @@ export default function AdminCategorias() {
     setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500)
   }, [])
 
-  /* Convierte archivo a base64 */
+  /* Optimiza (redimensiona + comprime) y convierte a base64. Acepta cualquier
+     tamaño; la imagen queda liviana sin pérdida visible. */
   const fileToBase64 = useCallback((file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      if (file.size > 2_097_152) { reject(new Error('La imagen debe ser menor a 2MB')); return }
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
+    return compressImage(file, { maxSize: 2000, quality: 0.85 })
   }, [])
 
   const handleFileDrop = useCallback(async (file: File) => {
@@ -337,7 +333,7 @@ export default function AdminCategorias() {
                         {dragging ? 'Suelta aquí' : 'Arrastra o haz clic'}
                       </p>
                       <p style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.35)', fontFamily: 'var(--font-mono)' }}>
-                        JPG, PNG, WEBP · máx 2MB
+                        JPG, PNG, WEBP · se optimiza sola · cualquier tamaño
                       </p>
                     </>
                   )}

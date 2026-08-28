@@ -45,9 +45,10 @@ export async function POST(req: NextRequest) {
     if (!linkUrl?.trim()) return NextResponse.json({ error: 'La URL del botón es requerida' }, { status: 400 })
     if (!linkTexto?.trim()) return NextResponse.json({ error: 'El texto del botón es requerido' }, { status: 400 })
 
-    // Limitar base64 a 2MB
-    if (imageData && imageData.length > 2_800_000) {
-      return NextResponse.json({ error: 'La imagen es demasiado grande. Máximo 2MB.' }, { status: 400 })
+    // Backstop de seguridad. Las imágenes se optimizan en el cliente (~<1MB),
+    // así que este tope es solo para casos límite (p.ej. data URL pegado).
+    if (imageData && imageData.length > 9_000_000) {
+      return NextResponse.json({ error: 'La imagen es demasiado grande.' }, { status: 400 })
     }
 
     const banner = await prisma.banner.create({

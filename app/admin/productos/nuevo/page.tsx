@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, ClipboardList, ImageIcon, Palette, Settings, AlertTriangle, Lightbulb } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
+import { compressImage } from '@/lib/imageCompress'
 
 const BADGES = ['', 'Nuevo', 'Oferta', 'Premium', 'Agotado']
 
@@ -60,15 +61,10 @@ export default function NuevoProducto() {
 
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
-  /* Convierte archivo a base64 y lo agrega a imágenes */
+  /* Optimiza (redimensiona + comprime) y convierte a base64. Acepta fotos de
+     cualquier tamaño; quedan en ~200-400KB sin pérdida visible. */
   const fileToBase64 = useCallback((file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      if (file.size > 2_097_152) { reject(new Error('Imagen mayor a 2MB')); return }
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
+    return compressImage(file, { maxSize: 2000, quality: 0.85 })
   }, [])
 
   const handleFiles = useCallback(async (files: FileList | null) => {
@@ -225,7 +221,7 @@ export default function NuevoProducto() {
                     {dragging ? 'Suelta las imágenes' : 'Arrastra imágenes o haz clic'}
                   </p>
                   <p style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.3)', fontFamily: 'var(--font-mono)' }}>
-                    JPG, PNG, WEBP · máx 2MB por imagen · múltiples permitidas
+                    JPG, PNG, WEBP · se optimizan solas · cualquier tamaño · múltiples permitidas
                   </p>
                   <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
                     onChange={e => handleFiles(e.target.files)} />
@@ -395,7 +391,7 @@ export default function NuevoProducto() {
             {/* Tip */}
             <div style={{ padding: '12px 14px', background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.12)', borderRadius: 10 }}>
               <p style={{ margin: 0, fontSize: 11, color: 'rgba(148,163,184,0.55)', lineHeight: 1.6, fontFamily: 'var(--font-mono)', display: 'flex', gap: 6 }}>
-                <Lightbulb size={14} color="#f97316" style={{ flexShrink: 0, marginTop: 1 }} /> <span>Puedes subir varias imágenes. La primera es la principal. Máx 2MB por imagen.</span>
+                <Lightbulb size={14} color="#f97316" style={{ flexShrink: 0, marginTop: 1 }} /> <span>Puedes subir varias imágenes. La primera es la principal. Se optimizan automáticamente al subirlas (sin pérdida visible).</span>
               </p>
             </div>
           </div>

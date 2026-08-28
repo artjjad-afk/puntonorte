@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, Save, ClipboardList, Image as ImageIcon, Palette, Settings, AlertTriangle, Lightbulb } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
+import { compressImage } from '@/lib/imageCompress'
 
 const BADGES = ['', 'Nuevo', 'Oferta', 'Premium', 'Agotado']
 
@@ -82,15 +83,10 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
 
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
-  /* Imágenes desde dispositivo */
+  /* Imágenes desde dispositivo: se optimizan (redimensionan + comprimen) al
+     subirlas, así se acepta cualquier tamaño sin inflar la base de datos. */
   const fileToBase64 = useCallback((file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      if (file.size > 2_097_152) { reject(new Error('Imagen mayor a 2MB')); return }
-      const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = reject
-      reader.readAsDataURL(file)
-    })
+    return compressImage(file, { maxSize: 2000, quality: 0.85 })
   }, [])
 
   const handleFiles = useCallback(async (files: FileList | null) => {
