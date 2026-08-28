@@ -161,6 +161,13 @@ export default function AdminDashboard() {
           height: 6px; border-radius: 3px;
           transition: width 1.4s cubic-bezier(.16,1,.3,1);
         }
+        /* Tarjetas-botón: toda la tarjeta es clickeable */
+        .stat-link { text-decoration: none; }
+        .stat-arrow { color: rgba(148,163,184,0.3); transition: color .2s, transform .2s; }
+        .stat-link:hover .stat-arrow { transform: translate(2px,-2px); }
+        .stat-link.orange:hover .stat-arrow { color: #f97316; }
+        .stat-link.amber:hover  .stat-arrow { color: #fbbf24; }
+        .stat-link.blue:hover   .stat-arrow { color: #60a5fa; }
         @media(max-width:1100px) {
           .dash-main-grid { grid-template-columns: 1fr !important; }
         }
@@ -254,11 +261,12 @@ export default function AdminDashboard() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
           {/* Productos activos */}
+          <Link href="/admin/productos" className="stat-link orange" style={{ flex: 1, display: 'flex' }}>
           <motion.div
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
             className="dash-card"
-            style={{ flex: 1, padding: '20px 22px', display: 'flex', alignItems: 'center', gap: 16 }}
+            style={{ flex: 1, padding: '20px 22px', display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}
           >
             <div style={{ width: 46, height: 46, borderRadius: 13, background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 16px rgba(249,115,22,0.2)' }}>
               <Package size={22} color="#f97316" strokeWidth={1.75} />
@@ -270,19 +278,19 @@ export default function AdminDashboard() {
                 <span style={{ fontSize: 14, color: 'rgba(148,163,184,0.4)', fontWeight: 500 }}> / {stats?.totalProducts ?? 0}</span>
               </p>
             </div>
-            <Link href="/admin/productos" style={{ color: 'rgba(148,163,184,0.3)', transition: 'color .2s' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#f97316')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(148,163,184,0.3)')}>
+            <span className="stat-arrow" style={{ display: 'inline-flex', flexShrink: 0 }}>
               <ArrowUpRight size={18} />
-            </Link>
+            </span>
           </motion.div>
+          </Link>
 
           {/* Pedidos pendientes */}
+          <Link href="/admin/pedidos" className="stat-link amber" style={{ flex: 1, display: 'flex' }}>
           <motion.div
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             className="dash-card"
-            style={{ flex: 1, padding: '20px 22px', display: 'flex', alignItems: 'center', gap: 16 }}
+            style={{ flex: 1, padding: '20px 22px', display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}
           >
             <div style={{ width: 46, height: 46, borderRadius: 13, background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 16px rgba(245,158,11,0.2)' }}>
               <AlertCircle size={22} color="#fbbf24" strokeWidth={1.75} />
@@ -294,19 +302,19 @@ export default function AdminDashboard() {
                 <span style={{ fontSize: 12, color: '#fbbf24', fontWeight: 600, marginLeft: 8 }}>por confirmar</span>
               </p>
             </div>
-            <Link href="/admin/pedidos" style={{ color: 'rgba(148,163,184,0.3)', transition: 'color .2s' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#fbbf24')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(148,163,184,0.3)')}>
+            <span className="stat-arrow" style={{ display: 'inline-flex', flexShrink: 0 }}>
               <ArrowUpRight size={18} />
-            </Link>
+            </span>
           </motion.div>
+          </Link>
 
           {/* Total pedidos */}
+          <Link href="/admin/pedidos" className="stat-link blue" style={{ flex: 1, display: 'flex' }}>
           <motion.div
             initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
             className="dash-card"
-            style={{ flex: 1, padding: '20px 22px', display: 'flex', alignItems: 'center', gap: 16 }}
+            style={{ flex: 1, padding: '20px 22px', display: 'flex', alignItems: 'center', gap: 16, cursor: 'pointer' }}
           >
             <div style={{ width: 46, height: 46, borderRadius: 13, background: 'rgba(96,165,250,0.15)', border: '1px solid rgba(96,165,250,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 0 16px rgba(96,165,250,0.2)' }}>
               <ShoppingBag size={22} color="#60a5fa" strokeWidth={1.75} />
@@ -317,12 +325,11 @@ export default function AdminDashboard() {
                 {loading ? '—' : <AnimNum to={stats?.totalOrders ?? 0} />}
               </p>
             </div>
-            <Link href="/admin/pedidos" style={{ color: 'rgba(148,163,184,0.3)', transition: 'color .2s' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#60a5fa')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(148,163,184,0.3)')}>
+            <span className="stat-arrow" style={{ display: 'inline-flex', flexShrink: 0 }}>
               <ArrowUpRight size={18} />
-            </Link>
+            </span>
           </motion.div>
+          </Link>
         </div>
       </div>
 
