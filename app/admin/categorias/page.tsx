@@ -1,13 +1,15 @@
 'use client'
 import { useEffect, useState, useRef, useCallback } from 'react'
-import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check, GripVertical, Upload, Link as LinkIcon, AlertCircle, CheckCircle2, Lightbulb, Home, Star } from 'lucide-react'
+import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check, GripVertical, Upload, Link as LinkIcon, AlertCircle, CheckCircle2, Lightbulb, Home, Star, Layers, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
 import { compressImage } from '@/lib/imageCompress'
+import type { Subcategory } from '@/lib/subcategories'
 
 interface Category {
   id: number; name: string; slug: string
   image: string | null; active: boolean
   showInNav: boolean; showInHome: boolean; order: number
+  subcategories?: Subcategory[]
 }
 
 interface Toast {
@@ -49,6 +51,11 @@ export default function AdminCategorias() {
   const [editImageData, setEditImageData] = useState<string | null>(null)
   const [toasts, setToasts]       = useState<Toast[]>([])
   const toastIdRef                = useRef(0)
+  // Editor de subopciones (dropdown del menú) por categoría
+  const [subOpenId, setSubOpenId] = useState<number | null>(null)
+  const [subDraft, setSubDraft]   = useState<Subcategory[]>([])
+  const [subInput, setSubInput]   = useState('')
+  const [subSaving, setSubSaving] = useState(false)
 
   const showToast = useCallback((type: Toast['type'], message: string) => {
     const id = ++toastIdRef.current
@@ -165,6 +172,44 @@ export default function AdminCategorias() {
     setEditingId(cat.id)
     setEditForm({ name: cat.name, image: cat.image || '', order: String(cat.order) })
     setEditImageData(null)
+  }
+
+  /* ── Subopciones (dropdown del menú) ── */
+  const openSub = (cat: Category) => {
+    if (subOpenId === cat.id) { setSubOpenId(null); return }
+    setSubOpenId(cat.id)
+    setSubDraft(cat.subcategories ?? [])
+    setSubInput('')
+  }
+  const addSub = () => {
+    const name = subInput.trim()
+    if (!name) return
+    const slug = slugify(name)
+    if (!slug || subDraft.some(s => s.slug === slug)) { setSubInput(''); return }
+    setSubDraft(d => [...d, { name: name.slice(0, 60), slug }])
+    setSubInput('')
+  }
+  const removeSub = (slug: string) => setSubDraft(d => d.filter(s => s.slug !== slug))
+  const moveSub = (idx: number, dir: -1 | 1) => setSubDraft(d => {
+    const a = [...d]; const j = idx + dir
+    if (j < 0 || j >= a.length) return a
+    ;[a[idx], a[j]] = [a[j], a[idx]]
+    return a
+  })
+  const saveSub = async (id: number) => {
+    setSubSaving(true)
+    try {
+      const res = await fetch(`/api/categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subcategories: subDraft }),
+      })
+      if (!res.ok) throw new Error()
+      showToast('success', 'Subopciones guardadas')
+      setSubOpenId(null)
+      fetchCats()
+    } catch { showToast('error', 'No se pudieron guardar las subopciones') }
+    finally { setSubSaving(false) }
   }
 
   const handleEdit = async (id: number) => {
@@ -492,7 +537,8 @@ export default function AdminCategorias() {
                       </div>
                     </motion.div>
                   ) : (
-                    /* ── Vista normal ── */
+                    <>
+                    {/* ── Vista normal ── */}
                     <div
                       className="cat-row"
                       style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 20px' }}
@@ -544,6 +590,15 @@ export default function AdminCategorias() {
                         >
                           <Star size={14} fill={cat.showInNav ? 'currentColor' : 'none'} /> MENÚ
                         </button>
+                        {/* Editor de subopciones (dropdown) */}
+                        <button
+                          onClick={() => openSub(cat)}
+                          title="Subopciones del menú"
+                          style={{ height: 32, padding: '0 10px', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 5, background: subOpenId === cat.id ? 'rgba(96,165,250,0.18)' : (cat.subcategories?.length ? 'rgba(96,165,250,0.1)' : 'rgba(148,163,184,0.08)'), border: `1px solid ${subOpenId === cat.id || cat.subcategories?.length ? 'rgba(96,165,250,0.3)' : 'rgba(148,163,184,0.15)'}`, color: subOpenId === cat.id || cat.subcategories?.length ? '#60a5fa' : 'rgba(148,163,184,0.5)', cursor: 'pointer', fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-mono)', letterSpacing: '0.06em' }}
+                        >
+                          <Layers size={14} /> SUB{cat.subcategories?.length ? ` · ${cat.subcategories.length}` : ''}
+                          {subOpenId === cat.id ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+                        </button>
                         <button onClick={() => startEdit(cat)} title="Editar" style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(96,165,250,0.1)', border: '1px solid rgba(96,165,250,0.2)', color: '#60a5fa', cursor: 'pointer' }}>
                           <Pencil size={13} />
                         </button>
@@ -555,6 +610,84 @@ export default function AdminCategorias() {
                         </button>
                       </div>
                     </div>
+
+                    {/* ── Panel de subopciones (dropdown del menú) ── */}
+                    <AnimatePresence>
+                      {subOpenId === cat.id && (
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          transition={{ duration: 0.2 }}
+                          style={{ overflow: 'hidden', background: 'rgba(96,165,250,0.05)', borderTop: '1px solid rgba(255,255,255,0.05)' }}
+                        >
+                          <div style={{ padding: '14px 20px 18px 48px' }}>
+                            <p style={{ margin: '0 0 10px', fontSize: 11, color: 'rgba(148,163,184,0.6)', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <Layers size={13} color="#60a5fa" /> Subopciones del menú desplegable bajo <b style={{ color: '#93c5fd' }}>&ldquo;{cat.name}&rdquo;</b>
+                            </p>
+
+                            {subDraft.length === 0 ? (
+                              <p style={{ margin: '0 0 12px', fontSize: 12, color: 'rgba(148,163,184,0.4)' }}>
+                                Aún no hay subopciones. Agrega la primera abajo (ej: Nike, Adidas).
+                              </p>
+                            ) : (
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+                                {subDraft.map((s, idx) => (
+                                  <div key={s.slug} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 8px 6px 12px', borderRadius: 9, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}>
+                                    <span style={{ fontSize: 11, color: 'rgba(148,163,184,0.35)', fontFamily: 'var(--font-mono)', width: 16, flexShrink: 0 }}>{idx + 1}</span>
+                                    <span style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 600, color: '#e2e8f0' }}>
+                                      {s.name}
+                                      <span style={{ marginLeft: 8, fontSize: 10, color: 'rgba(148,163,184,0.4)', fontFamily: 'var(--font-mono)', fontWeight: 400 }}>?sub={s.slug}</span>
+                                    </span>
+                                    <button type="button" onClick={() => moveSub(idx, -1)} disabled={idx === 0} title="Subir"
+                                      style={{ width: 26, height: 26, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.15)', color: idx === 0 ? 'rgba(148,163,184,0.25)' : 'rgba(148,163,184,0.7)', cursor: idx === 0 ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
+                                      <ChevronUp size={13} />
+                                    </button>
+                                    <button type="button" onClick={() => moveSub(idx, 1)} disabled={idx === subDraft.length - 1} title="Bajar"
+                                      style={{ width: 26, height: 26, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(148,163,184,0.08)', border: '1px solid rgba(148,163,184,0.15)', color: idx === subDraft.length - 1 ? 'rgba(148,163,184,0.25)' : 'rgba(148,163,184,0.7)', cursor: idx === subDraft.length - 1 ? 'not-allowed' : 'pointer', flexShrink: 0 }}>
+                                      <ChevronDown size={13} />
+                                    </button>
+                                    <button type="button" onClick={() => removeSub(s.slug)} title="Quitar"
+                                      style={{ width: 26, height: 26, borderRadius: 7, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', cursor: 'pointer', flexShrink: 0 }}>
+                                      <X size={13} />
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {/* Agregar subopción */}
+                            <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                              <input
+                                className="cat-input"
+                                value={subInput}
+                                onChange={e => setSubInput(e.target.value)}
+                                onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addSub() } }}
+                                placeholder="Ej: Nike"
+                                style={{ ...inp, padding: '8px 12px', flex: 1 }}
+                              />
+                              <button type="button" onClick={addSub} disabled={!subInput.trim()}
+                                style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '0 14px', borderRadius: 9, background: subInput.trim() ? 'rgba(96,165,250,0.15)' : 'rgba(148,163,184,0.08)', border: `1px solid ${subInput.trim() ? 'rgba(96,165,250,0.3)' : 'rgba(148,163,184,0.15)'}`, color: subInput.trim() ? '#60a5fa' : 'rgba(148,163,184,0.4)', cursor: subInput.trim() ? 'pointer' : 'not-allowed', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', flexShrink: 0 }}>
+                                <Plus size={14} /> Agregar
+                              </button>
+                            </div>
+
+                            {/* Guardar / cancelar */}
+                            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                              <button type="button" onClick={() => setSubOpenId(null)}
+                                style={{ padding: '8px 14px', borderRadius: 9, background: 'rgba(148,163,184,0.1)', border: '1px solid rgba(148,163,184,0.2)', color: 'rgba(148,163,184,0.7)', cursor: 'pointer', fontSize: 12, fontWeight: 600, fontFamily: 'inherit' }}>
+                                Cancelar
+                              </button>
+                              <button type="button" onClick={() => saveSub(cat.id)} disabled={subSaving}
+                                style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 16px', borderRadius: 9, background: subSaving ? 'rgba(249,115,22,0.3)' : 'linear-gradient(135deg,#f97316,#c1692b)', border: 'none', color: '#fff', cursor: subSaving ? 'not-allowed' : 'pointer', fontSize: 12, fontWeight: 700, fontFamily: 'inherit', boxShadow: subSaving ? 'none' : '0 4px 14px rgba(249,115,22,0.3)' }}>
+                                <Check size={14} /> {subSaving ? 'Guardando...' : 'Guardar subopciones'}
+                              </button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                    </>
                   )}
                 </motion.div>
               ))}

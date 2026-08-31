@@ -12,11 +12,12 @@ import { Product } from '@/types'
 function TiendaContent() {
   const searchParams = useSearchParams()
   const [selectedCat, setSelectedCat] = useState(searchParams.get('cat') || 'all')
+  const [selectedSub, setSelectedSub] = useState(searchParams.get('sub') || '')
   const [sortBy, setSortBy] = useState('featured')
   const [search, setSearch] = useState(searchParams.get('q') || '')
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
-  const [allCategories, setAllCategories] = useState([{ id: 'all', label: 'Todos' }])
+  const [allCategories, setAllCategories] = useState<{ id: string; label: string; subs?: { id: string; label: string }[] }[]>([{ id: 'all', label: 'Todos' }])
 
   useEffect(() => {
     fetch('/api/categories')
@@ -25,12 +26,21 @@ function TiendaContent() {
         if (Array.isArray(data)) {
           setAllCategories([
             { id: 'all', label: 'Todos' },
-            ...data.map((c: { slug: string; name: string }) => ({ id: c.slug, label: c.name }))
+            ...data.map((c: { slug: string; name: string; subcategories?: { slug: string; name: string }[] }) => ({
+              id: c.slug, label: c.name,
+              subs: Array.isArray(c.subcategories) ? c.subcategories.map(s => ({ id: s.slug, label: s.name })) : [],
+            }))
           ])
         }
       })
       .catch(() => {})
   }, [])
+
+  // Sincroniza los filtros cuando cambia la URL (ej: clic en el menú/dropdown)
+  useEffect(() => {
+    setSelectedCat(searchParams.get('cat') || 'all')
+    setSelectedSub(searchParams.get('sub') || '')
+  }, [searchParams])
 
   useEffect(() => {
     setLoading(true)
@@ -43,12 +53,13 @@ function TiendaContent() {
 
   const filtered = useMemo(() => {
     let list = [...products]
+    if (selectedSub) list = list.filter(p => p.subcategory === selectedSub)
     if (search) list = list.filter(p => p.name.toLowerCase().includes(search.toLowerCase()))
     if (sortBy === 'price-asc') list.sort((a, b) => a.price - b.price)
     else if (sortBy === 'price-desc') list.sort((a, b) => b.price - a.price)
     else list.sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
     return list
-  }, [products, sortBy, search])
+  }, [products, sortBy, search, selectedSub])
 
   const currentLabel = allCategories.find(c => c.id === selectedCat)?.label || 'Tienda'
 
@@ -167,7 +178,7 @@ function TiendaContent() {
             </button>
             <div className="filters-chips" ref={chipsRef}>
               {allCategories.map(cat => (
-                <button key={cat.id} onClick={() => setSelectedCat(cat.id)} className={`filter-chip ${selectedCat === cat.id ? 'active' : ''}`}>
+                <button key={cat.id} onClick={() => { setSelectedCat(cat.id); setSelectedSub('') }} className={`filter-chip ${selectedCat === cat.id ? 'active' : ''}`}>
                   {cat.label}
                 </button>
               ))}
@@ -193,6 +204,31 @@ function TiendaContent() {
           </div>
         </div>
 
+        {/* ── Subopciones de la categoría seleccionada ── */}
+        {(() => {
+          const activeCat = allCategories.find(c => c.id === selectedCat)
+          const subs = activeCat?.subs ?? []
+          if (selectedCat === 'all' || subs.length === 0) return null
+          const subChip = (active: boolean): React.CSSProperties => ({
+            padding: '7px 15px', borderRadius: 100, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+            border: `1px solid ${active ? '#c1692b' : 'rgba(193,105,43,0.28)'}`,
+            background: active ? 'linear-gradient(135deg,#e88c4a,#c1692b)' : '#fff',
+            color: active ? '#fff' : '#6b5f57', transition: 'all .18s',
+            boxShadow: active ? '0 4px 14px rgba(193,105,43,0.3)' : 'none',
+          })
+          return (
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, margin: '-20px 0 34px', alignItems: 'center' }}>
+              <span style={{ fontSize: 12, fontWeight: 700, color: '#a89a90', letterSpacing: '0.06em', textTransform: 'uppercase', marginRight: 4 }}>
+                {activeCat?.label}:
+              </span>
+              <button onClick={() => setSelectedSub('')} style={subChip(!selectedSub)}>Todo</button>
+              {subs.map(s => (
+                <button key={s.id} onClick={() => setSelectedSub(s.id)} style={subChip(selectedSub === s.id)}>{s.label}</button>
+              ))}
+            </div>
+          )
+        })()}
+
         {loading ? (
           <div className="tienda-grid">
             {Array.from({ length: 8 }).map((_, i) => (
@@ -210,7 +246,7 @@ function TiendaContent() {
             <Package size={48} strokeWidth={1} style={{ margin: '0 auto 16px', display: 'block' }} />
             <p style={{ fontSize: '18px', fontWeight: '600', marginBottom: '8px', color: '#211f1e' }}>Sin resultados</p>
             <p style={{ marginBottom: '24px' }}>Intenta con otro término o categoría</p>
-            <button onClick={() => { setSearch(''); setSelectedCat('all') }} className="btn-primary" style={{ padding: '12px 28px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '14px' }}>
+            <button onClick={() => { setSearch(''); setSelectedCat('all'); setSelectedSub('') }} className="btn-primary" style={{ padding: '12px 28px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '14px' }}>
               Ver todos los productos
             </button>
           </div>

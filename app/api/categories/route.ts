@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import jwt from 'jsonwebtoken'
+import { normalizeSubcategories, parseSubcategories } from '@/lib/subcategories'
 
 function isAdmin(req: NextRequest) {
   const token = req.cookies.get('admin_token')?.value
@@ -25,6 +26,7 @@ export async function GET(req: NextRequest) {
     const parsed = cats.map(c => ({
       ...c,
       image: c.imageData ?? c.image ?? null,
+      subcategories: parseSubcategories(c.subcategories),
     }))
 
     return NextResponse.json(parsed)
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest) {
   if (!isAdmin(req)) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   try {
-    const { name, slug, image, imageData, order } = await req.json()
+    const { name, slug, image, imageData, order, subcategories } = await req.json()
 
     if (!name?.trim()) return NextResponse.json({ error: 'El nombre es requerido' }, { status: 400 })
     if (!slug?.trim()) return NextResponse.json({ error: 'El slug es requerido' }, { status: 400 })
@@ -64,6 +66,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'La imagen es demasiado grande.' }, { status: 400 })
     }
 
+    const subs = normalizeSubcategories(subcategories)
+
     const cat = await prisma.category.create({
       data: {
         name: name.trim(),
@@ -72,10 +76,11 @@ export async function POST(req: NextRequest) {
         imageData: imageData || null,
         order: order || 0,
         showInNav: true,
+        subcategories: subs.length ? JSON.stringify(subs) : null,
       },
     })
 
-    return NextResponse.json({ ...cat, image: cat.imageData ?? cat.image ?? null }, { status: 201 })
+    return NextResponse.json({ ...cat, image: cat.imageData ?? cat.image ?? null, subcategories: subs }, { status: 201 })
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: 'Error al crear categoría' }, { status: 500 })

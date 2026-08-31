@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import jwt from 'jsonwebtoken'
+import { normalizeSubcategories } from '@/lib/subcategories'
 
 function isAdmin(req: NextRequest) {
   const token = req.cookies.get('admin_token')?.value
@@ -30,6 +31,10 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       ...(body.active     !== undefined && { active:      body.active }),
       ...(body.showInNav  !== undefined && { showInNav:   body.showInNav }),
       ...(body.showInHome !== undefined && { showInHome:  body.showInHome }),
+      ...(body.subcategories !== undefined && (() => {
+        const subs = normalizeSubcategories(body.subcategories)
+        return { subcategories: subs.length ? JSON.stringify(subs) : null }
+      })()),
     }
     const cat = await prisma.category.update({
       where: { id: parseInt(id) },

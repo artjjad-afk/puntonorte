@@ -5,6 +5,7 @@ import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, Save, Cli
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 import { compressImage } from '@/lib/imageCompress'
+import type { Subcategory } from '@/lib/subcategories'
 
 const BADGES = ['', 'Nuevo', 'Oferta', 'Premium', 'Agotado']
 
@@ -35,7 +36,7 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
   const [fetching, setFetching]   = useState(true)
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
-  const [categories, setCategories] = useState<{ slug: string; name: string }[]>([])
+  const [categories, setCategories] = useState<{ slug: string; name: string; subcategories?: Subcategory[] }[]>([])
   const [imgMode, setImgMode]     = useState<'upload' | 'url'>('upload')
   const [imgUrl, setImgUrl]       = useState('')
   const [dragging, setDragging]   = useState(false)
@@ -43,7 +44,7 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
   const [colorInput, setColorInput] = useState('')
   const [form, setForm] = useState({
     name: '', price: '', originalPrice: '',
-    category: '', description: '', badge: '',
+    category: '', subcategory: '', description: '', badge: '',
     stock: '0',
     featured: false, active: true,
     images: [] as string[],
@@ -67,6 +68,7 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
           price:         String(p.price || ''),
           originalPrice: p.originalPrice ? String(p.originalPrice) : '',
           category:      p.category    || '',
+          subcategory:   p.subcategory || '',
           description:   p.description || '',
           badge:         p.badge       || '',
           stock:         String(p.stock ?? 0),
@@ -200,7 +202,7 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>
                     <label style={lbl}>Categoría *</label>
-                    <select className="pn-inp" value={form.category} onChange={e => set('category', e.target.value)} style={{ ...inp, cursor: 'pointer' }}>
+                    <select className="pn-inp" value={form.category} onChange={e => { set('category', e.target.value); set('subcategory', '') }} style={{ ...inp, cursor: 'pointer' }}>
                       {categories.map(c => <option key={c.slug} value={c.slug}>{c.name}</option>)}
                     </select>
                   </div>
@@ -211,6 +213,24 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
                     </select>
                   </div>
                 </div>
+                {/* Subcategoría — solo si la categoría elegida tiene subopciones */}
+                {(() => {
+                  const activeCat = categories.find(c => c.slug === form.category)
+                  const subs = activeCat?.subcategories ?? []
+                  if (subs.length === 0) return null
+                  return (
+                    <div style={{ marginTop: 12 }}>
+                      <label style={lbl}>Subcategoría (opcional)</label>
+                      <select className="pn-inp" value={form.subcategory} onChange={e => set('subcategory', e.target.value)} style={{ ...inp, cursor: 'pointer' }}>
+                        <option value="">— Sin subcategoría —</option>
+                        {subs.map(s => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                      </select>
+                      <p style={{ margin: '6px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.4)' }}>
+                        Al elegirla, el producto aparece cuando el cliente filtra por esa subopción de <b style={{ color: 'rgba(148,163,184,0.7)' }}>{activeCat?.name}</b>.
+                      </p>
+                    </div>
+                  )
+                })()}
               </div>
             </motion.div>
 

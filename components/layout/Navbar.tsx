@@ -1,19 +1,26 @@
 ﻿'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { ShoppingCart, Menu, X, Search, ChevronRight, MapPin } from 'lucide-react'
+import { ShoppingCart, Menu, X, Search, ChevronRight, ChevronDown, MapPin } from 'lucide-react'
 import { useCartStore } from '@/store/cart'
 import { SearchDropdown } from '@/components/ui/SearchDropdown'
 
-const FALLBACK_LINKS: { href: string; label: string }[] = []
+export type NavLink = {
+  href: string
+  label: string
+  subs?: { href: string; label: string }[]
+}
+
+const FALLBACK_LINKS: NavLink[] = []
 // Sin fallback — si no hay categorías en la DB, el menú queda vacío
 
-export function Navbar({ initialLinks }: { initialLinks?: { href: string; label: string }[] }) {
+export function Navbar({ initialLinks }: { initialLinks?: NavLink[] }) {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [openSub, setOpenSub] = useState<string | null>(null) // acordeón móvil
   // Iniciar con los links pre-cargados desde el servidor — sin delay
-  const [navLinks, setNavLinks] = useState(initialLinks ?? FALLBACK_LINKS)
+  const [navLinks, setNavLinks] = useState<NavLink[]>(initialLinks ?? FALLBACK_LINKS)
   const { openCart, count } = useCartStore()
   const cartCount = count()
 
@@ -29,14 +36,17 @@ export function Navbar({ initialLinks }: { initialLinks?: { href: string; label:
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          const links = [
+          const links: NavLink[] = [
             { href: '/tienda', label: 'Tienda' },
             ...data
               .filter((c: { slug: string; name: string; showInNav?: boolean }) => c.showInNav !== false)
               .slice(0, 6)
-              .map((c: { slug: string; name: string }) => ({
+              .map((c: { slug: string; name: string; subcategories?: { slug: string; name: string }[] }) => ({
                 href: `/tienda?cat=${c.slug}`,
                 label: c.name,
+                subs: Array.isArray(c.subcategories)
+                  ? c.subcategories.map(s => ({ href: `/tienda?cat=${c.slug}&sub=${s.slug}`, label: s.name }))
+                  : [],
               }))
           ]
           setNavLinks(links)
@@ -68,6 +78,16 @@ export function Navbar({ initialLinks }: { initialLinks?: { href: string; label:
         }
         .nav-link { color: rgba(232,229,226,0.85); text-decoration: none; font-size: 13px; font-weight: 600; letter-spacing: 0.8px; padding: 8px 14px; border-radius: 8px; transition: all 0.2s; }
         .nav-link:hover { color: #fff; background: rgba(255,255,255,0.08); }
+        /* Dropdown de subopciones (desktop) */
+        .nav-item { position: relative; display: inline-flex; }
+        .nav-item::after { content: ''; position: absolute; top: 100%; left: 0; right: 0; height: 10px; } /* puente para no perder el hover */
+        .nav-dropdown { position: absolute; top: calc(100% + 8px); left: 0; min-width: 190px; background: #211f1e; border: 1px solid rgba(255,255,255,0.09); border-radius: 12px; padding: 6px; box-shadow: 0 14px 44px rgba(0,0,0,0.45); opacity: 0; visibility: hidden; transform: translateY(6px); transition: opacity .18s, transform .18s, visibility .18s; z-index: 60; }
+        .nav-item:hover .nav-dropdown { opacity: 1; visibility: visible; transform: translateY(0); }
+        .nav-dropdown-link { display: block; padding: 9px 12px; border-radius: 8px; color: rgba(232,229,226,0.8); text-decoration: none; font-size: 13px; font-weight: 600; white-space: nowrap; transition: all .15s; }
+        .nav-dropdown-link:hover { background: rgba(255,255,255,0.08); color: #fff; padding-left: 16px; }
+        .nav-dropdown-all { border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 4px; color: rgba(232,229,226,0.55); font-size: 12px; }
+        .mobile-sublink { display: block; padding: 12px 0 12px 4px; color: rgba(232,229,226,0.62); text-decoration: none; font-size: 14px; border-bottom: 1px solid rgba(255,255,255,0.04); transition: color .2s; }
+        .mobile-sublink:hover { color: #c1692b; }
         .mobile-link { display: flex; align-items: center; justify-content: space-between; color: #e8e5e2; text-decoration: none; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 16px; font-weight: 500; transition: color 0.2s; }
         .mobile-link:hover { color: #c1692b; }
         .mobile-link:last-child { border-bottom: none; }
@@ -110,7 +130,21 @@ export function Navbar({ initialLinks }: { initialLinks?: { href: string; label:
           {/* Desktop nav */}
           <nav className="nav-desktop">
             {navLinks.map(link => (
-              <Link key={link.href} href={link.href} className="nav-link">{link.label}</Link>
+              link.subs && link.subs.length > 0 ? (
+                <div key={link.href} className="nav-item">
+                  <Link href={link.href} className="nav-link" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    {link.label} <ChevronDown size={13} style={{ opacity: 0.6 }} />
+                  </Link>
+                  <div className="nav-dropdown">
+                    <Link href={link.href} className="nav-dropdown-link nav-dropdown-all">Ver todo {link.label}</Link>
+                    {link.subs.map(s => (
+                      <Link key={s.href} href={s.href} className="nav-dropdown-link">{s.label}</Link>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <Link key={link.href} href={link.href} className="nav-link">{link.label}</Link>
+              )
             ))}
           </nav>
 
@@ -177,10 +211,28 @@ export function Navbar({ initialLinks }: { initialLinks?: { href: string; label:
         {/* Links */}
         <nav style={{ flex: 1, overflowY: 'auto', padding: '8px 24px' }}>
           {navLinks.map(link => (
-            <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className="mobile-link">
-              {link.label}
-              <ChevronRight size={16} style={{ opacity: 0.4 }} />
-            </Link>
+            link.subs && link.subs.length > 0 ? (
+              <div key={link.href}>
+                <div className="mobile-link" style={{ cursor: 'pointer' }}
+                  onClick={() => setOpenSub(o => o === link.href ? null : link.href)}>
+                  {link.label}
+                  <ChevronDown size={16} style={{ opacity: 0.5, transition: 'transform .2s', transform: openSub === link.href ? 'rotate(180deg)' : 'none' }} />
+                </div>
+                {openSub === link.href && (
+                  <div style={{ padding: '4px 0 10px 12px' }}>
+                    <Link href={link.href} onClick={() => setMenuOpen(false)} className="mobile-sublink">Ver todo {link.label}</Link>
+                    {link.subs.map(s => (
+                      <Link key={s.href} href={s.href} onClick={() => setMenuOpen(false)} className="mobile-sublink">{s.label}</Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link key={link.href} href={link.href} onClick={() => setMenuOpen(false)} className="mobile-link">
+                {link.label}
+                <ChevronRight size={16} style={{ opacity: 0.4 }} />
+              </Link>
+            )
           ))}
         </nav>
 
