@@ -148,6 +148,7 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
     <div style={{ padding: '24px 28px 80px', minHeight: '100vh', background: 'var(--bg-console, #0f1421)', fontFamily: 'var(--font-display, sans-serif)', color: '#e2e8f0' }}>
       <style>{`
         .pn-inp:focus { border-color: rgba(249,115,22,0.5) !important; box-shadow: 0 0 0 3px rgba(249,115,22,0.1); }
+        .pn-inp option { background: #211f1e; color: #e8e5e2; }
         .card-top::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(249,115,22,0.2),transparent); border-radius:16px 16px 0 0; }
         @keyframes spin { to { transform:rotate(360deg); } }
       `}</style>
