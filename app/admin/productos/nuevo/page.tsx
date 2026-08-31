@@ -114,6 +114,7 @@ export default function NuevoProducto() {
     try {
       const fd = new FormData(); fd.append('file', file)
       const res = await fetch('/api/upload/video', { method: 'POST', body: fd })
+      if (res.status === 413) { setVideoError('El video supera el límite del servidor. Usa uno más liviano o pega un enlace de YouTube.'); return }
       const data = await res.json().catch(() => ({}))
       if (!res.ok) { setVideoError(data.error || 'Error al subir el video'); return }
       setForm(f => ({ ...f, videos: [...f.videos, data.url] }))
