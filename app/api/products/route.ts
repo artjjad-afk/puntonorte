@@ -104,6 +104,7 @@ export async function POST(req: NextRequest) {
         description: description.trim(),
         images: JSON.stringify(Array.isArray(images) ? images : [images]),
         videos: (() => { const v = normalizeVideos(videos); return v.length ? JSON.stringify(v) : null })(),
+        videoFirst: Boolean(body.videoFirst),
         sizes: sizes?.length ? JSON.stringify(sizes) : null,
         colors: colors?.length ? JSON.stringify(colors) : null,
         badge: badge || null,

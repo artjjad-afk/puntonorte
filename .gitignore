@@ -24,6 +24,9 @@
 .DS_Store
 *.pem
 
+# videos subidos por el admin (se guardan en el servidor, no en el repo)
+/public/uploads
+
 # debug
 npm-debug.log*
 yarn-debug.log*

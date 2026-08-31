@@ -8,6 +8,7 @@
   subcategory?: string | null
   images: string[]
   videos?: string[]
+  videoFirst?: boolean
   description: string
   sizes?: string[]
   colors?: string[]

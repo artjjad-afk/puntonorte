@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, Save, ClipboardList, Image as ImageIcon, Palette, Settings, AlertTriangle, Lightbulb, Film } from 'lucide-react'
+import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, Save, ClipboardList, Image as ImageIcon, Palette, Settings, AlertTriangle, Lightbulb, Film, Star } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 import { compressImage } from '@/lib/imageCompress'
@@ -50,11 +50,15 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
     featured: false, active: true,
     images: [] as string[],
     videos: [] as string[],
+    videoFirst: false,
     sizes: [] as string[],
     colors: [] as string[],
   })
   const [videoUrl, setVideoUrl] = useState('')
   const [videoError, setVideoError] = useState('')
+  const [videoMode, setVideoMode] = useState<'upload' | 'url'>('upload')
+  const [videoUploading, setVideoUploading] = useState(false)
+  const videoFileRef = useRef<HTMLInputElement>(null)
 
   /* Cargar categorías y producto */
   useEffect(() => {
@@ -80,6 +84,7 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
           active:        p.active      ?? true,
           images:        Array.isArray(p.images) ? p.images : [],
           videos:        Array.isArray(p.videos) ? p.videos : [],
+          videoFirst:    p.videoFirst ?? false,
           sizes:         Array.isArray(p.sizes)  ? p.sizes  : [],
           colors:        Array.isArray(p.colors) ? p.colors : [],
         })
@@ -125,6 +130,21 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
     setVideoUrl(''); setVideoError('')
   }
   const removeVideo = (i: number) => setForm(f => ({ ...f, videos: f.videos.filter((_, idx) => idx !== i) }))
+  const handleVideoFile = async (file: File) => {
+    if (!file.type.startsWith('video/')) { setVideoError('El archivo no es un video'); return }
+    if (file.size > 50 * 1024 * 1024) { setVideoError('El video supera el máximo de 50MB'); return }
+    setVideoError(''); setVideoUploading(true)
+    try {
+      const fd = new FormData(); fd.append('file', file)
+      const res = await fetch('/api/upload/video', { method: 'POST', body: fd })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok) { setVideoError(data.error || 'Error al subir el video'); return }
+      setForm(f => ({ ...f, videos: [...f.videos, data.url] }))
+    } catch { setVideoError('Error al subir el video') }
+    finally { setVideoUploading(false) }
+  }
+  const makeImageCover = (i: number) => setForm(f => { const a = [...f.images]; const [x] = a.splice(i, 1); a.unshift(x); return { ...f, images: a, videoFirst: false } })
+  const makeVideoCover = (i: number) => setForm(f => { const a = [...f.videos]; const [x] = a.splice(i, 1); a.unshift(x); return { ...f, videos: a, videoFirst: true } })
   const addSize  = () => { if (sizeInput.trim() && !form.sizes.includes(sizeInput.trim())) { set('sizes', [...form.sizes, sizeInput.trim()]); setSizeInput('') } }
   const addColor = () => { if (colorInput.trim() && !form.colors.includes(colorInput.trim())) { set('colors', [...form.colors, colorInput.trim()]); setColorInput('') } }
 
@@ -294,18 +314,30 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
 
               {form.images.length > 0 && (
                 <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                  {form.images.map((img, i) => (
-                    <div key={i} style={{ position: 'relative', width: 72, height: 72, borderRadius: 10, overflow: 'hidden', border: `2px solid ${i === 0 ? 'rgba(249,115,22,0.5)' : 'rgba(255,255,255,0.1)'}` }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      {i === 0 && <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(249,115,22,0.85)', fontSize: 9, fontWeight: 700, textAlign: 'center', color: '#fff', padding: '2px 0', fontFamily: 'var(--font-mono)' }}>PRINCIPAL</div>}
-                      <button type="button" onClick={() => removeImage(i)}
-                        style={{ position: 'absolute', top: 3, right: 3, width: 18, height: 18, borderRadius: '50%', background: 'rgba(0,0,0,0.75)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <X size={10} />
-                      </button>
-                    </div>
-                  ))}
+                  {form.images.map((img, i) => {
+                    const isCover = i === 0 && !form.videoFirst
+                    return (
+                      <div key={i} style={{ position: 'relative', width: 84, height: 84, borderRadius: 10, overflow: 'hidden', border: `2px solid ${isCover ? '#f97316' : 'rgba(255,255,255,0.1)'}` }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <button type="button" onClick={() => removeImage(i)}
+                          style={{ position: 'absolute', top: 3, right: 3, width: 18, height: 18, borderRadius: '50%', background: 'rgba(0,0,0,0.75)', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <X size={10} />
+                        </button>
+                        <button type="button" onClick={() => makeImageCover(i)} disabled={isCover}
+                          title={isCover ? 'Es la portada' : 'Hacer portada'}
+                          style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: isCover ? 'rgba(249,115,22,0.92)' : 'rgba(0,0,0,0.6)', border: 'none', color: '#fff', fontSize: 9, fontWeight: 700, padding: '3px 0', cursor: isCover ? 'default' : 'pointer', fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
+                          <Star size={9} fill={isCover ? '#fff' : 'none'} /> {isCover ? 'PORTADA' : 'Portada'}
+                        </button>
+                      </div>
+                    )
+                  })}
                 </div>
+              )}
+              {form.images.length > 0 && (
+                <p style={{ margin: '8px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.35)', fontFamily: 'var(--font-mono)' }}>
+                  La portada es lo primero que ve el cliente. Toca «Portada» en una foto o video para elegirla.
+                </p>
               )}
             </motion.div>
 
@@ -314,28 +346,64 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
               className="card-top" style={card}>
               <p style={{ ...lbl, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 8 }}><Film size={16} color="#f97316" /> Videos <span style={{ opacity: 0.5 }}>(opcional)</span></p>
               <p style={{ margin: '0 0 14px', fontSize: 11, color: 'rgba(148,163,184,0.4)' }}>
-                Pega enlaces de <b style={{ color: 'rgba(148,163,184,0.7)' }}>YouTube</b>, Vimeo o un archivo <b style={{ color: 'rgba(148,163,184,0.7)' }}>.mp4</b>. Se muestran en la ficha del producto.
+                Sube un video desde tu dispositivo o pega un enlace de <b style={{ color: 'rgba(148,163,184,0.7)' }}>YouTube</b>/Vimeo. Se muestran en la ficha del producto.
               </p>
-              <div style={{ display: 'flex', gap: 8, marginBottom: form.videos.length ? 12 : 0 }}>
-                <input className="pn-inp" value={videoUrl}
-                  onChange={e => { setVideoUrl(e.target.value); setVideoError('') }}
-                  placeholder="https://youtu.be/..." style={{ ...inp, flex: 1 }}
-                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addVideoUrl())} />
-                <button type="button" onClick={addVideoUrl}
-                  style={{ padding: '10px 16px', borderRadius: 10, background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)', color: '#f97316', cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
-                  <Plus size={14} /> Añadir
-                </button>
+
+              {/* Toggle subir / enlace */}
+              <div style={{ display: 'flex', gap: 4, marginBottom: 12 }}>
+                {(['upload', 'url'] as const).map(m => (
+                  <button key={m} type="button" onClick={() => { setVideoMode(m); setVideoError('') }}
+                    style={{ padding: '4px 12px', borderRadius: 7, fontSize: 11, fontWeight: 700, cursor: 'pointer', border: 'none', fontFamily: 'var(--font-mono)', background: videoMode === m ? 'rgba(249,115,22,0.2)' : 'rgba(255,255,255,0.06)', color: videoMode === m ? '#f97316' : 'rgba(148,163,184,0.6)' }}>
+                    {m === 'upload' ? <><Upload size={10} style={{ display: 'inline', marginRight: 4 }} />SUBIR VIDEO</> : <><LinkIcon size={10} style={{ display: 'inline', marginRight: 4 }} />ENLACE</>}
+                  </button>
+                ))}
               </div>
-              {videoError && <p style={{ margin: '0 0 10px', fontSize: 11, color: '#f87171', display: 'flex', alignItems: 'center', gap: 5 }}><AlertTriangle size={12} style={{ flexShrink: 0 }} /> {videoError}</p>}
+
+              {videoMode === 'upload' ? (
+                <div onClick={() => !videoUploading && videoFileRef.current?.click()}
+                  style={{ border: '2px dashed rgba(255,255,255,0.12)', borderRadius: 12, padding: '20px 16px', textAlign: 'center', cursor: videoUploading ? 'wait' : 'pointer', background: 'rgba(255,255,255,0.02)', marginBottom: form.videos.length ? 12 : 0 }}>
+                  {videoUploading ? (
+                    <p style={{ margin: 0, fontSize: 13, color: '#f97316', fontWeight: 600 }}>Subiendo video…</p>
+                  ) : (
+                    <>
+                      <Upload size={20} color="rgba(148,163,184,0.4)" style={{ margin: '0 auto 6px', display: 'block' }} />
+                      <p style={{ margin: 0, fontSize: 13, color: 'rgba(148,163,184,0.6)', fontWeight: 600 }}>Haz clic para subir un video</p>
+                      <p style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.35)', fontFamily: 'var(--font-mono)' }}>MP4, WebM o MOV · máx 50MB</p>
+                    </>
+                  )}
+                  <input ref={videoFileRef} type="file" accept="video/*" style={{ display: 'none' }}
+                    onChange={e => { const f = e.target.files?.[0]; if (f) handleVideoFile(f); e.target.value = '' }} />
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: 8, marginBottom: form.videos.length ? 12 : 0 }}>
+                  <input className="pn-inp" value={videoUrl}
+                    onChange={e => { setVideoUrl(e.target.value); setVideoError('') }}
+                    placeholder="https://youtu.be/..." style={{ ...inp, flex: 1 }}
+                    onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addVideoUrl())} />
+                  <button type="button" onClick={addVideoUrl}
+                    style={{ padding: '10px 16px', borderRadius: 10, background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)', color: '#f97316', cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                    <Plus size={14} /> Añadir
+                  </button>
+                </div>
+              )}
+
+              {videoError && <p style={{ margin: '10px 0 0', fontSize: 11, color: '#f87171', display: 'flex', alignItems: 'center', gap: 5 }}><AlertTriangle size={12} style={{ flexShrink: 0 }} /> {videoError}</p>}
+
               {form.videos.length > 0 && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
                   {form.videos.map((v, i) => {
                     const info = parseVideoUrl(v)
-                    const label = info.kind === 'youtube' ? 'YouTube' : info.kind === 'vimeo' ? 'Vimeo' : info.kind === 'file' ? 'Archivo' : '—'
+                    const label = info.kind === 'youtube' ? 'YouTube' : info.kind === 'vimeo' ? 'Vimeo' : info.kind === 'file' ? (v.startsWith('/uploads/') ? 'Subido' : 'Archivo') : '—'
+                    const isCover = form.videoFirst && i === 0
                     return (
-                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 9, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', borderRadius: 9, background: 'rgba(255,255,255,0.04)', border: `1px solid ${isCover ? 'rgba(249,115,22,0.4)' : 'rgba(255,255,255,0.08)'}` }}>
                         <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: 'rgba(249,115,22,0.15)', color: '#f97316', fontFamily: 'var(--font-mono)' }}>{label}</span>
                         <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'rgba(148,163,184,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</span>
+                        <button type="button" onClick={() => makeVideoCover(i)} disabled={isCover}
+                          title={isCover ? 'Es la portada' : 'Hacer portada'}
+                          style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 3, padding: '4px 8px', borderRadius: 7, fontSize: 10, fontWeight: 700, fontFamily: 'var(--font-mono)', cursor: isCover ? 'default' : 'pointer', border: '1px solid ' + (isCover ? 'rgba(249,115,22,0.4)' : 'rgba(148,163,184,0.2)'), background: isCover ? 'rgba(249,115,22,0.15)' : 'rgba(148,163,184,0.08)', color: isCover ? '#f97316' : 'rgba(148,163,184,0.6)' }}>
+                          <Star size={10} fill={isCover ? '#f97316' : 'none'} /> {isCover ? 'PORTADA' : 'Portada'}
+                        </button>
                         <button type="button" onClick={() => removeVideo(i)} style={{ width: 24, height: 24, borderRadius: 7, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                           <X size={12} />
                         </button>

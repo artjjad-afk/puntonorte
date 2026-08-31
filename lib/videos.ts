@@ -63,7 +63,8 @@ export function normalizeVideos(input: unknown, max = 6): string[] {
   const out: string[] = []
   for (const raw of input) {
     const url = String(raw ?? '').trim()
-    if (!/^https?:\/\//i.test(url)) continue
+    // Acepta enlaces http(s) o archivos subidos al servidor (/uploads/...)
+    if (!/^(https?:\/\/|\/)/i.test(url)) continue
     if (seen.has(url)) continue
     seen.add(url)
     out.push(url)

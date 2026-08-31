@@ -69,14 +69,15 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : null
   const waMsg = encodeURIComponent(`Hola Punto Norte! Me interesa: *${product.name}* - $${product.price}. ¿Tienen disponibilidad?`)
 
-  // Galería combinada: primero imágenes, luego videos (enlaces)
-  const media: Array<
+  // Galería combinada. El orden depende de si el video va de portada.
+  type Media =
     | { type: 'image'; src: string }
     | { type: 'video'; kind: string; url: string; embedUrl?: string; fileUrl?: string; thumbnail?: string }
-  > = [
-    ...product.images.map(src => ({ type: 'image' as const, src })),
-    ...((product.videos ?? []).map(url => ({ type: 'video' as const, ...parseVideoUrl(url) }))),
-  ]
+  const imageMedia: Media[] = product.images.map(src => ({ type: 'image' as const, src }))
+  const videoMedia: Media[] = (product.videos ?? []).map(url => ({ type: 'video' as const, ...parseVideoUrl(url) }))
+  const media: Media[] = product.videoFirst && videoMedia.length
+    ? [...videoMedia, ...imageMedia]
+    : [...imageMedia, ...videoMedia]
   const current = media[selectedImg] ?? media[0]
 
   const handleAdd = () => {

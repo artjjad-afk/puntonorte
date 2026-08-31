@@ -11,6 +11,7 @@ export type ProductFromDB = {
   description: string
   images: string[]
   videos: string[]
+  videoFirst: boolean
   sizes: string[]
   colors: string[]
   badge: string | null
@@ -22,7 +23,7 @@ export type ProductFromDB = {
 function parse(p: {
   id: number; name: string; slug: string; price: number;
   originalPrice: number | null; category: string; subcategory: string | null;
-  description: string; images: string; videos: string | null; sizes: string | null;
+  description: string; images: string; videos: string | null; videoFirst: boolean; sizes: string | null;
   colors: string | null; badge: string | null; inStock: boolean;
   featured: boolean; active: boolean;
 }): ProductFromDB {

@@ -17,8 +17,10 @@ model Product {
   subcategory   String?  @db.VarChar(100)
   description   String   @db.Text
   images        String   @db.LongText
-  // Videos por enlace (YouTube/Vimeo/.mp4). JSON: ["https://...", ...]
+  // Videos: enlaces (YouTube/Vimeo/.mp4) o archivos subidos (/uploads/...). JSON.
   videos        String?  @db.Text
+  // Si true, el/los video(s) se muestran antes que las fotos en la galería
+  videoFirst    Boolean  @default(false)
   sizes         String?  @db.Text
   colors        String?  @db.Text
   badge         String?  @db.VarChar(50)

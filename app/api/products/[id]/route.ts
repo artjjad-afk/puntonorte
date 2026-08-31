@@ -58,6 +58,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...(description !== undefined && description && { description: description.trim() }),
         ...(images      !== undefined && images      && { images: JSON.stringify(Array.isArray(images) ? images : [images]) }),
         ...(videos      !== undefined && (() => { const v = normalizeVideos(videos); return { videos: v.length ? JSON.stringify(v) : null } })()),
+        ...(body.videoFirst !== undefined && { videoFirst: Boolean(body.videoFirst) }),
         ...(sizes       !== undefined && { sizes:  sizes?.length  ? JSON.stringify(sizes)  : null }),
         ...(colors      !== undefined && { colors: colors?.length ? JSON.stringify(colors) : null }),
         ...(badge       !== undefined && { badge: badge || null }),
