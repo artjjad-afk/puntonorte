@@ -2,7 +2,8 @@
 import { useState, use, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ShoppingCart, Heart, Shield, Truck, RefreshCw, ChevronLeft, Star, Minus, Plus, Flame, CreditCard, AlertTriangle } from 'lucide-react'
+import { ShoppingCart, Heart, Shield, Truck, RefreshCw, ChevronLeft, Star, Minus, Plus, Flame, CreditCard, AlertTriangle, Play } from 'lucide-react'
+import { parseVideoUrl } from '@/lib/videos'
 import { useCartStore } from '@/store/cart'
 import { useToast } from '@/components/ui/Toast'
 import { useWishlistStore } from '@/store/wishlist'
@@ -68,6 +69,16 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   const discount = product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : null
   const waMsg = encodeURIComponent(`Hola Punto Norte! Me interesa: *${product.name}* - $${product.price}. ¿Tienen disponibilidad?`)
 
+  // Galería combinada: primero imágenes, luego videos (enlaces)
+  const media: Array<
+    | { type: 'image'; src: string }
+    | { type: 'video'; kind: string; url: string; embedUrl?: string; fileUrl?: string; thumbnail?: string }
+  > = [
+    ...product.images.map(src => ({ type: 'image' as const, src })),
+    ...((product.videos ?? []).map(url => ({ type: 'video' as const, ...parseVideoUrl(url) }))),
+  ]
+  const current = media[selectedImg] ?? media[0]
+
   const handleAdd = () => {
     // Validar talla obligatoria
     const needsSize  = product.sizes  && product.sizes.length  > 0 && !selectedSize
@@ -129,32 +140,56 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
         <div className="product-layout">
           {/* Galería */}
           <div>
-            <div style={{ position: 'relative', borderRadius: '20px', overflow: 'hidden', aspectRatio: '4/5', background: '#f4f2f0', marginBottom: '14px' }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={product.images[selectedImg]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              {product.badge && (
-                <span style={{ position: 'absolute', top: '20px', left: '20px', background: product.badge === 'Premium' ? '#211f1e' : '#c1692b', color: '#fff', padding: '5px 14px', borderRadius: '8px', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase' }}>
-                  {product.badge}
-                </span>
+            <div style={{ position: 'relative', borderRadius: '20px', overflow: 'hidden', aspectRatio: '4/5', background: current?.type === 'video' ? '#000' : '#f4f2f0', marginBottom: '14px' }}>
+              {current?.type === 'video' ? (
+                current.kind === 'file' ? (
+                  <video src={current.fileUrl} controls playsInline style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block', background: '#000' }} />
+                ) : current.embedUrl ? (
+                  <iframe src={current.embedUrl} title={product.name} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen style={{ width: '100%', height: '100%', border: 0, display: 'block' }} />
+                ) : (
+                  <a href={current.url} target="_blank" rel="noopener noreferrer" style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 10, color: '#fff', textDecoration: 'none' }}>
+                    <Play size={40} fill="#fff" /> <span style={{ fontSize: 13, fontWeight: 700 }}>Ver video</span>
+                  </a>
+                )
+              ) : (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={current?.type === 'image' ? current.src : product.images[0]} alt={product.name} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                  {product.badge && (
+                    <span style={{ position: 'absolute', top: '20px', left: '20px', background: product.badge === 'Premium' ? '#211f1e' : '#c1692b', color: '#fff', padding: '5px 14px', borderRadius: '8px', fontSize: '11px', fontWeight: '800', textTransform: 'uppercase' }}>
+                      {product.badge}
+                    </span>
+                  )}
+                  {discount && (
+                    <span style={{ position: 'absolute', top: '20px', right: '20px', background: 'rgba(33,31,30,0.85)', backdropFilter: 'blur(8px)', color: '#fff', padding: '5px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>
+                      -{discount}%
+                    </span>
+                  )}
+                  {!product.inStock && (
+                    <div style={{ position: 'absolute', inset: 0, background: 'rgba(33,31,30,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ background: '#211f1e', color: '#fff', padding: '10px 24px', borderRadius: '8px', fontWeight: '800', fontSize: '16px' }}>Agotado</span>
+                    </div>
+                  )}
+                  {current?.type === 'image' && <ImageZoom src={current.src} alt={product.name} />}
+                </>
               )}
-              {discount && (
-                <span style={{ position: 'absolute', top: '20px', right: '20px', background: 'rgba(33,31,30,0.85)', backdropFilter: 'blur(8px)', color: '#fff', padding: '5px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '700' }}>
-                  -{discount}%
-                </span>
-              )}
-              {!product.inStock && (
-                <div style={{ position: 'absolute', inset: 0, background: 'rgba(33,31,30,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <span style={{ background: '#211f1e', color: '#fff', padding: '10px 24px', borderRadius: '8px', fontWeight: '800', fontSize: '16px' }}>Agotado</span>
-                </div>
-              )}
-              <ImageZoom src={product.images[selectedImg]} alt={product.name} />
             </div>
-            {product.images.length > 1 && (
+            {media.length > 1 && (
               <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                {product.images.map((img, i) => (
-                  <button key={i} onClick={() => setSelectedImg(i)} className={`thumb-btn ${selectedImg === i ? 'active' : ''}`} style={{ width: '72px', height: '72px', flexShrink: 0 }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                {media.map((m, i) => (
+                  <button key={i} onClick={() => setSelectedImg(i)} className={`thumb-btn ${selectedImg === i ? 'active' : ''}`} style={{ width: '72px', height: '72px', flexShrink: 0, position: 'relative' }}>
+                    {m.type === 'image' ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img src={m.src} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', background: '#211f1e', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+                        {m.thumbnail && (
+                          /* eslint-disable-next-line @next/next/no-img-element */
+                          <img src={m.thumbnail} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', opacity: 0.55 }} />
+                        )}
+                        <Play size={18} fill="#fff" color="#fff" style={{ position: 'absolute' }} />
+                      </div>
+                    )}
                   </button>
                 ))}
               </div>

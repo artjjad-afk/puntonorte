@@ -10,6 +10,7 @@ export type ProductFromDB = {
   subcategory: string | null
   description: string
   images: string[]
+  videos: string[]
   sizes: string[]
   colors: string[]
   badge: string | null
@@ -21,13 +22,14 @@ export type ProductFromDB = {
 function parse(p: {
   id: number; name: string; slug: string; price: number;
   originalPrice: number | null; category: string; subcategory: string | null;
-  description: string; images: string; sizes: string | null;
+  description: string; images: string; videos: string | null; sizes: string | null;
   colors: string | null; badge: string | null; inStock: boolean;
   featured: boolean; active: boolean;
 }): ProductFromDB {
   return {
     ...p,
     images: JSON.parse(p.images || '[]'),
+    videos: p.videos ? JSON.parse(p.videos) : [],
     sizes: p.sizes ? JSON.parse(p.sizes) : [],
     colors: p.colors ? JSON.parse(p.colors) : [],
   }

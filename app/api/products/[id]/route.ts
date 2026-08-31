@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import jwt from 'jsonwebtoken'
+import { normalizeVideos } from '@/lib/videos'
 
 function isAdmin(req: NextRequest) {
   const token = req.cookies.get('admin_token')?.value
@@ -23,6 +24,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     return NextResponse.json({
       ...product,
       images: JSON.parse(product.images || '[]'),
+      videos: product.videos ? JSON.parse(product.videos) : [],
       sizes: product.sizes ? JSON.parse(product.sizes) : [],
       colors: product.colors ? JSON.parse(product.colors) : [],
     })
@@ -39,7 +41,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params
     const body = await req.json()
-    const { name, price, originalPrice, category, subcategory, description, images, sizes, colors, badge, featured, active } = body
+    const { name, price, originalPrice, category, subcategory, description, images, videos, sizes, colors, badge, featured, active } = body
 
     // Calcular inStock automáticamente si se envía stock
     const stockNum = body.stock !== undefined ? parseInt(body.stock) : undefined
@@ -55,6 +57,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...(subcategory !== undefined && { subcategory: subcategory || null }),
         ...(description !== undefined && description && { description: description.trim() }),
         ...(images      !== undefined && images      && { images: JSON.stringify(Array.isArray(images) ? images : [images]) }),
+        ...(videos      !== undefined && (() => { const v = normalizeVideos(videos); return { videos: v.length ? JSON.stringify(v) : null } })()),
         ...(sizes       !== undefined && { sizes:  sizes?.length  ? JSON.stringify(sizes)  : null }),
         ...(colors      !== undefined && { colors: colors?.length ? JSON.stringify(colors) : null }),
         ...(badge       !== undefined && { badge: badge || null }),
@@ -72,6 +75,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({
       ...product,
       images: JSON.parse(product.images || '[]'),
+      videos: product.videos ? JSON.parse(product.videos) : [],
       sizes: product.sizes ? JSON.parse(product.sizes) : [],
       colors: product.colors ? JSON.parse(product.colors) : [],
     })

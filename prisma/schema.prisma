@@ -17,6 +17,8 @@ model Product {
   subcategory   String?  @db.VarChar(100)
   description   String   @db.Text
   images        String   @db.LongText
+  // Videos por enlace (YouTube/Vimeo/.mp4). JSON: ["https://...", ...]
+  videos        String?  @db.Text
   sizes         String?  @db.Text
   colors        String?  @db.Text
   badge         String?  @db.VarChar(50)

@@ -7,6 +7,7 @@
   category: string
   subcategory?: string | null
   images: string[]
+  videos?: string[]
   description: string
   sizes?: string[]
   colors?: string[]

@@ -1,11 +1,12 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, ClipboardList, ImageIcon, Palette, Settings, AlertTriangle, Lightbulb } from 'lucide-react'
+import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, ClipboardList, ImageIcon, Palette, Settings, AlertTriangle, Lightbulb, Film } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 import { compressImage } from '@/lib/imageCompress'
 import type { Subcategory } from '@/lib/subcategories'
+import { parseVideoUrl, isPlayableVideo } from '@/lib/videos'
 
 const BADGES = ['', 'Nuevo', 'Oferta', 'Premium', 'Agotado']
 
@@ -45,9 +46,12 @@ export default function NuevoProducto() {
     stock: '0',
     featured: false, active: true,
     images: [] as string[],
+    videos: [] as string[],
     sizes: [] as string[],
     colors: [] as string[],
   })
+  const [videoUrl, setVideoUrl] = useState('')
+  const [videoError, setVideoError] = useState('')
 
   useEffect(() => {
     fetch('/api/categories')
@@ -88,6 +92,17 @@ export default function NuevoProducto() {
     }
   }
   const removeImage = (i: number) => setForm(f => ({ ...f, images: f.images.filter((_, idx) => idx !== i) }))
+
+  const addVideoUrl = () => {
+    const url = videoUrl.trim()
+    if (!url) return
+    if (!/^https?:\/\//i.test(url)) { setVideoError('El enlace debe empezar con http:// o https://'); return }
+    if (!isPlayableVideo(url)) { setVideoError('Enlace no reconocido. Usa YouTube, Vimeo o un archivo .mp4'); return }
+    if (form.videos.includes(url)) { setVideoUrl(''); return }
+    setForm(f => ({ ...f, videos: [...f.videos, url] }))
+    setVideoUrl(''); setVideoError('')
+  }
+  const removeVideo = (i: number) => setForm(f => ({ ...f, videos: f.videos.filter((_, idx) => idx !== i) }))
 
   const addSize  = () => { if (sizeInput.trim() && !form.sizes.includes(sizeInput.trim())) { set('sizes', [...form.sizes, sizeInput.trim()]); setSizeInput('') } }
   const addColor = () => { if (colorInput.trim() && !form.colors.includes(colorInput.trim())) { set('colors', [...form.colors, colorInput.trim()]); setColorInput('') } }
@@ -279,6 +294,43 @@ export default function NuevoProducto() {
                 <p style={{ margin: '8px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.35)', fontFamily: 'var(--font-mono)' }}>
                   La primera imagen es la principal · arrastra para reordenar
                 </p>
+              )}
+            </motion.div>
+
+            {/* Videos */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.12 }}
+              className="card-top" style={card}>
+              <p style={{ ...lbl, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 6 }}><Film size={16} color="#f97316" /> Videos <span style={{ opacity: 0.5 }}>(opcional)</span></p>
+              <p style={{ margin: '0 0 14px', fontSize: 11, color: 'rgba(148,163,184,0.4)' }}>
+                Pega enlaces de <b style={{ color: 'rgba(148,163,184,0.7)' }}>YouTube</b>, Vimeo o un archivo <b style={{ color: 'rgba(148,163,184,0.7)' }}>.mp4</b>. Se muestran en la ficha del producto.
+              </p>
+              <div style={{ display: 'flex', gap: 8, marginBottom: form.videos.length ? 12 : 0 }}>
+                <input className="pn-inp" value={videoUrl}
+                  onChange={e => { setVideoUrl(e.target.value); setVideoError('') }}
+                  placeholder="https://youtu.be/..." style={{ ...inp, flex: 1 }}
+                  onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addVideoUrl())} />
+                <button type="button" onClick={addVideoUrl}
+                  style={{ padding: '10px 16px', borderRadius: 10, background: 'rgba(249,115,22,0.15)', border: '1px solid rgba(249,115,22,0.3)', color: '#f97316', cursor: 'pointer', fontWeight: 700, fontSize: 13, fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+                  <Plus size={14} /> Añadir
+                </button>
+              </div>
+              {videoError && <p style={{ margin: '0 0 10px', fontSize: 11, color: '#f87171', display: 'flex', alignItems: 'center', gap: 5 }}><AlertTriangle size={12} style={{ flexShrink: 0 }} /> {videoError}</p>}
+              {form.videos.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {form.videos.map((v, i) => {
+                    const info = parseVideoUrl(v)
+                    const label = info.kind === 'youtube' ? 'YouTube' : info.kind === 'vimeo' ? 'Vimeo' : info.kind === 'file' ? 'Archivo' : '—'
+                    return (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 9, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                        <span style={{ flexShrink: 0, fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6, background: 'rgba(249,115,22,0.15)', color: '#f97316', fontFamily: 'var(--font-mono)' }}>{label}</span>
+                        <span style={{ flex: 1, minWidth: 0, fontSize: 12, color: 'rgba(148,163,184,0.7)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v}</span>
+                        <button type="button" onClick={() => removeVideo(i)} style={{ width: 24, height: 24, borderRadius: 7, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.2)', color: '#f87171', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <X size={12} />
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
               )}
             </motion.div>
 
