@@ -16,6 +16,7 @@ const NAV = [
   { href: '/admin/categorias', label: 'Categorías', icon: Tag,             exact: false },
   { href: '/admin/banners',    label: 'Ofertas',    icon: Zap,             exact: false },
   { href: '/admin/pedidos',    label: 'Pedidos',    icon: ShoppingBag,     exact: false },
+  { href: '/admin/venta',      label: 'Venta en tienda', icon: Store,      exact: false },
   { href: '/admin/reportes',   label: 'Reportes',   icon: BarChart3,       exact: false },
 ]
 

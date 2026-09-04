@@ -19,6 +19,7 @@ export interface ReportOrder {
   paymentMethod: string
   items: ReportOrderItem[]
   customerName: string
+  source?: string // 'web' | 'store'
 }
 export interface ReportProduct {
   id: number
@@ -90,6 +91,7 @@ export interface Aggregation {
   porCategoria: SalesRow[]
   serie: { label: string; ingresos: number }[]
   porMetodo: { metodo: string; pedidos: number; monto: number }[]
+  porCanal: { canal: string; pedidos: number; monto: number }[]
 }
 
 /** Agrega ventas de los pedidos ya filtrados. `products` sirve para mapear producto→categoría. */
@@ -126,6 +128,14 @@ export function aggregate(orders: ReportOrder[], products: ReportProduct[], from
     e.pedidos += 1; e.monto += o.total || 0; metMap.set(m, e)
   }
 
+  // Canal: web vs tienda
+  const canalMap = new Map<string, { canal: string; pedidos: number; monto: number }>()
+  for (const o of orders) {
+    const canal = o.source === 'store' ? 'Tienda' : 'Web'
+    const e = canalMap.get(canal) ?? { canal, pedidos: 0, monto: 0 }
+    e.pedidos += 1; e.monto += o.total || 0; canalMap.set(canal, e)
+  }
+
   // Serie temporal: diaria si el rango es corto (<=62 días), mensual si es largo.
   const times = orders.map(o => new Date(o.createdAt).getTime())
   const minT = from ? from.getTime() : Math.min(...(times.length ? times : [Date.now()]))
@@ -157,6 +167,7 @@ export function aggregate(orders: ReportOrder[], products: ReportProduct[], from
     porCategoria: Array.from(catMap.values()).sort(byRevDesc),
     serie,
     porMetodo: Array.from(metMap.values()).sort((a, b) => b.monto - a.monto),
+    porCanal: Array.from(canalMap.values()).sort((a, b) => b.monto - a.monto),
   }
 }
 

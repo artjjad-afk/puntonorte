@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { BarChart3, FileSpreadsheet, Printer, DollarSign, ShoppingBag, Boxes, Package, TrendingUp, Wallet, AlertTriangle, Coins, PiggyBank } from 'lucide-react'
+import { BarChart3, FileSpreadsheet, Printer, DollarSign, ShoppingBag, Boxes, Package, TrendingUp, Wallet, AlertTriangle, Coins, PiggyBank, Store, Globe } from 'lucide-react'
 import {
   getRange, paidOrdersInRange, aggregate, inventorySummary, money,
   type Preset, type ReportOrder, type ReportProduct,
@@ -80,6 +80,7 @@ export default function ReportesPage() {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(agg.porProducto.map(r => ({ Producto: r.name, Unidades: r.units, Ingresos: Number(r.revenue.toFixed(2)) }))), 'Ventas por producto')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(agg.porCategoria.map(r => ({ Categoria: r.name, Unidades: r.units, Ingresos: Number(r.revenue.toFixed(2)) }))), 'Ventas por categoria')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(agg.porMetodo.map(r => ({ Metodo: r.metodo, Pedidos: r.pedidos, Monto: Number(r.monto.toFixed(2)) }))), 'Metodos de pago')
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(agg.porCanal.map(r => ({ Canal: r.canal, Ventas: r.pedidos, Monto: Number(r.monto.toFixed(2)) }))), 'Ventas por canal')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(inv.filas.map(r => ({ Producto: r.name, Categoria: r.category, Stock: r.stock, 'Costo compra': r.sinCosto ? '' : Number(r.cost.toFixed(2)), 'Precio venta': r.price, 'Inversion (costo)': r.sinCosto ? '' : Number(r.costValue.toFixed(2)), 'Valor (venta)': Number(r.value.toFixed(2)) }))), 'Inventario')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(paidOrders.map(o => ({ '#': o.id, Fecha: new Date(o.createdAt).toLocaleDateString('es-VE'), Cliente: o.customerName, Metodo: o.paymentMethod, Estado: o.status, Total: Number((o.total || 0).toFixed(2)) }))), 'Pedidos')
     XLSX.writeFile(wb, `reporte-puntonorte-${fileTag}.xlsx`)
@@ -123,6 +124,8 @@ export default function ReportesPage() {
   ${tbl(['Producto', 'Unidades', 'Ingresos'], agg.porProducto.map(r => [r.name, String(r.units), money(r.revenue)]))}
   <h2>Ventas por categoría</h2>
   ${tbl(['Categoría', 'Unidades', 'Ingresos'], agg.porCategoria.map(r => [r.name, String(r.units), money(r.revenue)]))}
+  <h2>Ventas por canal</h2>
+  ${tbl(['Canal', 'Ventas', 'Monto'], agg.porCanal.map(r => [r.canal, String(r.pedidos), money(r.monto)]))}
   <h2>Métodos de pago</h2>
   ${tbl(['Método', 'Pedidos', 'Monto'], agg.porMetodo.map(r => [r.metodo, String(r.pedidos), money(r.monto)]))}
   <h2>Inventario actual</h2>
@@ -281,6 +284,22 @@ export default function ReportesPage() {
               </div>
             </div>
           </div>
+
+          {/* Ventas por canal */}
+          {agg.porCanal.length > 0 && (
+            <div style={{ ...card, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap' }}>
+              <p style={{ fontSize: 11, color: 'rgba(148,163,184,0.5)', letterSpacing: '0.1em', textTransform: 'uppercase', margin: 0, fontFamily: 'var(--font-mono)' }}>Ventas por canal</p>
+              {agg.porCanal.map(c => (
+                <div key={c.canal} style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 100, fontSize: 11, fontWeight: 700, background: c.canal === 'Tienda' ? 'rgba(52,211,153,0.14)' : 'rgba(96,165,250,0.14)', color: c.canal === 'Tienda' ? '#34d399' : '#60a5fa', border: `1px solid ${c.canal === 'Tienda' ? 'rgba(52,211,153,0.3)' : 'rgba(96,165,250,0.3)'}` }}>
+                    {c.canal === 'Tienda' ? <Store size={12} /> : <Globe size={12} />} {c.canal}
+                  </span>
+                  <span style={{ fontSize: 20, fontWeight: 800, color: '#fff' }}>{money(c.monto)}</span>
+                  <span style={{ fontSize: 12, color: 'rgba(148,163,184,0.5)' }}>{c.pedidos} venta{c.pedidos === 1 ? '' : 's'}</span>
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Inventario */}
           <div style={{ ...card, padding: 0 }}>
