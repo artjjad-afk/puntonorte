@@ -10,7 +10,7 @@ function isAdmin(req: NextRequest) {
 }
 
 // GET — obtener un producto por ID o slug
-export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
     const isNumeric = /^\d+$/.test(id)
@@ -21,12 +21,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
 
     if (!product) return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 })
 
+    // El costo (precio de compra) es privado: solo para el admin.
+    const { cost, ...rest } = product
     return NextResponse.json({
-      ...product,
+      ...rest,
       images: JSON.parse(product.images || '[]'),
       videos: product.videos ? JSON.parse(product.videos) : [],
       sizes: product.sizes ? JSON.parse(product.sizes) : [],
       colors: product.colors ? JSON.parse(product.colors) : [],
+      ...(isAdmin(req) ? { cost } : {}),
     })
   } catch (e) {
     console.error(e)
@@ -41,7 +44,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   try {
     const { id } = await params
     const body = await req.json()
-    const { name, price, originalPrice, category, subcategory, description, images, videos, sizes, colors, badge, featured, active } = body
+    const { name, price, originalPrice, cost, category, subcategory, description, images, videos, sizes, colors, badge, featured, active } = body
 
     // Calcular inStock automáticamente si se envía stock
     const stockNum = body.stock !== undefined ? parseInt(body.stock) : undefined
@@ -53,6 +56,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         ...(name        !== undefined && name        && { name: name.trim() }),
         ...(price       !== undefined && price       && { price: parseFloat(price) }),
         ...(originalPrice !== undefined && { originalPrice: originalPrice ? parseFloat(originalPrice) : null }),
+        ...(cost        !== undefined && { cost: (cost !== null && cost !== '') ? parseFloat(cost) : null }),
         ...(category    !== undefined && category    && { category }),
         ...(subcategory !== undefined && { subcategory: subcategory || null }),
         ...(description !== undefined && description && { description: description.trim() }),

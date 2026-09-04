@@ -22,17 +22,20 @@ export type ProductFromDB = {
 
 function parse(p: {
   id: number; name: string; slug: string; price: number;
-  originalPrice: number | null; category: string; subcategory: string | null;
+  originalPrice: number | null; cost: number | null; category: string; subcategory: string | null;
   description: string; images: string; videos: string | null; videoFirst: boolean; sizes: string | null;
   colors: string | null; badge: string | null; inStock: boolean;
   featured: boolean; active: boolean;
 }): ProductFromDB {
+  // El costo (precio de compra) es privado: se descarta y nunca llega a páginas públicas.
+  const { cost: _cost, ...rest } = p
+  void _cost
   return {
-    ...p,
-    images: JSON.parse(p.images || '[]'),
-    videos: p.videos ? JSON.parse(p.videos) : [],
-    sizes: p.sizes ? JSON.parse(p.sizes) : [],
-    colors: p.colors ? JSON.parse(p.colors) : [],
+    ...rest,
+    images: JSON.parse(rest.images || '[]'),
+    videos: rest.videos ? JSON.parse(rest.videos) : [],
+    sizes: rest.sizes ? JSON.parse(rest.sizes) : [],
+    colors: rest.colors ? JSON.parse(rest.colors) : [],
   }
 }
 

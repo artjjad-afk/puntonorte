@@ -55,12 +55,15 @@ export async function GET(req: NextRequest) {
       orderBy: [{ featured: 'desc' }, { createdAt: 'desc' }],
     })
 
-    const parsed = products.map(p => ({
+    // El costo (precio de compra) es privado: solo se incluye para el admin.
+    const admin = isAdmin(req)
+    const parsed = products.map(({ cost, ...p }) => ({
       ...p,
       images: JSON.parse(p.images || '[]'),
       videos: p.videos ? JSON.parse(p.videos) : [],
       sizes: p.sizes ? JSON.parse(p.sizes) : [],
       colors: p.colors ? JSON.parse(p.colors) : [],
+      ...(admin ? { cost } : {}),
     }))
 
     return NextResponse.json(parsed)
@@ -76,7 +79,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json()
-    const { name, price, originalPrice, category, subcategory, description, images, videos, sizes, colors, badge, featured } = body
+    const { name, price, originalPrice, cost, category, subcategory, description, images, videos, sizes, colors, badge, featured } = body
 
     if (!name || !price || !category || !description) {
       return NextResponse.json({ error: 'Faltan campos requeridos' }, { status: 400 })
@@ -99,6 +102,7 @@ export async function POST(req: NextRequest) {
         slug,
         price: parseFloat(price),
         originalPrice: originalPrice ? parseFloat(originalPrice) : null,
+        cost: (cost !== undefined && cost !== null && cost !== '') ? parseFloat(cost) : null,
         category,
         subcategory: subcategory || null,
         description: description.trim(),

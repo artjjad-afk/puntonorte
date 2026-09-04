@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, ClipboardList, ImageIcon, Palette, Settings, AlertTriangle, Lightbulb, Film, Star } from 'lucide-react'
+import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, ClipboardList, ImageIcon, Palette, Settings, AlertTriangle, Lightbulb, Film, Star, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
 import { compressImage } from '@/lib/imageCompress'
@@ -41,7 +41,7 @@ export default function NuevoProducto() {
   const [sizeInput, setSizeInput] = useState('')
   const [colorInput, setColorInput] = useState('')
   const [form, setForm] = useState({
-    name: '', price: '', originalPrice: '',
+    name: '', price: '', originalPrice: '', cost: '',
     category: '', subcategory: '', description: '', badge: '',
     stock: '0',
     featured: false, active: true,
@@ -206,6 +206,16 @@ export default function NuevoProducto() {
                     <input className="pn-inp" type="number" step="0.01" min="0" value={form.originalPrice}
                       onChange={e => set('originalPrice', e.target.value)} placeholder="0.00" style={inp} />
                   </div>
+                </div>
+                <div style={{ padding: '12px 14px', borderRadius: 10, background: 'rgba(96,165,250,0.06)', border: '1px solid rgba(96,165,250,0.18)' }}>
+                  <label style={{ ...lbl, display: 'flex', alignItems: 'center', gap: 5, color: '#93c5fd' }}>
+                    <Lock size={11} /> Precio de compra (costo) <span style={{ opacity: 0.6 }}>· privado</span>
+                  </label>
+                  <input className="pn-inp" type="number" step="0.01" min="0" value={form.cost}
+                    onChange={e => set('cost', e.target.value)} placeholder="0.00" style={{ ...inp, maxWidth: 200 }} />
+                  <p style={{ margin: '6px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.45)' }}>
+                    Cuánto te costó comprarlo. Es solo para tu control interno — <b style={{ color: 'rgba(148,163,184,0.7)' }}>los clientes nunca lo ven</b>.
+                  </p>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                   <div>

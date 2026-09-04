@@ -13,6 +13,8 @@ model Product {
   slug          String   @unique @db.VarChar(200)
   price         Float
   originalPrice Float?
+  // Precio de compra / costo — SOLO uso interno del admin. Nunca se expone al público.
+  cost          Float?
   category      String   @db.VarChar(100)
   subcategory   String?  @db.VarChar(100)
   description   String   @db.Text

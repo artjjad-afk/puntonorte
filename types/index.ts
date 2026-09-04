@@ -4,6 +4,7 @@
   slug: string
   price: number
   originalPrice?: number | null
+  cost?: number | null // privado — solo admin
   category: string
   subcategory?: string | null
   images: string[]
