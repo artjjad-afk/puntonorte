@@ -24,6 +24,7 @@ export interface ReportProduct {
   id: number
   name: string
   price: number
+  cost?: number | null // precio de compra (privado)
   category: string
   stock: number
   active?: boolean
@@ -159,36 +160,48 @@ export function aggregate(orders: ReportOrder[], products: ReportProduct[], from
   }
 }
 
-export interface InventoryRow { name: string; category: string; stock: number; price: number; value: number }
+export interface InventoryRow { name: string; category: string; stock: number; price: number; cost: number; value: number; costValue: number; sinCosto: boolean }
 export interface InventorySummary {
   valorVenta: number
+  valorCosto: number        // inversión: Σ stock × precio de compra
+  gananciaPotencial: number // valorVenta − valorCosto (si se vende todo el stock)
+  sinCosto: number          // productos sin costo cargado (la inversión queda incompleta)
   unidades: number
   totalProductos: number
   agotados: number
   bajoStock: number
   filas: InventoryRow[]
-  porCategoria: { name: string; unidades: number; valor: number }[]
+  porCategoria: { name: string; unidades: number; valor: number; costo: number }[]
 }
 
 /** Resumen del inventario actual (no depende del rango de fechas). */
 export function inventorySummary(products: ReportProduct[]): InventorySummary {
-  const filas: InventoryRow[] = products.map(p => ({
-    name: p.name, category: p.category, stock: p.stock || 0, price: p.price || 0,
-    value: (p.stock || 0) * (p.price || 0),
-  }))
+  const filas: InventoryRow[] = products.map(p => {
+    const stock = p.stock || 0
+    const price = p.price || 0
+    const hasCost = p.cost != null
+    const cost = hasCost ? (p.cost as number) : 0
+    return {
+      name: p.name, category: p.category, stock, price, cost,
+      value: stock * price, costValue: stock * cost, sinCosto: !hasCost,
+    }
+  })
   const valorVenta = filas.reduce((s, r) => s + r.value, 0)
+  const valorCosto = filas.reduce((s, r) => s + r.costValue, 0)
   const unidades = filas.reduce((s, r) => s + r.stock, 0)
   const agotados = filas.filter(r => r.stock === 0).length
   const bajoStock = filas.filter(r => r.stock > 0 && r.stock <= 5).length
+  const sinCosto = filas.filter(r => r.sinCosto).length
 
-  const catMap = new Map<string, { name: string; unidades: number; valor: number }>()
+  const catMap = new Map<string, { name: string; unidades: number; valor: number; costo: number }>()
   for (const r of filas) {
-    const e = catMap.get(r.category) ?? { name: r.category, unidades: 0, valor: 0 }
-    e.unidades += r.stock; e.valor += r.value; catMap.set(r.category, e)
+    const e = catMap.get(r.category) ?? { name: r.category, unidades: 0, valor: 0, costo: 0 }
+    e.unidades += r.stock; e.valor += r.value; e.costo += r.costValue; catMap.set(r.category, e)
   }
   return {
-    valorVenta, unidades, totalProductos: products.length, agotados, bajoStock,
-    filas: filas.sort((a, b) => b.value - a.value),
+    valorVenta, valorCosto, gananciaPotencial: valorVenta - valorCosto, sinCosto,
+    unidades, totalProductos: products.length, agotados, bajoStock,
+    filas: filas.sort((a, b) => b.costValue - a.costValue),
     porCategoria: Array.from(catMap.values()).sort((a, b) => b.valor - a.valor),
   }
 }

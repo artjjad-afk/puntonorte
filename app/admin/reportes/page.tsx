@@ -1,7 +1,7 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
-import { BarChart3, FileSpreadsheet, Printer, DollarSign, ShoppingBag, Boxes, Package, TrendingUp, Wallet, AlertTriangle } from 'lucide-react'
+import { BarChart3, FileSpreadsheet, Printer, DollarSign, ShoppingBag, Boxes, Package, TrendingUp, Wallet, AlertTriangle, Coins, PiggyBank } from 'lucide-react'
 import {
   getRange, paidOrdersInRange, aggregate, inventorySummary, money,
   type Preset, type ReportOrder, type ReportProduct,
@@ -66,18 +66,21 @@ export default function ReportesPage() {
       ['Ticket promedio', Number(agg.ticket.toFixed(2))],
       ['Unidades vendidas', agg.unidades],
       [],
-      ['INVENTARIO ACTUAL (a precio de venta)'],
-      ['Valor de inventario', inv.valorVenta],
+      ['INVENTARIO ACTUAL'],
+      ['Inversion (a precio de compra)', Number(inv.valorCosto.toFixed(2))],
+      ['Valor de inventario (a precio de venta)', Number(inv.valorVenta.toFixed(2))],
+      ['Ganancia potencial (si se vende todo)', Number(inv.gananciaPotencial.toFixed(2))],
       ['Unidades en stock', inv.unidades],
       ['Productos', inv.totalProductos],
+      ['Productos sin costo cargado', inv.sinCosto],
       ['Agotados', inv.agotados],
-      ['Bajo stock (≤5)', inv.bajoStock],
+      ['Bajo stock (<=5)', inv.bajoStock],
     ]
     XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(resumen), 'Resumen')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(agg.porProducto.map(r => ({ Producto: r.name, Unidades: r.units, Ingresos: Number(r.revenue.toFixed(2)) }))), 'Ventas por producto')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(agg.porCategoria.map(r => ({ Categoria: r.name, Unidades: r.units, Ingresos: Number(r.revenue.toFixed(2)) }))), 'Ventas por categoria')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(agg.porMetodo.map(r => ({ Metodo: r.metodo, Pedidos: r.pedidos, Monto: Number(r.monto.toFixed(2)) }))), 'Metodos de pago')
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(inv.filas.map(r => ({ Producto: r.name, Categoria: r.category, Stock: r.stock, 'Precio venta': r.price, 'Valor (venta)': Number(r.value.toFixed(2)) }))), 'Inventario')
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(inv.filas.map(r => ({ Producto: r.name, Categoria: r.category, Stock: r.stock, 'Costo compra': r.sinCosto ? '' : Number(r.cost.toFixed(2)), 'Precio venta': r.price, 'Inversion (costo)': r.sinCosto ? '' : Number(r.costValue.toFixed(2)), 'Valor (venta)': Number(r.value.toFixed(2)) }))), 'Inventario')
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(paidOrders.map(o => ({ '#': o.id, Fecha: new Date(o.createdAt).toLocaleDateString('es-VE'), Cliente: o.customerName, Metodo: o.paymentMethod, Estado: o.status, Total: Number((o.total || 0).toFixed(2)) }))), 'Pedidos')
     XLSX.writeFile(wb, `reporte-puntonorte-${fileTag}.xlsx`)
   }
@@ -111,9 +114,11 @@ export default function ReportesPage() {
     ${kpi('Pedidos', String(agg.pedidos))}
     ${kpi('Ticket promedio', money(agg.ticket))}
     ${kpi('Unidades vendidas', String(agg.unidades))}
+    ${kpi('Inversión en inventario', money(inv.valorCosto))}
     ${kpi('Valor inventario (venta)', money(inv.valorVenta))}
+    ${kpi('Ganancia potencial', money(inv.gananciaPotencial))}
   </div>
-  <p class="note">El valor de inventario es a precio de venta.</p>
+  <p class="note">Inversión = inventario a precio de compra. Valor = a precio de venta.${inv.sinCosto > 0 ? ` (${inv.sinCosto} producto(s) sin costo cargado.)` : ''}</p>
   <h2>Ventas por producto</h2>
   ${tbl(['Producto', 'Unidades', 'Ingresos'], agg.porProducto.map(r => [r.name, String(r.units), money(r.revenue)]))}
   <h2>Ventas por categoría</h2>
@@ -121,7 +126,7 @@ export default function ReportesPage() {
   <h2>Métodos de pago</h2>
   ${tbl(['Método', 'Pedidos', 'Monto'], agg.porMetodo.map(r => [r.metodo, String(r.pedidos), money(r.monto)]))}
   <h2>Inventario actual</h2>
-  ${tbl(['Producto', 'Categoría', 'Stock', 'Valor (venta)'], inv.filas.map(r => [r.name, r.category, String(r.stock), money(r.value)]))}
+  ${tbl(['Producto', 'Categoría', 'Stock', 'Costo', 'Inversión', 'Valor venta'], inv.filas.map(r => [r.name, r.category, String(r.stock), r.sinCosto ? '—' : money(r.cost), r.sinCosto ? '—' : money(r.costValue), money(r.value)]))}
   <script>window.onload=function(){window.print()}</script>
 </body></html>`
     w.document.write(html)
@@ -132,7 +137,9 @@ export default function ReportesPage() {
     { label: 'Ingresos generados', value: money(agg.ingresos), icon: DollarSign, color: '#f97316', hint: `${agg.pedidos} pedidos` },
     { label: 'Ticket promedio', value: money(agg.ticket), icon: TrendingUp, color: '#4ade80', hint: 'por pedido' },
     { label: 'Unidades vendidas', value: String(agg.unidades), icon: ShoppingBag, color: '#60a5fa', hint: 'en el periodo' },
+    { label: 'Inversión en inventario', value: money(inv.valorCosto), icon: Coins, color: '#f59e0b', hint: inv.sinCosto > 0 ? `⚠ ${inv.sinCosto} sin costo cargado` : 'a precio de compra' },
     { label: 'Valor inventario', value: money(inv.valorVenta), icon: Wallet, color: '#a78bfa', hint: 'a precio de venta' },
+    { label: 'Ganancia potencial', value: money(inv.gananciaPotencial), icon: PiggyBank, color: '#34d399', hint: 'si se vende todo el stock' },
     { label: 'Unidades en stock', value: String(inv.unidades), icon: Boxes, color: '#fbbf24', hint: `${inv.agotados} agotados · ${inv.bajoStock} bajo stock` },
   ]
 
@@ -282,20 +289,23 @@ export default function ReportesPage() {
                 <Package size={13} color="#a78bfa" /> Inventario actual
               </p>
               <p style={{ margin: 0, fontSize: 12, color: 'rgba(148,163,184,0.6)' }}>
-                {inv.totalProductos} productos · <b style={{ color: '#a78bfa' }}>{money(inv.valorVenta)}</b> a precio de venta
+                {inv.totalProductos} productos · Inversión <b style={{ color: '#f59e0b' }}>{money(inv.valorCosto)}</b> · Valor <b style={{ color: '#a78bfa' }}>{money(inv.valorVenta)}</b>
+                {inv.sinCosto > 0 && <span style={{ color: '#fbbf24', marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 3 }}><AlertTriangle size={12} /> {inv.sinCosto} sin costo</span>}
                 {inv.agotados > 0 && <span style={{ color: '#f87171', marginLeft: 8, display: 'inline-flex', alignItems: 'center', gap: 3 }}><AlertTriangle size={12} /> {inv.agotados} agotado(s)</span>}
               </p>
             </div>
-            <div style={{ maxHeight: 420, overflowY: 'auto' }}>
-              <table className="rep-tbl">
-                <thead><tr><th>Producto</th><th>Categoría</th><th className="rep-r">Stock</th><th className="rep-r">Precio</th><th className="rep-r">Valor (venta)</th></tr></thead>
+            <div style={{ maxHeight: 420, overflowY: 'auto', overflowX: 'auto' }}>
+              <table className="rep-tbl" style={{ minWidth: 640 }}>
+                <thead><tr><th>Producto</th><th>Categoría</th><th className="rep-r">Stock</th><th className="rep-r">Costo</th><th className="rep-r">Precio</th><th className="rep-r">Inversión</th><th className="rep-r">Valor venta</th></tr></thead>
                 <tbody>
                   {inv.filas.map((r, i) => (
                     <tr key={i}>
                       <td style={{ color: '#e2e8f0', fontWeight: 600 }}>{r.name}</td>
                       <td style={{ color: 'rgba(148,163,184,0.6)', fontSize: 12 }}>{r.category}</td>
                       <td className="rep-r" style={{ color: r.stock === 0 ? '#f87171' : r.stock <= 5 ? '#fbbf24' : 'rgba(148,163,184,0.85)', fontWeight: 700 }}>{r.stock}</td>
+                      <td className="rep-r" style={{ color: r.sinCosto ? 'rgba(148,163,184,0.35)' : '#fbbf24' }}>{r.sinCosto ? '—' : money(r.cost)}</td>
                       <td className="rep-r" style={{ color: 'rgba(148,163,184,0.7)' }}>{money(r.price)}</td>
+                      <td className="rep-r" style={{ color: r.sinCosto ? 'rgba(148,163,184,0.35)' : '#f59e0b', fontWeight: 700 }}>{r.sinCosto ? '—' : money(r.costValue)}</td>
                       <td className="rep-r" style={{ color: '#e2e8f0', fontWeight: 700 }}>{money(r.value)}</td>
                     </tr>
                   ))}
