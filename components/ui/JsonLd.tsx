@@ -98,7 +98,7 @@ export function StoreJsonLd() {
       {
         '@type': 'OpeningHoursSpecification',
         dayOfWeek: ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],
-        opens: '09:00',
+        opens: '11:30',
         closes: '19:00',
       },
     ],
@@ -108,7 +108,7 @@ export function StoreJsonLd() {
     ],
     priceRange: '$',
     currenciesAccepted: 'USD',
-    paymentAccepted: 'Cash, Zelle, Pago Móvil',
+    paymentAccepted: 'Cash, USDT (Binance), Pago Móvil',
     hasMap: 'https://maps.google.com/?q=Barcelona,+Anzoátegui,+Venezuela',
     aggregateRating: {
       '@type': 'AggregateRating',
@@ -151,7 +151,7 @@ export function FaqJsonLd() {
       {
         '@type': 'Question',
         name: '¿Cómo puedo pagar?',
-        acceptedAnswer: { '@type': 'Answer', text: 'Aceptamos pago en dólares (efectivo o Zelle), y Pago Móvil en bolívares.' },
+        acceptedAnswer: { '@type': 'Answer', text: 'Aceptamos pago en dólares (efectivo o Binance USDT), y Pago Móvil en bolívares.' },
       },
       {
         '@type': 'Question',

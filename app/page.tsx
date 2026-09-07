@@ -314,12 +314,7 @@ export default function HomePage() {
 
         {/* Contenido */}
         <div style={{ position:'relative', zIndex:4, maxWidth:'1320px', margin:'0 auto', padding:'120px 32px 80px', width:'100%' }}>
-          <div style={{ maxWidth:'740px' }}>
-
-            <div className="hero-badge animate-fadeIn" style={{ marginBottom:'32px' }}>
-              <span className="hero-badge-dot" />
-              <span style={{ color:'#e88c4a', fontSize:'11px', fontWeight:'700', letterSpacing:'2.5px', textTransform:'uppercase' }}>✦ Nueva Colección 2025 ✦</span>
-            </div>
+          <div style={{ maxWidth:'740px', paddingTop:'20px' }}>
 
             <h1 className="animate-slide-up" style={{ color:'#fff', fontSize:'clamp(46px,7.5vw,96px)', fontWeight:'900', lineHeight:'.98', marginBottom:'6px', letterSpacing:'-3px', animationDelay:'.1s' }}>
               TU ESTILO,

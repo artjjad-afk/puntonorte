@@ -7,7 +7,7 @@ interface Prod { id: number; name: string; price: number; stock: number; categor
 interface Line { productId: number; name: string; price: number; quantity: number; stock: number }
 interface Toast { id: number; type: 'success' | 'error'; message: string }
 
-const PAYMENTS = ['Efectivo', 'Pago Móvil', 'Zelle', 'Punto de venta', 'Transferencia']
+const PAYMENTS = ['Efectivo USD', 'Pago Móvil', 'Binance USDT']
 const money = (n: number) => '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 
 const inp: React.CSSProperties = {
@@ -20,7 +20,7 @@ export default function VentaTienda() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [cart, setCart] = useState<Line[]>([])
-  const [payment, setPayment] = useState('Efectivo')
+  const [payment, setPayment] = useState('Efectivo USD')
   const [customer, setCustomer] = useState('')
   const [saving, setSaving] = useState(false)
   const [toasts, setToasts] = useState<Toast[]>([])

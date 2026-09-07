@@ -4,7 +4,7 @@ const BASE = 'https://puntonorteshop.com'
 
 export const metadata: Metadata = {
   title: 'Tienda — Ropa, Accesorios y Perfumes en Venezuela',
-  description: 'Compra ropa de dama y caballero, accesorios, perfumes y cargadores online en Venezuela. Calidad premium con envíos a todo el país. Pago por Zelle y Pago Móvil.',
+  description: 'Compra ropa de dama y caballero, accesorios, perfumes y cargadores online en Venezuela. Calidad premium con envíos a todo el país. Pago por Binance USDT y Pago Móvil.',
   keywords: [
     'tienda ropa venezuela', 'comprar ropa online venezuela', 'ropa dama venezuela',
     'ropa caballero venezuela', 'accesorios moda venezuela', 'perfumes online venezuela',

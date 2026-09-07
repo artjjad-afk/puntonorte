@@ -6,7 +6,8 @@ import { CheckCircle, MessageCircle, Home, ShoppingBag, ArrowRight, AlertCircle,
 import { buildOrderWAMessage } from '@/lib/whatsappOrder'
 
 const PAYMENT_LABELS: Record<string, string> = {
-  'zelle':      'Zelle',
+  'binance':    'Binance USDT',
+  'zelle':      'Zelle', // pedidos antiguos
   'pago-movil': 'Pago Móvil',
   'efectivo':   'Efectivo USD',
   'whatsapp':   'Coordinar por WhatsApp',

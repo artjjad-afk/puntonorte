@@ -101,8 +101,9 @@ export function Navbar({ initialLinks }: { initialLinks?: NavLink[] }) {
           {[...Array(4)].map((_, i) => (
             <span key={i} style={{ display: 'inline-flex', gap: '48px' }}>
               <span>✦ ENVÍO A TODA VENEZUELA</span>
-              <span>✦ ZELLE · PAGO MÓVIL · EFECTIVO</span>
+              <span>✦ BINANCE USDT · PAGO MÓVIL · EFECTIVO USD</span>
               <span>✦ ATENCIÓN POR WHATSAPP</span>
+              <span>✦ LUN A SÁB · 11:30AM - 7PM</span>
               <span>✦ BARCELONA, ANZOÁTEGUI</span>
             </span>
           ))}

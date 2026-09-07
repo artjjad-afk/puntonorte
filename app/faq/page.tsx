@@ -17,9 +17,9 @@ const faqs = [
   {
     cat: 'Pagos',
     preguntas: [
-      { q: '¿Qué métodos de pago aceptan?', a: 'Aceptamos Zelle (USD), Pago Móvil (bolívares) y Efectivo USD. Si tienes otro método, consúltanos por WhatsApp y buscamos una solución.' },
+      { q: '¿Qué métodos de pago aceptan?', a: 'Aceptamos Binance (USDT), Pago Móvil (bolívares) y Efectivo USD. Si tienes otro método, consúltanos por WhatsApp y buscamos una solución.' },
       { q: '¿Los precios están en dólares?', a: 'Sí, todos nuestros precios están en USD. Si pagas por Pago Móvil, el monto en bolívares se calcula según la tasa del BCV del día del pago.' },
-      { q: '¿Es seguro pagar con Zelle?', a: 'Sí. El pago por Zelle es directo entre tu banco y el nuestro, sin intermediarios. Solo te pedimos el comprobante de la transferencia para confirmar tu pedido.' },
+      { q: '¿Cómo pago con Binance (USDT)?', a: 'Te enviamos nuestra dirección o usuario de Binance para que hagas la transferencia en USDT. Solo nos compartes el comprobante y confirmamos tu pedido.' },
       { q: '¿Cuándo confirman mi pedido?', a: 'Confirmamos tu pedido en un máximo de 2 horas hábiles después de recibir el comprobante de pago. Te notificamos por el mismo WhatsApp.' },
     ]
   },

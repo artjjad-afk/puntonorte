@@ -70,7 +70,7 @@ export function Footer() {
             <a href="https://wa.me/584140906768" style={{ color: '#c1692b', textDecoration: 'none', fontSize: '15px', fontWeight: 'bold' }}>
               0414-0906768
             </a>
-            <p style={{ color: '#7a7675', fontSize: '13px', marginTop: '12px' }}>Lun - Sáb: 9am - 7pm</p>
+            <p style={{ color: '#7a7675', fontSize: '13px', marginTop: '12px' }}>Lun - Sáb: 11:30am - 7pm</p>
             <p style={{ color: '#7a7675', fontSize: '13px', marginTop: '6px' }}><MapPin size={14} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> Barcelona, Anzoátegui</p>
           </div>
         </div>
@@ -80,7 +80,7 @@ export function Footer() {
             © {new Date().getFullYear()} Punto Norte. Todos los derechos reservados.
           </p>
           <div className="footer-payments" style={{ display: 'flex', gap: '8px' }}>
-            {['Zelle', 'Pago Móvil', 'Efectivo USD'].map(m => (
+            {['Binance USDT', 'Pago Móvil', 'Efectivo USD'].map(m => (
               <span key={m} style={{ backgroundColor: '#393738', color: '#e8e5e2', padding: '4px 10px', borderRadius: '4px', fontSize: '12px' }}>{m}</span>
             ))}
           </div>

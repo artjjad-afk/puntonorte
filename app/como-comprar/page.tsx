@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { Search, ShoppingCart, ClipboardList, MessageCircle, Package, CheckCircle, Landmark, Smartphone, Banknote } from 'lucide-react'
+import { Search, ShoppingCart, ClipboardList, MessageCircle, Package, CheckCircle, Coins, Smartphone, Banknote } from 'lucide-react'
 
 const pasos = [
   {
@@ -19,13 +19,13 @@ const pasos = [
     num: '03', icon: <ClipboardList size={24} color="#c1692b" />,
     titulo: 'Completa tu pedido',
     desc: 'Haz clic en "Finalizar Compra". Llena tus datos de envío (nombre, teléfono, dirección) y elige tu método de pago preferido.',
-    tip: 'Tip: Tenemos Zelle, Pago Móvil y Efectivo USD disponibles.',
+    tip: 'Tip: Tenemos Binance USDT, Pago Móvil y Efectivo USD disponibles.',
   },
   {
     num: '04', icon: <MessageCircle size={24} color="#c1692b" />,
     titulo: 'Confirma por WhatsApp',
     desc: 'Al confirmar, se abre automáticamente WhatsApp con el resumen de tu pedido. Envía el mensaje y un asesor te responderá de inmediato.',
-    tip: 'Tip: Atendemos de Lunes a Sábado de 9am a 7pm.',
+    tip: 'Tip: Atendemos de Lunes a Sábado de 11:30am a 7pm.',
   },
   {
     num: '05', icon: <CheckCircle size={24} color="#c1692b" />,
@@ -42,7 +42,7 @@ const pasos = [
 ]
 
 const metodos = [
-  { icon: Landmark, nombre: 'Zelle', desc: 'Transferencia en USD desde cualquier banco americano. Sin comisiones adicionales.', disponible: true },
+  { icon: Coins, nombre: 'Binance USDT', desc: 'Pago en USDT a través de Binance. Rápido y en dólares digitales.', disponible: true },
   { icon: Smartphone, nombre: 'Pago Móvil', desc: 'Transferencia instantánea entre bancos venezolanos. Desde tu app bancaria en segundos.', disponible: true },
   { icon: Banknote, nombre: 'Efectivo USD', desc: 'Pago en efectivo al momento de la entrega o en punto acordado.', disponible: true },
   { icon: MessageCircle, nombre: 'Otro método', desc: 'Si tienes otro método preferido, escríbenos y lo coordinamos juntos.', disponible: true },

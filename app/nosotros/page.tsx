@@ -126,7 +126,7 @@ export default function NosotrosPage() {
             </div>
             <div style={{ display:'flex', alignItems:'center', gap:'8px', color:'rgba(232,229,226,0.5)', fontSize:'14px' }}>
               <Clock size={14} color="#c1692b" />
-              <span>Lunes a Sábado · 9:00 AM – 7:00 PM</span>
+              <span>Lunes a Sábado · 11:30 AM – 7:00 PM</span>
             </div>
           </div>
         </div>

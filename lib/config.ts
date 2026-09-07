@@ -23,7 +23,7 @@ export const STORE_CONFIG = {
   country: 'Venezuela',
 
   // Horario
-  schedule: 'Lunes a Sábado · 9:00 AM – 7:00 PM',
+  schedule: 'Lunes a Sábado · 11:30 AM – 7:00 PM',
 }
 
 // Helper para generar links de WhatsApp

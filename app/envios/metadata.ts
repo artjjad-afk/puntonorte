@@ -4,7 +4,7 @@ const BASE = 'https://puntonorteshop.com'
 
 export const metadata: Metadata = {
   title: 'Envíos a Toda Venezuela — Punto Norte',
-  description: 'Enviamos a toda Venezuela desde Barcelona, Anzoátegui. Conoce tiempos de entrega, costos y zonas de cobertura. Envío express disponible. Pago por Zelle y Pago Móvil.',
+  description: 'Enviamos a toda Venezuela desde Barcelona, Anzoátegui. Conoce tiempos de entrega, costos y zonas de cobertura. Envío express disponible. Pago por Binance USDT y Pago Móvil.',
   keywords: [
     'envios venezuela', 'envio ropa venezuela', 'delivery ropa venezuela',
     'envio barcelona anzoategui', 'envio express venezuela', 'como llega mi pedido venezuela',

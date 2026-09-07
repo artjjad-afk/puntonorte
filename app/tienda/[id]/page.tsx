@@ -343,7 +343,7 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
                 { icon: <Truck size={16} color="#c1692b" />, text: 'Envío a todo Venezuela' },
                 { icon: <Shield size={16} color="#c1692b" />, text: 'Garantía de calidad' },
                 { icon: <RefreshCw size={16} color="#c1692b" />, text: 'Cambios en 7 días' },
-                { icon: <CreditCard size={16} color="#c1692b" />, text: 'Zelle / Pago Móvil' },
+                { icon: <CreditCard size={16} color="#c1692b" />, text: 'Binance / Pago Móvil' },
               ].map((item, i) => (
                 <div key={i} className="guarantee-item">{item.icon}<span style={{ fontSize: '12px', color: '#393738', fontWeight: '600' }}>{item.text}</span></div>
               ))}

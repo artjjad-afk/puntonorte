@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: 'Resolvemos tus dudas sobre pedidos, pagos, envíos, cambios y devoluciones en Punto Norte. Todo lo que necesitas saber para comprar con confianza en Venezuela.',
   keywords: [
     'preguntas frecuentes tienda venezuela', 'como comprar online venezuela',
-    'pago movil tienda ropa', 'zelle compra ropa venezuela', 'cambios ropa venezuela',
+    'pago movil tienda ropa', 'binance usdt compra ropa venezuela', 'cambios ropa venezuela',
     'devolucion ropa online venezuela', 'dudas compra online venezuela',
   ],
   alternates: { canonical: `${BASE}/faq` },

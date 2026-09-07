@@ -4,12 +4,12 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useCartStore } from '@/store/cart'
 import { CustomerInfo } from '@/types'
-import { ChevronLeft, Check, MapPin, CreditCard, ClipboardCheck, ShoppingBag, Landmark, Smartphone, Banknote, MessageCircle, CheckCircle2, XCircle, AlertTriangle, FileText, Lock } from 'lucide-react'
+import { ChevronLeft, Check, MapPin, CreditCard, ClipboardCheck, ShoppingBag, Coins, Smartphone, Banknote, MessageCircle, CheckCircle2, XCircle, AlertTriangle, FileText, Lock } from 'lucide-react'
 import { buildOrderWAMessage } from '@/lib/whatsappOrder'
 import { VENEZUELA } from '@/lib/venezuela'
 
 const PAYMENT_METHODS = [
-  { id: 'zelle',     label: 'Zelle',               desc: 'Transferencia USD desde banco americano', icon: Landmark },
+  { id: 'binance',   label: 'Binance USDT',        desc: 'Pago en USDT a través de Binance', icon: Coins },
   { id: 'pago-movil',label: 'Pago Móvil',          desc: 'Transferencia instantánea bancos venezolanos', icon: Smartphone },
   { id: 'efectivo',  label: 'Efectivo USD',         desc: 'Pago en efectivo al momento de entrega', icon: Banknote },
   { id: 'whatsapp',  label: 'Coordinar por WhatsApp', desc: 'Te contactamos para acordar el método', icon: MessageCircle },

@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
     const rawItems: SaleItemIn[] = Array.isArray(body.items) ? body.items : []
-    const paymentMethod = String(body.paymentMethod ?? 'Efectivo').slice(0, 50)
+    const paymentMethod = String(body.paymentMethod ?? 'Efectivo USD').slice(0, 50)
     const customerName = String(body.customerName ?? '').trim().slice(0, 200) || 'Venta en tienda'
     const notes = body.notes ? String(body.notes).trim().slice(0, 500) : null
 
