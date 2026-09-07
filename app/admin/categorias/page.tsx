@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import { Plus, Trash2, Tag, Eye, EyeOff, Pencil, X, Check, GripVertical, Upload, Link as LinkIcon, AlertCircle, CheckCircle2, Lightbulb, Home, Star, Layers, ChevronDown, ChevronUp } from 'lucide-react'
 import { motion, AnimatePresence } from 'motion/react'
-import { compressImage } from '@/lib/imageCompress'
+import { uploadProductImage } from '@/lib/imageUpload'
 import type { Subcategory } from '@/lib/subcategories'
 
 interface Category {
@@ -63,30 +63,25 @@ export default function AdminCategorias() {
     setTimeout(() => setToasts(t => t.filter(x => x.id !== id)), 3500)
   }, [])
 
-  /* Optimiza (redimensiona + comprime) y convierte a base64. Acepta cualquier
-     tamaño; la imagen queda liviana sin pérdida visible. */
-  const fileToBase64 = useCallback((file: File): Promise<string> => {
-    return compressImage(file, { maxSize: 2000, quality: 0.85 })
-  }, [])
-
+  /* Comprime y SUBE la imagen como archivo; guarda la URL (no base64). */
   const handleFileDrop = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) { setError('Solo se aceptan imágenes'); return }
     try {
-      const b64 = await fileToBase64(file)
-      setImageData(b64)
+      const url = await uploadProductImage(file)
+      setImageData(url)
       setError('')
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Error al procesar imagen')
+      setError(e instanceof Error ? e.message : 'Error al subir la imagen')
     }
-  }, [fileToBase64])
+  }, [])
 
   const handleEditFileDrop = useCallback(async (file: File) => {
     if (!file.type.startsWith('image/')) return
     try {
-      const b64 = await fileToBase64(file)
-      setEditImageData(b64)
+      const url = await uploadProductImage(file)
+      setEditImageData(url)
     } catch { /* ignorar */ }
-  }, [fileToBase64])
+  }, [])
 
   const fetchCats = async () => {
     setLoading(true)

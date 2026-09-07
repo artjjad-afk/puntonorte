@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, ClipboardList, ImageIcon, Palette, Settings, AlertTriangle, Lightbulb, Film, Star, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
-import { compressImage } from '@/lib/imageCompress'
+import { uploadProductImage } from '@/lib/imageUpload'
 import type { Subcategory } from '@/lib/subcategories'
 import { parseVideoUrl, isPlayableVideo } from '@/lib/videos'
 
@@ -38,6 +38,7 @@ export default function NuevoProducto() {
   const [imgMode, setImgMode]     = useState<'upload' | 'url'>('upload')
   const [imgUrl, setImgUrl]       = useState('')
   const [dragging, setDragging]   = useState(false)
+  const [imgUploading, setImgUploading] = useState(false)
   const [sizeInput, setSizeInput] = useState('')
   const [colorInput, setColorInput] = useState('')
   const [form, setForm] = useState({
@@ -70,24 +71,23 @@ export default function NuevoProducto() {
 
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
-  /* Optimiza (redimensiona + comprime) y convierte a base64. Acepta fotos de
-     cualquier tamaño; quedan en ~200-400KB sin pérdida visible. */
-  const fileToBase64 = useCallback((file: File): Promise<string> => {
-    return compressImage(file, { maxSize: 2000, quality: 0.85 })
-  }, [])
-
+  /* Optimiza (redimensiona + comprime) y SUBE la imagen como archivo; guarda
+     la URL (no base64). Mantiene la BD liviana y el catálogo rápido. */
   const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files) return
     const arr = Array.from(files).filter(f => f.type.startsWith('image/'))
+    if (arr.length === 0) return
+    setImgUploading(true)
     for (const file of arr) {
       try {
-        const b64 = await fileToBase64(file)
-        setForm(f => ({ ...f, images: [...f.images, b64] }))
+        const url = await uploadProductImage(file)
+        setForm(f => ({ ...f, images: [...f.images, url] }))
       } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : 'Error al procesar imagen')
+        setError(e instanceof Error ? e.message : 'Error al subir la imagen')
       }
     }
-  }, [fileToBase64])
+    setImgUploading(false)
+  }, [])
 
   const addImageUrl = () => {
     if (imgUrl.trim() && !form.images.includes(imgUrl.trim())) {
@@ -283,8 +283,8 @@ export default function NuevoProducto() {
                   style={{ border: `2px dashed ${dragging ? 'rgba(249,115,22,0.7)' : 'rgba(255,255,255,0.12)'}`, borderRadius: 12, padding: '20px 16px', textAlign: 'center', cursor: 'pointer', background: dragging ? 'rgba(249,115,22,0.06)' : 'rgba(255,255,255,0.02)', transition: 'all .2s', marginBottom: 12 }}
                 >
                   <Upload size={22} color={dragging ? '#f97316' : 'rgba(148,163,184,0.3)'} style={{ margin: '0 auto 8px', display: 'block' }} />
-                  <p style={{ margin: 0, fontSize: 13, color: dragging ? '#f97316' : 'rgba(148,163,184,0.5)', fontWeight: 600 }}>
-                    {dragging ? 'Suelta las imágenes' : 'Arrastra imágenes o haz clic'}
+                  <p style={{ margin: 0, fontSize: 13, color: imgUploading ? '#f97316' : dragging ? '#f97316' : 'rgba(148,163,184,0.5)', fontWeight: 600 }}>
+                    {imgUploading ? 'Subiendo imágenes…' : dragging ? 'Suelta las imágenes' : 'Arrastra imágenes o haz clic'}
                   </p>
                   <p style={{ margin: '4px 0 0', fontSize: 11, color: 'rgba(148,163,184,0.3)', fontFamily: 'var(--font-mono)' }}>
                     JPG, PNG, WEBP · se optimizan solas · cualquier tamaño · múltiples permitidas

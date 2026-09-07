@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { ChevronLeft, Plus, X, Upload, Link as LinkIcon, Zap, Package, Save, ClipboardList, Image as ImageIcon, Palette, Settings, AlertTriangle, Lightbulb, Film, Star, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'motion/react'
-import { compressImage } from '@/lib/imageCompress'
+import { uploadProductImage } from '@/lib/imageUpload'
 import type { Subcategory } from '@/lib/subcategories'
 import { parseVideoUrl, isPlayableVideo } from '@/lib/videos'
 
@@ -41,6 +41,7 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
   const [imgMode, setImgMode]     = useState<'upload' | 'url'>('upload')
   const [imgUrl, setImgUrl]       = useState('')
   const [dragging, setDragging]   = useState(false)
+  const [imgUploading, setImgUploading] = useState(false)
   const [sizeInput, setSizeInput] = useState('')
   const [colorInput, setColorInput] = useState('')
   const [form, setForm] = useState({
@@ -96,23 +97,23 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
 
   const set = (k: string, v: unknown) => setForm(f => ({ ...f, [k]: v }))
 
-  /* Imágenes desde dispositivo: se optimizan (redimensionan + comprimen) al
-     subirlas, así se acepta cualquier tamaño sin inflar la base de datos. */
-  const fileToBase64 = useCallback((file: File): Promise<string> => {
-    return compressImage(file, { maxSize: 2000, quality: 0.85 })
-  }, [])
-
+  /* Imágenes desde dispositivo: se comprimen y SUBEN como archivo; se guarda
+     la URL (no base64). Mantiene la BD liviana y el catálogo rápido. */
   const handleFiles = useCallback(async (files: FileList | null) => {
     if (!files) return
-    for (const file of Array.from(files).filter(f => f.type.startsWith('image/'))) {
+    const arr = Array.from(files).filter(f => f.type.startsWith('image/'))
+    if (arr.length === 0) return
+    setImgUploading(true)
+    for (const file of arr) {
       try {
-        const b64 = await fileToBase64(file)
-        setForm(f => ({ ...f, images: [...f.images, b64] }))
+        const url = await uploadProductImage(file)
+        setForm(f => ({ ...f, images: [...f.images, url] }))
       } catch (e: unknown) {
-        setError(e instanceof Error ? e.message : 'Error al procesar imagen')
+        setError(e instanceof Error ? e.message : 'Error al subir la imagen')
       }
     }
-  }, [fileToBase64])
+    setImgUploading(false)
+  }, [])
 
   const addImageUrl = () => {
     if (imgUrl.trim() && !form.images.includes(imgUrl.trim())) {
@@ -305,9 +306,9 @@ export default function EditarProducto({ params }: { params: Promise<{ id: strin
                   onClick={() => fileRef.current?.click()}
                   style={{ border: `2px dashed ${dragging ? 'rgba(249,115,22,0.7)' : 'rgba(255,255,255,0.12)'}`, borderRadius: 12, padding: '16px', textAlign: 'center', cursor: 'pointer', background: dragging ? 'rgba(249,115,22,0.06)' : 'rgba(255,255,255,0.02)', transition: 'all .2s', marginBottom: 12 }}
                 >
-                  <Upload size={20} color={dragging ? '#f97316' : 'rgba(148,163,184,0.3)'} style={{ margin: '0 auto 6px', display: 'block' }} />
-                  <p style={{ margin: 0, fontSize: 12, color: dragging ? '#f97316' : 'rgba(148,163,184,0.5)', fontWeight: 600 }}>
-                    {dragging ? 'Suelta aquí' : 'Arrastra o haz clic para agregar más imágenes'}
+                  <Upload size={20} color={dragging || imgUploading ? '#f97316' : 'rgba(148,163,184,0.3)'} style={{ margin: '0 auto 6px', display: 'block' }} />
+                  <p style={{ margin: 0, fontSize: 12, color: dragging || imgUploading ? '#f97316' : 'rgba(148,163,184,0.5)', fontWeight: 600 }}>
+                    {imgUploading ? 'Subiendo imágenes…' : dragging ? 'Suelta aquí' : 'Arrastra o haz clic para agregar más imágenes'}
                   </p>
                   <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
                     onChange={e => handleFiles(e.target.files)} />

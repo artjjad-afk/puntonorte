@@ -56,6 +56,8 @@ export function ProductCard({ product }: { product: Product }) {
           <img
             src={product.images[imgIdx]}
             alt={product.name}
+            loading="lazy"
+            decoding="async"
             style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }}
           />
 

@@ -66,6 +66,54 @@ export async function compressImage(
   return out
 }
 
+/**
+ * Igual que compressImage pero devuelve un ARCHIVO (Blob) para subir al
+ * servidor, en vez de un data URL base64. Usado por la carga de imágenes a
+ * archivos (/uploads/images) para no inflar la base de datos.
+ */
+export async function compressToBlob(
+  file: File,
+  { maxSize = 2000, quality = 0.85, mimeType = 'image/webp' }: CompressOptions = {},
+): Promise<{ blob: Blob; ext: string }> {
+  if (!file.type.startsWith('image/')) {
+    throw new Error('El archivo no es una imagen')
+  }
+  // GIF (animado) y SVG (vectorial) no pasan por canvas: se suben tal cual.
+  if (file.type === 'image/gif') return { blob: file, ext: 'gif' }
+  if (file.type === 'image/svg+xml') return { blob: file, ext: 'svg' }
+
+  const original = await readAsDataURL(file)
+  const img = await loadImage(original)
+
+  const scale = Math.min(1, maxSize / Math.max(img.width, img.height))
+  const targetW = Math.max(1, Math.round(img.width * scale))
+  const targetH = Math.max(1, Math.round(img.height * scale))
+
+  const canvas = document.createElement('canvas')
+  canvas.width = targetW
+  canvas.height = targetH
+  const ctx = canvas.getContext('2d')
+  if (!ctx) throw new Error('No se pudo procesar la imagen')
+
+  ctx.fillStyle = '#ffffff'
+  ctx.fillRect(0, 0, targetW, targetH)
+  ctx.drawImage(img, 0, 0, targetW, targetH)
+
+  let blob = await canvasToBlob(canvas, mimeType, quality)
+  // Si el navegador no dio WebP, cae a JPEG.
+  if (mimeType === 'image/webp' && (!blob || blob.type !== 'image/webp')) {
+    blob = await canvasToBlob(canvas, 'image/jpeg', quality)
+  }
+  if (!blob) throw new Error('No se pudo comprimir la imagen')
+
+  const ext = blob.type === 'image/webp' ? 'webp' : blob.type === 'image/png' ? 'png' : 'jpg'
+  return { blob, ext }
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob | null> {
+  return new Promise(resolve => canvas.toBlob(b => resolve(b), type, quality))
+}
+
 function readAsDataURL(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
