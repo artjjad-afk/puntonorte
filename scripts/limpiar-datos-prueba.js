@@ -35,12 +35,14 @@ async function main() {
   console.log('Pedidos en total:', orders.length)
   if (orders.length === 0) { console.log('No hay pedidos que limpiar.'); return }
 
-  // Respaldo de pedidos
+  // Respaldo COMPLETO y reversible: pedidos + stock actual de cada producto
+  // (antes de modificarlo). Con esto se puede revertir todo si hiciera falta.
   if (!DRY) {
     fs.mkdirSync(BACKUP_DIR, { recursive: true })
-    const bk = path.join(BACKUP_DIR, 'orders-backup-' + Date.now() + '.json')
-    fs.writeFileSync(bk, JSON.stringify(orders))
-    console.log('Respaldo de pedidos:', bk, '(' + (fs.statSync(bk).size / 1024).toFixed(0) + ' KB)')
+    const stockSnapshot = await prisma.product.findMany({ select: { id: true, name: true, stock: true, inStock: true } })
+    const bk = path.join(BACKUP_DIR, 'limpieza-backup-' + Date.now() + '.json')
+    fs.writeFileSync(bk, JSON.stringify({ fecha: new Date().toISOString(), orders, productsStockAntes: stockSnapshot }))
+    console.log('Respaldo (pedidos + stock previo):', bk, '(' + (fs.statSync(bk).size / 1024).toFixed(0) + ' KB)')
   }
 
   // Calcular cuánto stock devolver (solo de pedidos que descontaron)
