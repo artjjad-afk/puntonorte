@@ -40,7 +40,7 @@ export function Navbar({ initialLinks }: { initialLinks?: NavLink[] }) {
             { href: '/tienda', label: 'Tienda' },
             ...data
               .filter((c: { slug: string; name: string; showInNav?: boolean }) => c.showInNav !== false)
-              .slice(0, 6)
+              .slice(0, 12)
               .map((c: { slug: string; name: string; subcategories?: { slug: string; name: string }[] }) => ({
                 href: `/tienda?cat=${c.slug}`,
                 label: c.name,

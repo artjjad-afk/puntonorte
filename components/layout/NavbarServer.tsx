@@ -14,7 +14,7 @@ export async function NavbarServer() {
       where: { active: true, showInNav: true },
       orderBy: { order: 'asc' },
       select: { slug: true, name: true, subcategories: true },
-      take: 6,
+      take: 12,
     })
 
     if (cats.length > 0) {
