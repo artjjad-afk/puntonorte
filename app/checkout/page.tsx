@@ -478,7 +478,7 @@ export default function CheckoutPage() {
                               {loading ? 'Procesando...' : 'Reintentar'}
                             </button>
                             <a
-                              href={`https://wa.me/584140906768?text=${buildMsg()}`}
+                              href={`https://wa.me/584246159554?text=${buildMsg()}`}
                               target="_blank" rel="noopener noreferrer"
                               onClick={() => clearCart()}
                               style={{ padding:'8px 16px', borderRadius:'8px', border:'1.5px solid #25d366', background:'#25d366', color:'#fff', textDecoration:'none', fontWeight:'700', fontSize:'12px', display:'inline-flex', alignItems:'center', gap:'6px' }}

@@ -81,7 +81,7 @@ export function StoreJsonLd() {
     url: BASE,
     logo: `${BASE}/logo.png`,
     image: `${BASE}/og-image.jpg`,
-    telephone: '+584140906768',
+    telephone: '+584246159554',
     email: 'puntonorte@gmail.com',
     address: {
       '@type': 'PostalAddress',
@@ -104,7 +104,7 @@ export function StoreJsonLd() {
     ],
     sameAs: [
       'https://www.instagram.com/puntonorte.shop',
-      'https://wa.me/584140906768',
+      'https://wa.me/584246159554',
     ],
     priceRange: '$',
     currenciesAccepted: 'USD',

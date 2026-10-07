@@ -111,7 +111,7 @@ export default function NosotrosPage() {
           </p>
           <div style={{ display:'flex', flexDirection:'column', gap:'16px', alignItems:'center' }}>
             <div style={{ display:'flex', gap:'16px', flexWrap:'wrap', justifyContent:'center' }}>
-              <a href="https://wa.me/584140906768" target="_blank" rel="noopener noreferrer"
+              <a href="https://wa.me/584246159554" target="_blank" rel="noopener noreferrer"
                 style={{ display:'inline-flex', alignItems:'center', gap:'10px', background:'#25d366', color:'#fff', padding:'14px 28px', borderRadius:'12px', textDecoration:'none', fontWeight:'700', fontSize:'14px' }}>
                 <Phone size={16} /> +58 414-0906768
               </a>

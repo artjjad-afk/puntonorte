@@ -115,7 +115,7 @@ export default function FaqPage() {
             Escríbenos por WhatsApp y un asesor te responde en minutos.
           </p>
           <div style={{ display:'flex', gap:'12px', justifyContent:'center', flexWrap:'wrap' }}>
-            <a href="https://wa.me/584140906768?text=Hola%2C%20tengo%20una%20pregunta" target="_blank" rel="noopener noreferrer"
+            <a href="https://wa.me/584246159554?text=Hola%2C%20tengo%20una%20pregunta" target="_blank" rel="noopener noreferrer"
               style={{ display:'inline-flex', alignItems:'center', gap:'8px', background:'#25d366', color:'#fff', padding:'14px 28px', borderRadius:'12px', textDecoration:'none', fontWeight:'700', fontSize:'14px' }}>
               <MessageCircle size={16} /> Escribir por WhatsApp
             </a>

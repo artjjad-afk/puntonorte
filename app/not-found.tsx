@@ -36,7 +36,7 @@ export default function NotFound() {
           <Link href="/tienda" className="btn-primary" style={{ padding:'14px 24px', borderRadius:'12px', fontSize:'14px', display:'inline-flex', alignItems:'center', gap:'8px' }}>
             <ShoppingBag size={16} /> Ver tienda
           </Link>
-          <a href="https://wa.me/584140906768" target="_blank" rel="noopener noreferrer"
+          <a href="https://wa.me/584246159554" target="_blank" rel="noopener noreferrer"
             style={{ display:'inline-flex', alignItems:'center', gap:'8px', background:'#25d366', color:'#fff', padding:'14px 24px', borderRadius:'12px', textDecoration:'none', fontWeight:'700', fontSize:'14px' }}>
             <MessageCircle size={16} /> WhatsApp
           </a>

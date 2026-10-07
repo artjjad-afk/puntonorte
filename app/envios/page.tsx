@@ -128,7 +128,7 @@ export default function EnviosPage() {
       <section style={{ padding:'60px 32px', background:'#211f1e', textAlign:'center' }}>
         <h2 style={{ color:'#fff', fontSize:'clamp(22px, 3vw, 32px)', fontWeight:'800', marginBottom:'12px', letterSpacing:'-0.5px' }}>¿Tienes preguntas sobre tu envío?</h2>
         <p style={{ color:'rgba(232,229,226,0.55)', marginBottom:'28px', fontSize:'15px' }}>Escríbenos y te respondemos al instante</p>
-        <a href="https://wa.me/584140906768?text=Hola%2C%20tengo%20una%20pregunta%20sobre%20los%20env%C3%ADos" target="_blank" rel="noopener noreferrer"
+        <a href="https://wa.me/584246159554?text=Hola%2C%20tengo%20una%20pregunta%20sobre%20los%20env%C3%ADos" target="_blank" rel="noopener noreferrer"
           style={{ display:'inline-flex', alignItems:'center', gap:'10px', background:'#25d366', color:'#fff', padding:'14px 32px', borderRadius:'12px', textDecoration:'none', fontWeight:'700', fontSize:'14px' }}>
           <MessageCircle size={16} /> Consultar por WhatsApp
         </a>

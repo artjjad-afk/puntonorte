@@ -1,7 +1,7 @@
 ﻿'use client'
 import { useState, useEffect } from 'react'
 
-const WA_NUMBER = '584140906768'
+const WA_NUMBER = '584246159554'
 const WA_MSG = encodeURIComponent('Hola Punto Norte! Me gustaría obtener información sobre sus productos.')
 
 export function WhatsAppButton() {

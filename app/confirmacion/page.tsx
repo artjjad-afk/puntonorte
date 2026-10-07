@@ -102,13 +102,13 @@ function ConfirmacionContent() {
   useEffect(() => {
     if (!order) return
     const waMsg = buildWAMessage(order)
-    const t = setTimeout(() => window.open(`https://wa.me/584140906768?text=${waMsg}`, '_blank'), 900)
+    const t = setTimeout(() => window.open(`https://wa.me/584246159554?text=${waMsg}`, '_blank'), 900)
     return () => clearTimeout(t)
   }, [order])
 
   if (!orderId || !validOrderId) return null
 
-  const waUrl = order ? `https://wa.me/584140906768?text=${buildWAMessage(order)}` : '#'
+  const waUrl = order ? `https://wa.me/584246159554?text=${buildWAMessage(order)}` : '#'
 
   return (
     <>
@@ -166,7 +166,7 @@ function ConfirmacionContent() {
                     Pero tu pedido <strong>sí fue guardado</strong> con el número <strong>#{orderId}</strong>. Contáctanos por WhatsApp para coordinar.
                   </p>
                   <a
-                    href={`https://wa.me/584140906768?text=${encodeURIComponent(`Hola, hice un pedido con número #${orderId} y necesito coordinar la entrega.`)}`}
+                    href={`https://wa.me/584246159554?text=${encodeURIComponent(`Hola, hice un pedido con número #${orderId} y necesito coordinar la entrega.`)}`}
                     target="_blank" rel="noopener noreferrer"
                     style={{ display:'inline-flex', alignItems:'center', gap:'8px', background:'#25d366', color:'#fff', padding:'13px 24px', borderRadius:'12px', textDecoration:'none', fontWeight:'700', fontSize:'14px' }}
                   >

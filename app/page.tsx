@@ -1136,7 +1136,7 @@ export default function HomePage() {
 
           <div style={{ display:'flex', gap:'16px', justifyContent:'center', flexWrap:'wrap' }} data-burst>
             <ParticlesBurst />
-            <a href="https://wa.me/584140906768?text=Hola%2C%20quiero%20recibir%20novedades%20de%20Punto%20Norte"
+            <a href="https://wa.me/584246159554?text=Hola%2C%20quiero%20recibir%20novedades%20de%20Punto%20Norte"
               target="_blank" rel="noopener noreferrer"
               style={{
                 display:'inline-flex', alignItems:'center', gap:'10px',

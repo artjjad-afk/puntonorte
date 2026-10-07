@@ -24,8 +24,11 @@
 .DS_Store
 *.pem
 
-# videos subidos por el admin (se guardan en el servidor, no en el repo)
+# videos e imágenes subidos por el admin (se guardan en el servidor, no en el repo)
 /public/uploads
+
+# respaldos generados por los scripts en el servidor (no en el repo; no borrar)
+/backups
 
 # debug
 npm-debug.log*

@@ -9,8 +9,8 @@ export const STORE_CONFIG = {
   description: 'Tienda online de ropa, accesorios, perfumes y más. Calidad premium al mejor precio.',
 
   // Contacto
-  whatsapp: '584140906768',         // Número con código de país sin +
-  whatsappDisplay: '0414-0906768',  // Número para mostrar en pantalla
+  whatsapp: '584246159554',         // Número con código de país sin +
+  whatsappDisplay: '0424-6159554',  // Número para mostrar en pantalla
 
   // Redes sociales
   instagram: 'https://www.instagram.com/puntonorte.shop?igsh=a2pxaDRteGd2NmJx',
@@ -37,8 +37,8 @@ export const waLink = (msg?: string) => {
  * Ejemplos:
  *   0414-090-6768  → 58414090678
  *   (0412) 123 4567 → 584121234567
- *   584140906768   → 584140906768 (ya correcto)
- *   4140906768     → 584140906768
+ *   584246159554   → 584246159554 (ya correcto)
+ *   4140906768     → 584246159554
  */
 export function formatWAPhone(phone: string): string {
   const digits = phone.replace(/\D/g, '')

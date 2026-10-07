@@ -17,7 +17,7 @@ type CatProduct = {
 }
 
 const CONTACT = {
-  whatsapp: '584140906768',
+  whatsapp: '584246159554',
   instagram: 'puntonorte.shop',
   ciudad: 'Barcelona, Anzoátegui — Venezuela',
 }
